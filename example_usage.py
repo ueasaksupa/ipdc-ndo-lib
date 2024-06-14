@@ -1,5 +1,6 @@
 from NDOService import l2_service
 from NDOService.core.ndo_connector import NDOTenantTemplate
+from NDOService.core.configurations import *
 
 """
 This is the example how to call the method to create l2 service on NDO.
@@ -47,8 +48,11 @@ params = {
             "epg_phy_domain": "PHY_DOMAIN_SERVER_CL_DOM01_01",
         },
     ],
+    "deployment_mode": "...",  # all_site, sigle_site
     "tenant_name": "TN_NUTTAWUT_TEST",
     "schema_name": "TN_NUTTAWUT_TEST_Schema01",
+    "filter_name": "FLT_IP",
+    "contract_name": "CON_VRF_CUSTOMER",
     "vrf_template_name": "VRF_Contract_Stretch_Template",
     "bd_template_name": "Policy_All_Site_template",
     "vrf_name": "VRF_CUSTOMER",
@@ -57,14 +61,18 @@ params = {
     "epg_name": "EPG_CUSTOMER",
 }
 
-l2_service.create(**params)
+# ndo = NDOTenantTemplate(
+#     params["connection"]["host"],
+#     params["connection"]["username"],
+#     params["connection"]["password"],
+#     params["connection"]["port"],
+# )
 
-ndo = NDOTenantTemplate(
-    params["connection"]["host"],
-    params["connection"]["username"],
-    params["connection"]["password"],
-    params["connection"]["port"],
-)
-ndo.create_fabric_policy("TLS1_nuttawut_test_by_script", "TLS1")
-ndo.create_fabric_resource("TLS1_nuttawut_test_by_script", "TLS1")
-ndo.add_vlans_to_pool("TLS1_nuttawut_test_by_script", "VLAN_SERVER_CL_TEST", [3013, 3014])
+bd_subnet = BridgeDomainSubnet("10.0.0.1/24", "test from api")
+bd_config = BridgeDomainParams(subnets=[bd_subnet])
+
+l2_service.create(**params, bd_config=bd_config)
+
+# ndo.create_fabric_policy("TLS1_nuttawut_test_by_script", "TLS1")
+# ndo.create_fabric_resource("TLS1_nuttawut_test_by_script", "TLS1")
+# ndo.add_vlans_to_pool("TLS1_nuttawut_test_by_script", "VLAN_SERVER_CL_TEST", [3013, 3014])

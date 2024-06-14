@@ -1,11 +1,12 @@
 import os
 from pprint import pprint
+from .core.configurations import *
 from .core.ndo_connector import NDOTenantTemplate
 
 
 def create(**kwargs):
     """
-    TODO
+    For create L2 service
     """
     ndo = NDOTenantTemplate(
         kwargs["connection"]["host"],
@@ -13,7 +14,10 @@ def create(**kwargs):
         kwargs["connection"]["password"],
         kwargs["connection"]["port"],
     )
-    # get tenant by name if tenant was not been created before, It will be created automatically
+    # prepare configuration opject
+    bd_config = BridgeDomainParams() if "bd_config" not in kwargs else kwargs["bd_config"]
+    vrf_config = VrfParams() if "vrf_config" not in kwargs else kwargs["vrf_config"]
+
     tenant = ndo.create_tenant(kwargs["tenant_name"], kwargs["sites"])
     # get schema by name if schema was not been created before, It will be created automatically
     schema = ndo.create_schema(kwargs["schema_name"])
@@ -33,8 +37,16 @@ def create(**kwargs):
     schema = ndo.save_schema(schema)
 
     # ----- CREATE OBJECTS UNDER TEMPLATE ------
+    # create filter under template
+    ndo.create_filter_under_template(schema, kwargs["vrf_template_name"], kwargs["filter_name"])
+    # create contract under template
+    ndo.create_contract_under_template(
+        schema, kwargs["vrf_template_name"], kwargs["contract_name"], kwargs["filter_name"]
+    )
     # create VRF under template
-    ndo.create_vrf_under_template(schema, kwargs["vrf_template_name"], kwargs["vrf_name"])
+    ndo.create_vrf_under_template(
+        schema, kwargs["vrf_template_name"], kwargs["vrf_name"], kwargs["contract_name"], vrf_config
+    )
     # create Bridge-Domain under template
     ndo.create_bridge_domain_under_template(
         schema,
@@ -42,6 +54,7 @@ def create(**kwargs):
         kwargs["bd_template_name"],
         kwargs["vrf_name"],
         kwargs["bd_name"],
+        bd_config,
     )
     # create Application Profile under template
     anp = ndo.create_anp_under_template(schema, kwargs["bd_template_name"], kwargs["anp_name"])
@@ -112,6 +125,8 @@ if __name__ == "__main__":
         ],
         "tenant_name": "TN_NUTTAWUT_TEST",
         "schema_name": "TN_NUTTAWUT_TEST_Schema01",
+        "filter_name": "FLT_IP",
+        "contract_name": "CON_VRF_CUSTOMER",
         "vrf_template_name": "VRF_Contract_Stretch_Template",
         "bd_template_name": "Policy_All_Site_template",
         "vrf_name": "VRF_CUSTOMER",

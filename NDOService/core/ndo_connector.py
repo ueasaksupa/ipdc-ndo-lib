@@ -1,5 +1,7 @@
 from .path_const import *
 from .types import *
+from .configurations import *
+from dataclasses import asdict
 import requests
 import urllib3
 
@@ -18,6 +20,20 @@ class NDOTenantTemplate:
         self.schema = None
         # LOGIN
         self.login()
+
+    def __get_port_resource_path(self, **kwargs):
+        path = ""
+        if kwargs["port_type"] == "vpc":
+            vpc_resource = self.find_vpc_by_site(kwargs["port_name"], kwargs["site_name"])
+            if not vpc_resource:
+                raise Exception(
+                    f"VPC resource name {kwargs['port_name']} does not exist in the Fabric Resource Policy, Please create it first."
+                )
+            path = vpc_resource["path"]
+        elif kwargs["port_type"] == "port":
+            path = f"topology/{kwargs['pod']}/paths-{kwargs['node']}/pathep-[{kwargs['port_name']}]"
+
+        return path
 
     def login(self) -> None:
         if not self.session:
@@ -88,8 +104,11 @@ class NDOTenantTemplate:
     # Tenant Template
     def save_schema(self, schema: dict) -> Schema:
         print(f"--- Saving schema {schema['displayName']}")
-        url = f"{self.base_path}{PATH_SCHEMAS}/{schema['id']}"
-        return self.session.put(url, json=schema).json()
+        url = f"{self.base_path}{PATH_SCHEMAS}/{schema['id']}?enableVersionCheck=true"
+        resp = self.session.put(url, json=schema)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+        return resp.json()
 
     def create_tenant(self, tenant_name: str, sites: list, tenant_desc: str = "") -> Tenant:
         print(f"--- Creating tenant {tenant_name}")
@@ -188,8 +207,92 @@ class NDOTenantTemplate:
             except Exception:
                 raise Exception(f"Site {target_site['name']} does not exist")
 
-    def create_vrf_under_template(self, schema: dict, template_name: str, vrf_name: str, vrf_desc: str = "") -> Vrf:
+    def create_filter_under_template(self, schema: dict, template_name: str, filter_name: str) -> Filter:
+        print(f"--- Creating filter {filter_name}")
+
+        filter_template = list(
+            filter(
+                lambda t: t["name"].upper() == template_name.upper(),
+                schema["templates"],
+            )
+        )
+        if len(filter_template) == 0:
+            raise Exception(f"Template {template_name} does not exist.")
+
+        filter_object = list(filter(lambda d: d["name"].upper() == filter_name.upper(), filter_template[0]["filters"]))
+        if len(filter_object) != 0:
+            print(f"  |--- Filter {filter_name} is already exist")
+            return filter_object[0]
+
+        payload = {
+            "name": filter_name,
+            "displayName": filter_name,
+            "entries": [
+                {
+                    "name": "IP",
+                    "displayName": "IP",
+                    "description": "",
+                    "etherType": "ip",
+                    "arpFlag": "unspecified",
+                    "ipProtocol": "unspecified",
+                    "matchOnlyFragments": False,
+                    "stateful": False,
+                    "sourceFrom": "unspecified",
+                    "sourceTo": "unspecified",
+                    "destinationFrom": "unspecified",
+                    "destinationTo": "unspecified",
+                    "tcpSessionRules": ["unspecified"],
+                }
+            ],
+        }
+
+        filter_template[0]["filters"].append(payload)
+        return filter_template[0]["filters"][-1]
+
+    def create_contract_under_template(
+        self, schema: dict, template_name: str, contract_name: str, filter_name: str
+    ) -> Contract:
+        print(f"--- Creating contract {contract_name}")
+
+        filter_template = list(
+            filter(
+                lambda t: t["name"].upper() == template_name.upper(),
+                schema["templates"],
+            )
+        )
+        if len(filter_template) == 0:
+            raise Exception(f"Template {template_name} does not exist.")
+
+        contract = list(filter(lambda d: d["name"].upper() == contract_name.upper(), filter_template[0]["contracts"]))
+        if len(contract) != 0:
+            print(f"  |--- Contract {contract_name} is already exist")
+            return contract[0]
+
+        payload = {
+            "name": contract_name,
+            "displayName": contract_name,
+            "filterRelationships": [
+                {
+                    "filterRef": {"templateName": template_name, "filterName": filter_name},
+                    "directives": [],
+                    "action": "permit",
+                    "priorityOverride": "default",
+                }
+            ],
+        }
+
+        filter_template[0]["contracts"].append(payload)
+        return filter_template[0]["contracts"][-1]
+
+    def create_vrf_under_template(
+        self, schema: dict, template_name: str, vrf_name: str, contract_name: str, vrf_config: VrfParams = None
+    ) -> Vrf:
         print(f"--- Creating VRF {vrf_name}")
+        if vrf_config == None:
+            vrf_config = VrfParams()
+        elif not isinstance(vrf_config, VrfParams):
+            raise Exception("vrf_config must be object of VrfParams")
+
         template = list(
             filter(
                 lambda t: t["name"].upper() == template_name.upper(),
@@ -199,25 +302,21 @@ class NDOTenantTemplate:
         if len(template) == 0:
             raise Exception(f"Template {template_name} does not exist.")
 
-        target_template_index = schema["templates"].index(template[0])
         filter_vrf = list(filter(lambda d: d["name"].upper() == vrf_name.upper(), template[0]["vrfs"]))
         if len(filter_vrf) != 0:
             print(f"  |--- VRF {vrf_name} is already exist")
             return filter_vrf[0]
 
-        # TODO
-        # Parameterized flags
         payload = {
             "displayName": vrf_name,
             "name": vrf_name,
-            "description": vrf_desc,
-            "l3MCast": False,
-            "preferredGroup": False,
-            "vzAnyEnabled": False,
-            "ipDataPlaneLearning": "enabled",
+            "vzAnyConsumerContracts": [{"contractRef": {"contractName": contract_name}}],
+            "vzAnyProviderContracts": [{"contractRef": {"contractName": contract_name}}],
         }
-        schema["templates"][target_template_index]["vrfs"].append(payload)
-        return schema["templates"][target_template_index]["vrfs"][-1]
+        payload.update(asdict(vrf_config))
+
+        template[0]["vrfs"].append(payload)
+        return template[0]["vrfs"][-1]
 
     def create_bridge_domain_under_template(
         self,
@@ -226,9 +325,14 @@ class NDOTenantTemplate:
         template_name_bd: str,
         linked_vrf_name: str,
         bd_name: str,
-        bd_desc: str = "",
+        bd_config: BridgeDomainParams = None,
     ) -> BD:
         print(f"--- Creating BD under template {template_name_bd}")
+        if bd_config == None:
+            bd_config = BridgeDomainParams()
+        elif not isinstance(bd_config, BridgeDomainParams):
+            raise Exception("bd_config must be object of BridgeDomainParams")
+
         filter_template = list(
             filter(
                 lambda t: t["name"].upper() == template_name_bd.upper(),
@@ -249,39 +353,22 @@ class NDOTenantTemplate:
             print(f"   |--- BD {bd_name} is already exist in template {template_name_bd}")
             return filter_bd[0]
 
-        # TODO
-        # Parameterized flags
         # "vrfRef": f"/schemas/{schema['id']}/templates/{template_name_vrf}/vrfs/{linked_vrf_name}",
         payload = {
             "name": bd_name,
             "displayName": bd_name,
-            "vrfRef": {
-                "schemaID": schema["id"],
-                "templateName": template_name_vrf,
-                "vrfName": linked_vrf_name,
-            },
-            "description": bd_desc,
-            "l2UnknownUnicast": "proxy",
-            "intersiteBumTrafficAllow": True,
-            "optimizeWanBandwidth": True,
-            "l2Stretch": True,
-            "l3MCast": False,
-            "unkMcastAct": "flood",
-            "v6unkMcastAct": "flood",
-            "arpFlood": True,
-            "multiDstPktAct": "bd-flood",
-            "unicastRouting": True,
+            "vrfRef": {"schemaID": schema["id"], "templateName": template_name_vrf, "vrfName": linked_vrf_name},
         }
-        schema["templates"][template_index]["bds"].append(payload)
-        return schema["templates"][template_index]["bds"][-1]
+        payload.update(asdict(bd_config))
+
+        filter_template[0]["bds"].append(payload)
+        return filter_template[0]["bds"][-1]
 
     def create_anp_under_template(self, schema: dict, template_name: str, anp_name: str, anp_desc: str = "") -> ANP:
         print(f"--- Creating ANP under template {template_name}")
         filter_template = list(filter(lambda t: t["name"].upper() == template_name.upper(), schema["templates"]))
         if len(filter_template) == 0:
             raise Exception(f"Template {template_name} does not exist.")
-
-        template_index = schema["templates"].index(filter_template[0])
 
         filter_anp = list(filter(lambda anp: anp["name"].upper() == anp_name.upper(), filter_template[0]["anps"]))
         if len(filter_anp) != 0:
@@ -294,8 +381,8 @@ class NDOTenantTemplate:
             "description": anp_desc,
             "epgs": [],
         }
-        schema["templates"][template_index]["anps"].append(payload)
-        return schema["templates"][template_index]["anps"][-1]
+        filter_template[0]["anps"].append(payload)
+        return filter_template[0]["anps"][-1]
 
     def create_epg_under_template(
         self,
@@ -319,6 +406,7 @@ class NDOTenantTemplate:
             "name": epg_name,
             "displayName": epg_name,
             "description": epg_desc,
+            "bdRef": {"schemaID": schema["id"], "templateName": linked_template, "bdName": linked_bd},
             "contractRelationships": [],
             "subnets": [],
             "uSegEpg": False,
@@ -328,7 +416,6 @@ class NDOTenantTemplate:
             "proxyArp": False,
             "mCastSource": False,
             "preferredGroup": False,
-            "bdRef": {"schemaID": schema["id"], "templateName": linked_template, "bdName": linked_bd},
             "selectors": [],
             "epgType": "application",
         }
@@ -406,17 +493,9 @@ class NDOTenantTemplate:
 
         for conf in port_configurations:
             print(f"   |--- Adding port {conf['node']}/{conf['port_name']}/")
-            if conf["port_type"] == "vpc":
-                vpc_resource = self.find_vpc_by_site(conf["port_name"], site_name)
-                if not vpc_resource:
-                    raise Exception(
-                        f"VPC resource name {conf['port_name']} does not exist in the Fabric Resource Policy, Please create it first."
-                    )
-                path = vpc_resource["path"]
-            elif conf["port_type"] == "port":
-                path = f"topology/{pod}/paths-{conf['node']}/pathep-[{conf['port_name']}]"
-            filter_port = list(filter(lambda p: p["path"].upper() == path.upper(), target_epg[0]["staticPorts"]))
 
+            path = self.__get_port_resource_path(**conf, site_name=site_name, pod=pod)
+            filter_port = list(filter(lambda p: p["path"].upper() == path.upper(), target_epg[0]["staticPorts"]))
             if len(filter_port) != 0:
                 print(f"   |--- Port {conf['port_name']} on {conf['node']} is already exist.")
                 continue
@@ -495,7 +574,7 @@ class NDOTenantTemplate:
         return self.session.post(url, json=payload)
 
     def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int] = []) -> None:
-        print(f"--- Adding vlans {",".join([str(v) for v in vlans])} to pool {pool_name}")
+        print(f"--- Adding vlans {','.join([str(v) for v in vlans])} to pool {pool_name}")
         policy = self.find_fabric_policy_by_name(policy_name)
         if not policy:
             raise Exception(f"Policy {pool_name} not exist, Please create it first.")
@@ -525,3 +604,6 @@ class NDOTenantTemplate:
         if resp.status_code >= 400:
             print(f"   |--- {resp.json()['info']}")
             raise Exception(resp.json())
+
+    def add_physical_port_to_fabric_resource():
+        pass
