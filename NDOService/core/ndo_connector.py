@@ -1,14 +1,16 @@
 from .path_const import *
 from .types import *
 from .configurations import *
+
 from dataclasses import asdict
+from typing import Literal
 import requests
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-class NDOTenantTemplate:
+class NDOTemplate:
     def __init__(self, host, username, password, port=443) -> None:
         self.host = host
         self.username = username
@@ -21,6 +23,7 @@ class NDOTenantTemplate:
         # LOGIN
         self.login()
 
+    # INTERNAL UTIL METHODs
     def __get_port_resource_path(self, **kwargs):
         path = ""
         if kwargs["port_type"] == "vpc":
@@ -35,6 +38,23 @@ class NDOTenantTemplate:
 
         return path
 
+    def __append_fabric_intf_object(
+        self,
+        key: str,
+        template: dict,
+        port_config: PhysicalIntfResource | PortChannelResource | VPCResource,
+    ):
+        if not template[key]:
+            template[key] = [asdict(port_config)]
+            return
+        # check whether the object name already exist.
+        filter_object = list(filter(lambda i: i["name"] == port_config.name, template[key]))
+        if len(filter_object) > 0:
+            print(f"   |--- {key} name {port_config.name} already exist.")
+            return
+        template[key].append(asdict(port_config))
+
+    # UTILS
     def login(self) -> None:
         if not self.session:
             self.session = requests.session()
@@ -510,7 +530,7 @@ class NDOTenantTemplate:
             target_epg[0]["staticPorts"].append(payload)
 
     # Fabric Template
-    def find_fabric_policy_by_name(self, name) -> FabricPolicy | None:
+    def find_fabric_policy_by_name(self, name: str) -> FabricPolicy | None:
         url = f"{self.base_path}{PATH_FABRIC_POLICIES_SUM}"
         resp = self.session.get(url).json()
         filtered_resp = list(filter(lambda p: p["templateName"] == name, resp))
@@ -520,7 +540,7 @@ class NDOTenantTemplate:
             url = f"{self.base_path}{PATH_TEMPLATES}/{filtered_resp[0]['templateId']}"
             return self.session.get(url).json()
 
-    def find_fabric_resource_by_name(self, name) -> FabricPolicy | None:
+    def find_fabric_resource_by_name(self, name: str) -> FabricPolicy | None:
         url = f"{self.base_path}{PATH_FABRIC_RESOURCES_SUM}"
         resp = self.session.get(url).json()
         filtered_resp = list(filter(lambda p: p["templateName"] == name, resp))
@@ -529,6 +549,30 @@ class NDOTenantTemplate:
         else:
             url = f"{self.base_path}{PATH_TEMPLATES}/{filtered_resp[0]['templateId']}"
             return self.session.get(url).json()
+
+    def find_phyintf_setting_id_by_name(self, name: str) -> str | None:
+        url = f"{self.base_path}{PATH_PHYINTF_POLICY_GROUP}"
+        resp = self.session.get(url)
+        if resp.status_code != 200:
+            raise Exception(resp.json())
+
+        resp = resp.json()
+        for item in resp["items"]:
+            if item["spec"]["name"] == name:
+                return item["spec"]["uuid"]
+        return None
+
+    def find_pc_intf_setting_id_by_name(self, name: str) -> str | None:
+        url = f"{self.base_path}{PATH_PORTCHANNEL_POLICY_GROUP}"
+        resp = self.session.get(url)
+        if resp.status_code != 200:
+            raise Exception(resp.json())
+
+        resp = resp.json()
+        for item in resp["items"]:
+            if item["spec"]["name"] == name:
+                return item["spec"]["uuid"]
+        return None
 
     def create_fabric_policy(self, name: str, site: str) -> FabricPolicy:
         print(f"--- Creating policy {name} on site {site}")
@@ -605,5 +649,46 @@ class NDOTenantTemplate:
             print(f"   |--- {resp.json()['info']}")
             raise Exception(resp.json())
 
-    def add_physical_port_to_fabric_resource():
-        pass
+    def add_port_to_fabric_resource(
+        self,
+        resource_name: str,
+        port_config: PhysicalIntfResource | PortChannelResource | VPCResource,
+        intf_policy_name: str,
+    ):
+        print(f"--- Adding fabric resource {port_config.name}")
+        # find resource template
+        resource = self.find_fabric_resource_by_name(resource_name)
+        if not resource:
+            raise Exception(f"Fabric resource {resource_name} does not exist.")
+
+        template = resource["fabricResourceTemplate"]["template"]
+        if isinstance(port_config, PhysicalIntfResource):
+            # find policy ID
+            policy_id = self.find_phyintf_setting_id_by_name(intf_policy_name)
+            port_config.policy = policy_id
+            if not policy_id:
+                raise Exception(f"policy {intf_policy_name} does not exist. Please create it before using.")
+            self.__append_fabric_intf_object("interfaceProfiles", template, port_config)
+        elif isinstance(port_config, PortChannelResource):
+            # find policy ID
+            policy_id = self.find_pc_intf_setting_id_by_name(intf_policy_name)
+            port_config.policy = policy_id
+            if not policy_id:
+                raise Exception(f"policy {intf_policy_name} does not exist. Please create it before using.")
+            self.__append_fabric_intf_object("portChannels", template, port_config)
+        elif isinstance(port_config, VPCResource):
+            # find policy ID
+            policy_id = self.find_pc_intf_setting_id_by_name(intf_policy_name)
+            port_config.policy = policy_id
+            if not policy_id:
+                raise Exception(f"policy {intf_policy_name} does not exist. Please create it before using.")
+            self.__append_fabric_intf_object("virtualPortChannels", template, port_config)
+        else:
+            raise Exception(
+                "port_config is not valid, you must pass an object of types PhysicalIntfResource | PortChannelResource | VPCResource"
+            )
+
+        url = f'{self.base_path}{PATH_TEMPLATES}/{resource["templateId"]}'
+        resp = self.session.put(url, json=resource)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())

@@ -38,3 +38,46 @@ class VrfParams:
     preferredGroup: bool = False
     vzAnyEnabled: bool = True
     ipDataPlaneLearning: str = "enabled"  # enabled, disabled
+
+
+@dataclass
+class IntfDescription:
+    nodeID: str
+    interfaceID: str
+    description: str
+
+
+@dataclass
+class VPCNodeDetails:
+    node: str
+    memberInterfaces: str
+
+
+@dataclass
+class PhysicalIntfResource:
+    name: str
+    interfaces: str
+    policy: str = ""
+    nodes: list[str] = field(default_factory=list)
+    interfaceDescriptions: List[IntfDescription] = field(default_factory=list)
+    description: str = ""
+
+
+@dataclass
+class PortChannelResource:
+    name: str
+    node: str
+    memberInterfaces: str
+    policy: str = ""
+    interfaceDescriptions: List[IntfDescription] = field(default_factory=list)
+    description: str = ""
+
+
+@dataclass
+class VPCResource:
+    name: str
+    node1Details: VPCNodeDetails
+    node2Details: VPCNodeDetails
+    policy: str = ""
+    interfaceDescriptions: list[IntfDescription] = field(default_factory=list)
+    description: str = ""

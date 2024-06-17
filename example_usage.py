@@ -1,5 +1,5 @@
 from NDOService import l2_service
-from NDOService.core.ndo_connector import NDOTenantTemplate
+from NDOService.core.ndo_connector import NDOTemplate
 from NDOService.core.configurations import *
 
 """
@@ -61,18 +61,58 @@ params = {
     "epg_name": "EPG_CUSTOMER",
 }
 
-# ndo = NDOTenantTemplate(
-#     params["connection"]["host"],
-#     params["connection"]["username"],
-#     params["connection"]["password"],
-#     params["connection"]["port"],
-# )
 
-bd_subnet = BridgeDomainSubnet("10.0.0.1/24", "test from api")
-bd_config = BridgeDomainParams(subnets=[bd_subnet])
+def Example_Service_Create():
+    # EXAMPLE HOW TO CREATE SERVICE
+    #
+    bd_subnet = BridgeDomainSubnet("10.0.0.1/24", "test from api")
+    bd_config = BridgeDomainParams()
+    l2_service.create(**params, bd_config=bd_config)
 
-l2_service.create(**params, bd_config=bd_config)
 
-# ndo.create_fabric_policy("TLS1_nuttawut_test_by_script", "TLS1")
-# ndo.create_fabric_resource("TLS1_nuttawut_test_by_script", "TLS1")
-# ndo.add_vlans_to_pool("TLS1_nuttawut_test_by_script", "VLAN_SERVER_CL_TEST", [3013, 3014])
+def Example_Fabric_Template():
+    # EXAMPLE HOW TO CREATE FABRIC POLICIES/RESOURCES
+    #
+    ndo = NDOTemplate(
+        params["connection"]["host"],
+        params["connection"]["username"],
+        params["connection"]["password"],
+        params["connection"]["port"],
+    )
+    # example - To create fabric_policy
+    ndo.create_fabric_policy("TLS1_nuttawut_test_by_script", "TLS1")
+
+    # example - To create fabric_resource
+    ndo.create_fabric_resource("TLS1_nuttawut_test_by_script", "TLS1")
+
+    # example - To add vlan to pool
+    ndo.add_vlans_to_pool("TLS1_nuttawut_test_by_script", "VLAN_SERVER_CL_TEST", [3013, 3014])
+
+    vpc_port_config = VPCResource(
+        name="VPC_SILA_TEST",
+        node1Details=VPCNodeDetails("3101", "1/14"),
+        node2Details=VPCNodeDetails("3102", "1/14"),
+    )
+    pc_port_config = PortChannelResource(
+        name="PC_SILA_TEST",
+        node="3102",
+        memberInterfaces="1/15,1/16",
+    )
+    phy_port_config = PhysicalIntfResource(
+        name="PHY_TEST",
+        nodes=["3102"],
+        interfaces="1/17",
+    )
+    ndo.add_port_to_fabric_resource(
+        "SILA_CL_DOM01_ResourcePolicy01", phy_port_config, "INT_SILA1_CL_DOM01_PHY_SERVER_1G"
+    )
+    ndo.add_port_to_fabric_resource(
+        "SILA_CL_DOM01_ResourcePolicy01", pc_port_config, "INT_SILA1_CL_DOM01_VPC_SERVER_1G"
+    )
+    ndo.add_port_to_fabric_resource(
+        "SILA_CL_DOM01_ResourcePolicy01", vpc_port_config, "INT_SILA1_CL_DOM01_VPC_SERVER_1G"
+    )
+
+
+if __name__ == "__main__":
+    Example_Fabric_Template()

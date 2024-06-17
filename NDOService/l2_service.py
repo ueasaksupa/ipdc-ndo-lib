@@ -1,14 +1,13 @@
 import os
-from pprint import pprint
 from .core.configurations import *
-from .core.ndo_connector import NDOTenantTemplate
+from .core.ndo_connector import NDOTemplate
 
 
 def create(**kwargs):
     """
     For create L2 service
     """
-    ndo = NDOTenantTemplate(
+    ndo = NDOTemplate(
         kwargs["connection"]["host"],
         kwargs["connection"]["username"],
         kwargs["connection"]["password"],
@@ -80,9 +79,9 @@ def create(**kwargs):
 
     # update schema
     schema = ndo.save_schema(schema)
-    print("=" * os.get_terminal_size().columns)
-    pprint(schema)
-    print("=" * os.get_terminal_size().columns)
+    # print("=" * os.get_terminal_size().columns)
+    # pprint(schema)
+    # print("=" * os.get_terminal_size().columns)
 
 
 if __name__ == "__main__":
