@@ -2,6 +2,7 @@ from .path_const import *
 from .types import *
 from .configurations import *
 
+from pprint import pprint
 from dataclasses import asdict
 from typing import Literal
 import requests
@@ -54,6 +55,28 @@ class NDOTemplate:
             return
         template[key].append(asdict(port_config))
 
+    def __generate_rm_payload(self, rnConfig: RouteMapConfig):
+        entryList = []
+        for entry in rnConfig.entryList:
+            prefixes = []
+            for prefix in entry.prefixes:
+                prefixes.append(
+                    {
+                        "prefix": prefix.prefix,
+                        "fromPfxLen": prefix.fromPfxLen,
+                        "toPfxLen": prefix.toPfxLen,
+                        "aggregate": prefix.aggregate,
+                    }
+                )
+            entryList.append(
+                {
+                    "rtMapContext": {"order": entry.order, "name": entry.name, "action": entry.action},
+                    "matchRule": [{"matchPrefixList": prefixes}],
+                }
+            )
+        completed_payload = {"name": rnConfig.name, "description": rnConfig.description, "rtMapEntryList": entryList}
+        return completed_payload
+
     # UTILS
     def login(self) -> None:
         if not self.session:
@@ -77,7 +100,7 @@ class NDOTemplate:
         resp = self.session.get(url).json()
         return resp["sites"]
 
-    def find_tenant_by_name(self, tenant_name) -> Tenant | None:
+    def find_tenant_by_name(self, tenant_name: str) -> Tenant | None:
         url = f"{self.base_path}{PATH_TENANTS}"
         # Get all
         resp: list = self.session.get(url).json()["tenants"]
@@ -88,7 +111,7 @@ class NDOTemplate:
 
         return None
 
-    def find_schema_by_name(self, schema_name) -> Schema | None:
+    def find_schema_by_name(self, schema_name: str) -> Schema | None:
         url = f"{self.base_path}{PATH_SCHEMAS_LIST}"
         # Get all
         resp: list = self.session.get(url).json()["schemas"]
@@ -106,7 +129,7 @@ class NDOTemplate:
 
         return None
 
-    def find_vpc_by_site(self, vpc_name, site_name) -> VPCResourcePolicy | None:
+    def find_vpc_by_site(self, vpc_name: str, site_name: str) -> VPCResourcePolicy | None:
         if site_name not in self.sitename_id_map:
             raise Exception(f"Site {site_name} does not exist.")
 
@@ -120,6 +143,32 @@ class NDOTemplate:
             return None
 
         return filtered_vpc[0]
+
+    def find_l3out_template_by_name(self, l3out_name: str) -> L3OutTemplate | None:
+        url = f"{self.base_path}{PATH_L3OUT_TEMPLATE_SUM}"
+        # Get all
+        resp: list = self.session.get(url).json()
+        # filter by name
+        filtered = list(filter(lambda t: t["templateName"].upper() == l3out_name.upper(), resp))
+        if len(filtered) > 0:
+            # re-query to get full object
+            resp = self.session.get(f"{self.base_path}{PATH_TEMPLATES}/{filtered[0]['templateId']}").json()
+            return resp
+
+        return None
+
+    def find_tenant_policies_template_by_name(self, name: str) -> TenantPoliciesTemplate | None:
+        url = f"{self.base_path}{PATH_TENANT_POLICIES_TEMPLATE_SUM}"
+        # Get all
+        resp: list = self.session.get(url).json()
+        # filter by name
+        filtered = list(filter(lambda t: t["templateName"].upper() == name.upper(), resp))
+        if len(filtered) > 0:
+            # re-query to get full object
+            resp = self.session.get(f"{self.base_path}{PATH_TEMPLATES}/{filtered[0]['templateId']}").json()
+            return resp
+
+        return None
 
     # Tenant Template
     def save_schema(self, schema: dict) -> Schema:
@@ -528,6 +577,146 @@ class NDOTemplate:
                 "mode": conf["port_mode"],
             }
             target_epg[0]["staticPorts"].append(payload)
+
+    # Tenant policies template
+    def create_tenant_policies_template(
+        self, template_name: str, sites: list[str], tenant_name: str
+    ) -> TenantPoliciesTemplate:
+        print(f"--- Creating Tenant policies template {template_name}")
+        for site in sites:
+            if site not in self.sitename_id_map:
+                raise Exception(f"site {site} does not exist.")
+
+        tenant = self.find_tenant_by_name(tenant_name)
+        if not tenant:
+            raise Exception(f"tenant {tenant_name} does not exist.")
+
+        template = self.find_tenant_policies_template_by_name(template_name)
+        if template:
+            print(f"   |--- Template already exist")
+            return template
+
+        url = f"{self.base_path}{PATH_TEMPLATES}"
+        payload = {
+            "name": template_name,
+            "displayName": template_name,
+            "templateType": "tenantPolicy",
+            "tenantPolicyTemplate": {
+                "template": {"tenantId": tenant["id"]},
+                "sites": list(map(lambda s: {"siteId": self.sitename_id_map[s]}, sites)),
+            },
+        }
+
+        resp = self.session.post(url, json=payload)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+        return resp.json()
+
+    def add_route_map_policy(self, template_name: str, rnConfig: RouteMapConfig) -> None:
+        print("--- Adding RouteMap policy")
+        template = self.find_tenant_policies_template_by_name(template_name)
+        if not template_name:
+            raise Exception(f"template {template_name} does not exist")
+
+        if "routeMapPolicies" not in template["tenantPolicyTemplate"]["template"]:
+            template["tenantPolicyTemplate"]["template"]["routeMapPolicies"] = [self.__generate_rm_payload(rnConfig)]
+        else:
+            rm_policies: list = template["tenantPolicyTemplate"]["template"]["routeMapPolicies"]
+            filtered_rm = list(filter(lambda rm: rm["name"] == rnConfig.name, rm_policies))
+            if len(filtered_rm) > 0:
+                print(f"   |--- RouteMap {rnConfig.name} already exist.")
+                return
+            rm_policies.append(self.__generate_rm_payload(rnConfig))
+
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
+        resp = self.session.put(url, json=template)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+    def add_l3out_intf_routing_policy(
+        self,
+        template_name: str,
+        pol_name: str,
+        bfdConfig: BFDPolicyConfig = None,
+        ospfIntfConfig: OSPFIntfConfig = None,
+    ) -> None:
+        print("--- Adding Interface policy")
+        if bfdConfig == None and ospfIntfConfig == None:
+            raise Exception("Either bfdConfig or ospfIntfConfig is required.")
+
+        template = self.find_tenant_policies_template_by_name(template_name)
+        if not template_name:
+            raise Exception(f"template {template_name} does not exist")
+
+        payload = {"name": pol_name}
+        if bfdConfig != None:
+            payload["bfdPol"] = asdict(bfdConfig)
+        if ospfIntfConfig != None:
+            payload["ospfIntfPol"] = {
+                "networkType": ospfIntfConfig.networkType,
+                "prio": ospfIntfConfig.prio,
+                "cost": ospfIntfConfig.cost,
+                "ifControl": {
+                    "advertiseSubnet": ospfIntfConfig.advertiseSubnet,
+                    "bfd": ospfIntfConfig.bfd,
+                    "ignoreMtu": ospfIntfConfig.ignoreMtu,
+                    "passiveParticipation": ospfIntfConfig.passiveParticipation,
+                },
+                "helloInterval": ospfIntfConfig.helloInterval,
+                "deadInterval": ospfIntfConfig.deadInterval,
+                "retransmitInterval": ospfIntfConfig.retransmitInterval,
+                "transmitDelay": ospfIntfConfig.transmitDelay,
+            }
+
+        if "l3OutIntfPolGroups" not in template["tenantPolicyTemplate"]["template"]:
+            template["tenantPolicyTemplate"]["template"]["l3OutIntfPolGroups"] = [payload]
+        else:
+            policies: list = template["tenantPolicyTemplate"]["template"]["l3OutIntfPolGroups"]
+            filtered_pol = list(filter(lambda pol: pol["name"] == pol_name, policies))
+            if len(filtered_pol) > 0:
+                print(f"   |--- Interface policy {pol_name} already exist.")
+                return
+            policies.append(payload)
+
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
+        resp = self.session.put(url, json=template)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+    # L3OUT template
+    def create_l3out_template(self, template_name: str, site_name: str, tenant_name: str) -> L3OutTemplate:
+        print(f"--- Creating L3outTemplate {template_name}")
+        if site_name not in self.sitename_id_map:
+            raise Exception(f"site {site_name} does not exist.")
+
+        tenant = self.find_tenant_by_name(tenant_name)
+        if not tenant:
+            raise Exception(f"tenant {tenant_name} does not exist.")
+
+        l3out = self.find_l3out_template_by_name(template_name)
+        if l3out:
+            print(f"   |--- Template already exist")
+            return l3out
+
+        url = f"{self.base_path}/{PATH_TEMPLATES}"
+        payload = {
+            "name": template_name,
+            "displayName": template_name,
+            "templateType": "l3out",
+            "l3outTemplate": {
+                "tenantId": tenant["id"],
+                "siteId": self.sitename_id_map[site_name],
+                "l3outs": [],
+            },
+        }
+        resp = self.session.post(url, json=payload)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+        return resp.json()
+
+    def add_l3out_under_template(self, l3out_name: str):
+        # TODO
+        pass
 
     # Fabric Template
     def find_fabric_policy_by_name(self, name: str) -> FabricPolicy | None:

@@ -29,7 +29,6 @@ Required params:
     epg_name: EPG name
 """
 
-
 params = {
     "connection": {"host": "127.0.0.1", "port": 10443, "username": "admin", "password": "P@ssw0rd"},
     "sites": [
@@ -61,6 +60,41 @@ params = {
     "epg_name": "EPG_CUSTOMER",
 }
 
+# INIT
+ndo = NDOTemplate(
+    params["connection"]["host"],
+    params["connection"]["username"],
+    params["connection"]["password"],
+    params["connection"]["port"],
+)
+
+
+def Example_create_Tenant_Policies():
+    ndo.create_l3out_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", "SILA", "TN_NUTTAWUT_TEST")
+    ndo.create_tenant_policies_template(
+        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", ["SILA", "TLS1"], "TN_NUTTAWUT_TEST"
+    )
+    # prepare prefixes
+    prefixes_for_1 = [RouteMapPrefix(prefix="10.100.0.0/24"), RouteMapPrefix(prefix="10.200.0.0/24")]
+    prefixes_default = [
+        RouteMapPrefix(prefix="0.0.0.0/0", aggregate=True, fromPfxLen=0, toPfxLen=32),
+    ]
+    entries = [
+        RouteMapEntry(order=1, name="1", action="permit", prefixes=prefixes_for_1),
+        RouteMapEntry(order=9, name="9", action="permit", prefixes=prefixes_default),
+    ]
+    rnconfig = RouteMapConfig(name="RN_TEST", entryList=entries)
+    ndo.add_route_map_policy("TN_NUTTAWUT_TEST_Tenant_Policies_Template", rnconfig)
+
+    bfdconfig = BFDPolicyConfig(minRxInterval=100, minTxInterval=100, echoRxInterval=100)
+    ospfconfig = OSPFIntfConfig()
+    ndo.add_l3out_intf_routing_policy(
+        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_BFD_100", bfdConfig=bfdconfig
+    )
+    ndo.add_l3out_intf_routing_policy(
+        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_OSPF_DEFAULT", ospfIntfConfig=ospfconfig
+    )
+
 
 def Example_Service_Create():
     # EXAMPLE HOW TO CREATE SERVICE
@@ -72,13 +106,7 @@ def Example_Service_Create():
 
 def Example_Fabric_Template():
     # EXAMPLE HOW TO CREATE FABRIC POLICIES/RESOURCES
-    #
-    ndo = NDOTemplate(
-        params["connection"]["host"],
-        params["connection"]["username"],
-        params["connection"]["password"],
-        params["connection"]["port"],
-    )
+
     # example - To create fabric_policy
     ndo.create_fabric_policy("TLS1_nuttawut_test_by_script", "TLS1")
 
@@ -115,4 +143,5 @@ def Example_Fabric_Template():
 
 
 if __name__ == "__main__":
-    Example_Fabric_Template()
+    # Example_Fabric_Template()
+    Example_create_Tenant_Policies()

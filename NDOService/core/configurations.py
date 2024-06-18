@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Literal
 
 
 @dataclass
@@ -81,3 +81,57 @@ class VPCResource:
     policy: str = ""
     interfaceDescriptions: list[IntfDescription] = field(default_factory=list)
     description: str = ""
+
+
+@dataclass
+class L3OutConfig:
+    name: str
+
+
+@dataclass
+class RouteMapPrefix:
+    prefix: str
+    fromPfxLen: int = 0
+    toPfxLen: int = 0
+    aggregate: bool = False
+
+
+@dataclass
+class RouteMapEntry:
+    order: int
+    name: str
+    action: Literal["permit", "deny"]
+    prefixes: list[RouteMapPrefix]
+
+
+@dataclass
+class RouteMapConfig:
+    name: str
+    entryList: list[RouteMapEntry]
+    description: str = ""
+
+
+@dataclass
+class BFDPolicyConfig:
+    adminState: Literal["enabled", "disabled"] = "enabled"
+    detectionMultiplier: int = 3
+    minRxInterval: int = 50
+    minTxInterval: int = 50
+    echoAdminState: Literal["enabled", "disabled"] = "enabled"
+    echoRxInterval: int = 50
+    ifControl: bool = False
+
+
+@dataclass
+class OSPFIntfConfig:
+    networkType: Literal["broadcast", "pointToPoint"] = "broadcast"
+    prio: int = 1
+    cost: int = 0
+    advertiseSubnet: bool = False
+    bfd: bool = False
+    ignoreMtu: bool = False
+    passiveParticipation: bool = False
+    helloInterval: int = 10
+    deadInterval: int = 40
+    retransmitInterval: int = 5
+    transmitDelay: int = 1
