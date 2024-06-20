@@ -20,6 +20,7 @@ class NDOTemplate:
         self.base_path = f"https://{self.host}:{port}"
         self.session = None
         self.sitename_id_map = {}
+        self.siteid_name_map = {}
         self.schema = None
         # LOGIN
         self.login()
@@ -28,7 +29,7 @@ class NDOTemplate:
     def __get_port_resource_path(self, **kwargs):
         path = ""
         if kwargs["port_type"] == "vpc":
-            vpc_resource = self.find_vpc_by_site(kwargs["port_name"], kwargs["site_name"])
+            vpc_resource = self.find_vpc_by_name(kwargs["port_name"], kwargs["site_name"])
             if not vpc_resource:
                 raise Exception(
                     f"VPC resource name {kwargs['port_name']} does not exist in the Fabric Resource Policy, Please create it first."
@@ -77,6 +78,66 @@ class NDOTemplate:
         completed_payload = {"name": rnConfig.name, "description": rnConfig.description, "rtMapEntryList": entryList}
         return completed_payload
 
+    def __generate_l3out_phyintf(self, payload: dict, intfConfig: L3OutInterfaceConfig):
+        pass
+
+    def __generate_l3out_subintf(self, payload: dict, site_name: str, intfConfig: L3OutInterfaceConfig):
+        pcintf = self.find_pc_by_name(intfConfig.portChannelName, site_name)
+        if not pcintf:
+            raise Exception(f"PortChannel {intfConfig.portChannelName} does not exist in the fabric resource.")
+
+        payload["subInterfaces"].append(
+            {
+                "pathType": intfConfig.portType,
+                "pathRef": pcintf["uuid"],
+                "encap": {"encapType": intfConfig.encapType, "value": intfConfig.encapVal},
+                "addresses": {"primaryV4": intfConfig.primaryV4, "primaryV6": intfConfig.primaryV6},
+                "mac": "00:22:BD:F8:19:FF",
+                "mtu": "inherit",
+                "bgpPeers": list(map(lambda obj: asdict(obj), intfConfig.bgpPeers)),
+            }
+        )
+
+    def __generate_l3out_interface_payload(self, template: dict, payload: dict, l3outConfig: L3OutConfig):
+        payload["interfaces"] = []
+        payload["subInterfaces"] = []
+        for intf in l3outConfig.interfaces:
+            if intf.type == "interfaces":
+                self.__generate_l3out_phyintf(payload, self.siteid_name_map[template["l3outTemplate"]["siteId"]], intf)
+            elif intf.type == "subInterfaces":
+                self.__generate_l3out_subintf(payload, self.siteid_name_map[template["l3outTemplate"]["siteId"]], intf)
+
+    def __generate_l3out_payload(self, template: dict, l3outConfig: L3OutConfig):
+        vrf = self.find_template_object_by_name(
+            l3outConfig.vrf, f"type=vrf&tenant-id={template['l3outTemplate']['tenantId']}"
+        )
+        if vrf is None:
+            raise Exception(f"VRF {l3outConfig.vrf} does not exist.")
+
+        routemap = self.find_template_object_by_name(
+            l3outConfig.exportRouteMap, f"type=routeMap&tenant-id={template['l3outTemplate']['tenantId']}"
+        )
+        if routemap is None:
+            raise Exception(f"RouteMap {l3outConfig.exportRouteMap} does not exist.")
+
+        l3domain = self.find_domain_by_name(
+            l3outConfig.l3domain, site_id=template["l3outTemplate"]["siteId"], type="l3"
+        )
+        if l3domain is None:
+            raise Exception(f"l3domain {l3outConfig.l3domain} does not exist.")
+
+        payload = {
+            "name": l3outConfig.name,
+            "vrfRef": vrf["uuid"],
+            "l3domain": l3domain["uuid"],
+            "routingProtocol": l3outConfig.routingProtocol,
+            "exportRouteMapRef": routemap["uuid"],
+            "nodes": list(map(lambda obj: asdict(obj), l3outConfig.nodes)),
+        }
+        self.__generate_l3out_interface_payload(template, payload, l3outConfig)
+        # pprint(payload)
+        return payload
+
     # UTILS
     def login(self) -> None:
         if not self.session:
@@ -94,6 +155,7 @@ class NDOTemplate:
         # create site name to ID map
         for site in self.get_all_sites():
             self.sitename_id_map[site["name"]] = site["id"]
+            self.siteid_name_map[site["id"]] = site["name"]
 
     def get_all_sites(self) -> Site:
         url = f"{self.base_path}{PATH_SITES}"
@@ -129,21 +191,6 @@ class NDOTemplate:
 
         return None
 
-    def find_vpc_by_site(self, vpc_name: str, site_name: str) -> VPCResourcePolicy | None:
-        if site_name not in self.sitename_id_map:
-            raise Exception(f"Site {site_name} does not exist.")
-
-        url = f"{self.base_path}{PATH_VPC_SUMMARY_SITE}/{self.sitename_id_map[site_name]}"
-        resp = self.session.get(url).json()
-        if "vpcs" not in resp["spec"]:
-            return None
-
-        filtered_vpc = list(filter(lambda v: v["name"] == vpc_name, resp["spec"]["vpcs"]))
-        if len(filtered_vpc) == 0:
-            return None
-
-        return filtered_vpc[0]
-
     def find_l3out_template_by_name(self, l3out_name: str) -> L3OutTemplate | None:
         url = f"{self.base_path}{PATH_L3OUT_TEMPLATE_SUM}"
         # Get all
@@ -157,7 +204,7 @@ class NDOTemplate:
 
         return None
 
-    def find_tenant_policies_template_by_name(self, name: str) -> TenantPoliciesTemplate | None:
+    def find_tenant_policies_template_by_name(self, name: str) -> TenantPolTemplate | None:
         url = f"{self.base_path}{PATH_TENANT_POLICIES_TEMPLATE_SUM}"
         # Get all
         resp: list = self.session.get(url).json()
@@ -169,6 +216,18 @@ class NDOTemplate:
             return resp
 
         return None
+
+    def find_template_object_by_name(self, target_name: str, query: str) -> Template | None:
+        url = f"{self.base_path}{PATH_TEMPLATES_OBJECT}?{query}"
+        resp = self.session.get(url)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+        filtered = list(filter(lambda v: v["name"] == target_name, resp.json()))
+        if len(filtered) == 0:
+            return None
+
+        return filtered[0]
 
     # Tenant Template
     def save_schema(self, schema: dict) -> Schema:
@@ -581,7 +640,7 @@ class NDOTemplate:
     # Tenant policies template
     def create_tenant_policies_template(
         self, template_name: str, sites: list[str], tenant_name: str
-    ) -> TenantPoliciesTemplate:
+    ) -> TenantPolTemplate:
         print(f"--- Creating Tenant policies template {template_name}")
         for site in sites:
             if site not in self.sitename_id_map:
@@ -614,6 +673,9 @@ class NDOTemplate:
 
     def add_route_map_policy(self, template_name: str, rnConfig: RouteMapConfig) -> None:
         print("--- Adding RouteMap policy")
+        if not isinstance(rnConfig, RouteMapConfig):
+            raise ValueError("rnConfig must be an object of class RouteMapConfig")
+
         template = self.find_tenant_policies_template_by_name(template_name)
         if not template_name:
             raise Exception(f"template {template_name} does not exist")
@@ -714,11 +776,62 @@ class NDOTemplate:
             raise Exception(resp.json())
         return resp.json()
 
-    def add_l3out_under_template(self, l3out_name: str):
-        # TODO
-        pass
+    def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig):
+        print(f"--- Adding L3out {l3outConfig.name} to template {template_name}")
+        if not isinstance(l3outConfig, L3OutConfig):
+            raise ValueError("l3outConfig must be an object of class L3OutConfig")
+
+        template = self.find_l3out_template_by_name(template_name)
+
+        if not template:
+            raise Exception(f"template {template_name} does not exist.")
+        if "l3outs" not in template["l3outTemplate"]:
+            template["l3outTemplate"]["l3outs"] = []
+
+        l3outs = template["l3outTemplate"]["l3outs"]
+        payload = self.__generate_l3out_payload(template, l3outConfig)
+        filtered = list(filter(lambda l: l["name"] == l3outConfig.name, l3outs))
+        if len(filtered) != 0:
+            print(f"   |--- L3out {l3outConfig.name} already exist.")
+            return
+
+        l3outs.append(payload)
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
+        resp = self.session.put(url, json=template)
+        if resp.status_code >= 400:
+            print(resp.json())
 
     # Fabric Template
+    def find_vpc_by_name(self, vpc_name: str, site_name: str) -> VPCResourcePolicy | None:
+        if site_name not in self.sitename_id_map:
+            raise Exception(f"Site {site_name} does not exist.")
+
+        url = f"{self.base_path}{PATH_VPC_SUMMARY_SITE}/{self.sitename_id_map[site_name]}"
+        resp = self.session.get(url).json()
+        if "vpcs" not in resp["spec"]:
+            return None
+
+        filtered = list(filter(lambda v: v["name"] == vpc_name, resp["spec"]["vpcs"]))
+        if len(filtered) == 0:
+            return None
+
+        return filtered[0]
+
+    def find_pc_by_name(self, pc_name: str, site_name: str) -> VPCResourcePolicy | None:
+        if site_name not in self.sitename_id_map:
+            raise Exception(f"Site {site_name} does not exist.")
+
+        url = f"{self.base_path}{PATH_PC_SUMMARY_SITE}/{self.sitename_id_map[site_name]}"
+        resp = self.session.get(url).json()
+        if "pcs" not in resp["spec"]:
+            return None
+
+        filtered = list(filter(lambda v: v["name"] == pc_name, resp["spec"]["pcs"]))
+        if len(filtered) == 0:
+            return None
+
+        return filtered[0]
+
     def find_fabric_policy_by_name(self, name: str) -> FabricPolicy | None:
         url = f"{self.base_path}{PATH_FABRIC_POLICIES_SUM}"
         resp = self.session.get(url).json()
@@ -761,6 +874,20 @@ class NDOTemplate:
         for item in resp["items"]:
             if item["spec"]["name"] == name:
                 return item["spec"]["uuid"]
+        return None
+
+    def find_domain_by_name(
+        self, domain_name: str, site_name: str = None, site_id: str = None, type: str = ""
+    ) -> dict | None:
+        if not site_name and not site_id:
+            raise Exception("Sitename or SiteID is required.")
+
+        url = f"{self.base_path}{PATH_DOMAINSUM_SITE}/{site_id if site_id is not None else self.sitename_id_map[site_name]}?types={type}"
+        resp = self.session.get(url).json()
+        domains = resp["spec"]["domains"]
+        for domain in domains:
+            if domain["name"] == domain_name:
+                return domain
         return None
 
     def create_fabric_policy(self, name: str, site: str) -> FabricPolicy:
@@ -810,7 +937,7 @@ class NDOTemplate:
         print(f"--- Adding vlans {','.join([str(v) for v in vlans])} to pool {pool_name}")
         policy = self.find_fabric_policy_by_name(policy_name)
         if not policy:
-            raise Exception(f"Policy {pool_name} not exist, Please create it first.")
+            raise Exception(f"Policy {policy_name} not exist, Please create it first.")
 
         payload = {
             "name": pool_name,
@@ -819,7 +946,7 @@ class NDOTemplate:
         }
         # vlan pool never initialized before in this template
         if "vlanPools" not in policy["fabricPolicyTemplate"]["template"]:
-            policy["fabricPolicyTemplate"]["template"] = {"vlanPools": [payload]}
+            policy["fabricPolicyTemplate"]["template"]["vlanPools"] = [payload]
         else:
             target_pool = list(
                 filter(lambda pool: pool["name"] == pool_name, policy["fabricPolicyTemplate"]["template"]["vlanPools"])
@@ -835,7 +962,7 @@ class NDOTemplate:
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
         resp = self.session.put(url, json=policy)
         if resp.status_code >= 400:
-            print(f"   |--- {resp.json()['info']}")
+            print(f"   |--- {resp.json()}")
             raise Exception(resp.json())
 
     def add_port_to_fabric_resource(
@@ -843,7 +970,7 @@ class NDOTemplate:
         resource_name: str,
         port_config: PhysicalIntfResource | PortChannelResource | VPCResource,
         intf_policy_name: str,
-    ):
+    ) -> None:
         print(f"--- Adding fabric resource {port_config.name}")
         # find resource template
         resource = self.find_fabric_resource_by_name(resource_name)
@@ -880,4 +1007,42 @@ class NDOTemplate:
         url = f'{self.base_path}{PATH_TEMPLATES}/{resource["templateId"]}'
         resp = self.session.put(url, json=resource)
         if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+    def add_domain_to_fabric_policy(
+        self,
+        policy_name: str,
+        domain_type: Literal["l3Domains", "domains"],
+        domain_name: str,
+        pool_name: str,
+    ) -> None:
+        print(f"--- Adding {domain_type} to fabric policy {policy_name}")
+        if domain_type not in ["l3Domains", "domains"]:
+            raise Exception("only domain_type of l3Domain or domains is supported")
+        policy = self.find_fabric_policy_by_name(policy_name)
+        if not policy:
+            raise Exception(f"Policy {policy_name} not exist, Please create it first.")
+
+        template = policy["fabricPolicyTemplate"]["template"]
+        poolname_map = {}  # use for mapping pool_name to uuid
+        for pool in [] if "vlanPools" not in template else template["vlanPools"]:
+            poolname_map[pool["name"]] = pool["uuid"]
+
+        if pool_name not in poolname_map:
+            raise Exception(f"Vlan pool {pool_name} does not exist in the policy {policy_name}.")
+
+        payload = {"name": domain_name, "pool": poolname_map[pool_name]}
+        if domain_type not in template:
+            template[domain_type] = [payload]
+        else:
+            target = list(filter(lambda pol: pol["name"] == domain_name, template[domain_type]))
+            if len(target) != 0:
+                print(f"   |--- {domain_type} name {domain_name} already exist.")
+                return
+            template[domain_type].append(payload)
+
+        url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
+        resp = self.session.put(url, json=policy)
+        if resp.status_code >= 400:
+            print(f"   |--- {resp.json()}")
             raise Exception(resp.json())

@@ -135,3 +135,78 @@ class OSPFIntfConfig:
     deadInterval: int = 40
     retransmitInterval: int = 5
     transmitDelay: int = 1
+
+
+@dataclass
+class L3OutNodeConfig:
+    nodeID: str
+    routerID: str
+    podID: str = "1"
+    useRouteIDAsLoopback: bool = False
+
+
+@dataclass
+class L3OutBGPControl:
+    allowSelfAS: bool = False
+    asOverride: bool = False
+    disablePeerASCheck: bool = False
+    nextHopSelf: bool = False
+    sendCommunity: bool = False
+    sendExtendedCommunity: bool = False
+    sendDomainPath: bool = False
+
+
+@dataclass
+class L3OutBGPPeerControl:
+    bfd: bool = True
+    disableConnectedCheck: bool = False
+
+
+@dataclass
+class L3OutBGPPeerConfig:
+    peerAddressV4: str
+    peerAsn: int
+    peerAddressV6: str = None
+    adminState: str = "enabled"
+    authEnabled: bool = False
+    allowedSelfASCount: str = 3
+    ebpgMultiHopTTL: str = 1
+    localAsnConfig: str = "none"
+    bgpControls: L3OutBGPControl = field(default_factory=L3OutBGPControl)
+    peerControls: L3OutBGPPeerControl = field(default_factory=L3OutBGPPeerControl)
+
+
+@dataclass
+class L3OutInterfaceConfig:
+    type: Literal["interfaces", "subInterfaces", "sviInterfaces"]
+    portType: Literal["port", "pc"]
+    encapVal: int
+    bgpPeers: List[L3OutBGPPeerConfig]
+    encapType: Literal["vlan", "vxlan"] = "vlan"
+    primaryV4: str = None
+    primaryV6: str = None
+    portChannelName: str = None
+    nodeID: str = None
+    path: str = None
+    podID: str = "1"
+
+
+@dataclass
+class L3OutConfig:
+    """
+    Parameter documentation:
+    name : the name of L3OUT template
+    vrf : the VRF name for this L3OUT
+    nodes : List of L3OutNodeConfig object
+    routingProtocol : either bgp or ospf
+    exportRouteMap : name of route map in Tenant policy
+    interfaces : List of L3OutInterfaceConfig object
+    """
+
+    name: str
+    vrf: str
+    l3domain: str
+    nodes: List[L3OutNodeConfig]
+    routingProtocol: Literal["bgp", "ospf"]
+    exportRouteMap: str
+    interfaces: List[L3OutInterfaceConfig]

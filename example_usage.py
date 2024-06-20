@@ -70,22 +70,25 @@ ndo = NDOTemplate(
 
 
 def Example_create_Tenant_Policies():
-    ndo.create_l3out_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", "SILA", "TN_NUTTAWUT_TEST")
+    # policy template
     ndo.create_tenant_policies_template(
         "TN_NUTTAWUT_TEST_Tenant_Policies_Template", ["SILA", "TLS1"], "TN_NUTTAWUT_TEST"
     )
-    # prepare prefixes
-    prefixes_for_1 = [RouteMapPrefix(prefix="10.100.0.0/24"), RouteMapPrefix(prefix="10.200.0.0/24")]
-    prefixes_default = [
-        RouteMapPrefix(prefix="0.0.0.0/0", aggregate=True, fromPfxLen=0, toPfxLen=32),
+    # prepare prefixes config for RouteMap
+    prefixes_1 = [
+        RouteMapPrefix(prefix="10.100.0.0/24"),
+        RouteMapPrefix(prefix="10.200.0.0/24"),
     ]
-    entries = [
-        RouteMapEntry(order=1, name="1", action="permit", prefixes=prefixes_for_1),
-        RouteMapEntry(order=9, name="9", action="permit", prefixes=prefixes_default),
-    ]
-    rnconfig = RouteMapConfig(name="RN_TEST", entryList=entries)
+    prefixes_default = [RouteMapPrefix(prefix="0.0.0.0/0", aggregate=True, fromPfxLen=0, toPfxLen=32)]
+    rnconfig = RouteMapConfig(
+        name="RN_TEST",
+        entryList=[
+            RouteMapEntry(order=1, name="1", action="permit", prefixes=prefixes_1),
+            RouteMapEntry(order=9, name="9", action="permit", prefixes=prefixes_default),
+        ],
+    )
     ndo.add_route_map_policy("TN_NUTTAWUT_TEST_Tenant_Policies_Template", rnconfig)
-
+    # BFD or OSPF interface settings
     bfdconfig = BFDPolicyConfig(minRxInterval=100, minTxInterval=100, echoRxInterval=100)
     ospfconfig = OSPFIntfConfig()
     ndo.add_l3out_intf_routing_policy(
@@ -94,6 +97,38 @@ def Example_create_Tenant_Policies():
     ndo.add_l3out_intf_routing_policy(
         "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_OSPF_DEFAULT", ospfIntfConfig=ospfconfig
     )
+    # L3out template
+    ndo.create_l3out_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", "SILA", "TN_NUTTAWUT_TEST")
+    ndo.create_l3out_template("TN_NUTTAWUT_TEST_TLS1_L3Out_Template", "TLS1", "TN_NUTTAWUT_TEST")
+    # create L3 domain
+    ndo.add_domain_to_fabric_policy(
+        "SILA1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM01", "VLAN_SERVER_CL_DOM01_01"
+    )
+    ndo.add_domain_to_fabric_policy(
+        "TLS1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM01", "VLAN_SERVER_CL_DOM01_01"
+    )
+    # prepare L3Out config
+    l3outconfig = L3OutConfig(
+        name="L3OUT_SILA_TEST",
+        vrf="VRF_CUSTOMER",
+        l3domain="L3_DOMAIN_BL_DOM01",
+        nodes=[
+            L3OutNodeConfig(nodeID="1101", routerID="10.0.0.1"),
+        ],
+        routingProtocol="bgp",
+        exportRouteMap="RN_TEST",
+        interfaces=[
+            L3OutInterfaceConfig(
+                type="subInterfaces",
+                portType="pc",
+                primaryV4="10.0.0.1/30",
+                encapVal=3000,
+                portChannelName="PC_SILA_BL_01",
+                bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.0.2", peerAsn=65001)],
+            ),
+        ],
+    )
+    ndo.add_l3out_under_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", l3outconfig)
 
 
 def Example_Service_Create():

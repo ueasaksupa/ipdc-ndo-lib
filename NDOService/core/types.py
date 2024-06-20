@@ -9,6 +9,6 @@ type BD = dict
 type ANP = dict
 type FabricPolicy = dict
 type VPCResourcePolicy = dict
-type TenantPoliciesTemplate = dict
+type TenantPolTemplate = dict
 type L3OutTemplate = dict
 type L3Out = dict
