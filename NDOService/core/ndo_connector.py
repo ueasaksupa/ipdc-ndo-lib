@@ -548,7 +548,7 @@ class NDOTemplate:
         linked_bd: str,
         epg_name: str,
         epg_desc: str = "",
-    ) -> dict:
+    ) -> EPG:
         print(f"--- Creating EPG under ANP {anp['name']}")
         filter_epg = list(filter(lambda epg: epg["name"].upper() == epg_name.upper(), anp["epgs"]))
 
@@ -577,6 +577,59 @@ class NDOTemplate:
         }
         anp["epgs"].append(payload)
         return anp["epgs"][-1]
+
+    def create_ext_epg_under_template(
+        self,
+        schema: dict,
+        template_name: str,
+        epg_name: str,
+        vrf_name: str,
+        vrf_template: str,
+        l3outs: List[dict],
+        epg_desc: str = "",
+    ) -> ExtEPG:
+        print(f"--- Creating External EPG under template {template_name}")
+        filter_template = list(filter(lambda t: t["name"].upper() == template_name.upper(), schema["templates"]))
+        if len(filter_template) == 0:
+            raise Exception(f"Template {template_name} does not exist.")
+
+        filter_eepg = list(
+            filter(lambda anp: anp["name"].upper() == epg_name.upper(), filter_template[0]["externalEpgs"])
+        )
+        if len(filter_eepg) != 0:
+            print(f"   |--- External EPG {epg_name} is already exist in template {template_name}")
+            return filter_eepg[0]
+
+        payload = {
+            "name": epg_name,
+            "displayName": epg_name,
+            "extEpgType": "on-premise",
+            "vrfRef": {"vrfName": vrf_name, "templateName": vrf_template},
+            "description": epg_desc,
+        }
+        # Add External EPG to template
+        filter_template[0]["externalEpgs"].append(payload)
+
+        # Add L3Out to site
+        for l3out in l3outs:
+            for site in schema["sites"]:
+                if site["siteId"] == self.sitename_id_map[l3out["site"]] and site["templateName"] == template_name:
+                    l3outTemplate = self.find_l3out_template_by_name(l3out["l3OutTemplateName"])
+                    if l3outTemplate is None:
+                        raise ValueError(f"L3out template {l3out["l3OutTemplateName"]} does not exist.")
+                    l3outObject = list(filter(lambda l:l["name"] == l3out["l3outName"],l3outTemplate["l3outTemplate"]["l3outs"]))
+                    if len(l3outObject) == 0:
+                        raise Exception(f"L3out {l3out["l3outName"]} does not exist in template {l3out["l3OutTemplateName"]}")
+                    
+                    sitePayload = {
+                        "externalEpgRef": {
+                            "templateName":template_name,"externalEpgName":epg_name
+                        },
+                        "l3outRef": l3outObject[0]["uuid"],
+                    }
+                    site["externalEpgs"].append(sitePayload)
+
+        return filter_template[0]["externalEpgs"][-1]
 
     def add_phy_domain_to_epg(
         self,
