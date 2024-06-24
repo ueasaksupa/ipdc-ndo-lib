@@ -1,63 +1,9 @@
-from NDOService import l2_service
 from NDOService.core.ndo_connector import NDOTemplate
 from NDOService.core.configurations import *
 
-"""
-This is the example how to call the method to create l2 service on NDO.
-Required params:
-    connection:
-        host: NDO host ip/hostname
-        username: NDO username
-        password: NDO password
-        port: NDO port [default 443]
-    sites: array of dictionary of site.
-        name: site name
-        endpoints: Array of endpoint in the selected site
-            node: node name
-            port_type: either vpc or port
-            port_name: port name ex. eth1/13
-            port_mode: port mode select one of the [regular, native, untagged]
-            vlan: vlan number
-        epg_phy_domain: Physical domain for EPG
-    tenant_name: Tenant name
-    schema_name: Schema name
-    vrf_template_name: Name of the template for VRF
-    bd_template_name: Name of the template for BD
-    vrf_name: VRF name
-    bd_name: Bridge-domaon name
-    anp_name: Application profile name
-    epg_name: EPG name
-"""
 
 params = {
     "connection": {"host": "127.0.0.1", "port": 10443, "username": "admin", "password": "P@ssw0rd"},
-    "sites": [
-        {
-            "name": "TLS1",
-            "endpoints": [
-                {"node": "3101", "port_type": "port", "port_name": "eth1/13", "port_mode": "regular", "vlan": 2103}
-            ],
-            "epg_phy_domain": "PHY_DOMAIN_SERVER_CL_DOM01_01",
-        },
-        {
-            "name": "SILA",
-            "endpoints": [
-                {"node": "3101", "port_type": "port", "port_name": "eth1/13", "port_mode": "regular", "vlan": 2103}
-            ],
-            "epg_phy_domain": "PHY_DOMAIN_SERVER_CL_DOM01_01",
-        },
-    ],
-    "deployment_mode": "...",  # all_site, sigle_site
-    "tenant_name": "TN_NUTTAWUT_TEST",
-    "schema_name": "TN_NUTTAWUT_TEST_Schema01",
-    "filter_name": "FLT_IP",
-    "contract_name": "CON_VRF_CUSTOMER",
-    "vrf_template_name": "VRF_Contract_Stretch_Template",
-    "bd_template_name": "Policy_All_Site_template",
-    "vrf_name": "VRF_CUSTOMER",
-    "bd_name": "BD_CUSTOMER",
-    "anp_name": "AP_CUSTOMER",
-    "epg_name": "EPG_CUSTOMER",
 }
 
 # INIT
@@ -69,34 +15,7 @@ ndo = NDOTemplate(
 )
 
 
-def Example_create_Tenant_Policies():
-    # policy template
-    ndo.create_tenant_policies_template(
-        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", ["SILA", "TLS1"], "TN_NUTTAWUT_TEST"
-    )
-    # prepare prefixes config for RouteMap
-    prefixes_1 = [
-        RouteMapPrefix(prefix="10.100.0.0/24"),
-        RouteMapPrefix(prefix="10.200.0.0/24"),
-    ]
-    prefixes_default = [RouteMapPrefix(prefix="0.0.0.0/0", aggregate=True, fromPfxLen=0, toPfxLen=32)]
-    rnconfig = RouteMapConfig(
-        name="RN_TEST",
-        entryList=[
-            RouteMapEntry(order=1, name="1", action="permit", prefixes=prefixes_1),
-            RouteMapEntry(order=9, name="9", action="permit", prefixes=prefixes_default),
-        ],
-    )
-    ndo.add_route_map_policy("TN_NUTTAWUT_TEST_Tenant_Policies_Template", rnconfig)
-    # BFD or OSPF interface settings
-    bfdconfig = BFDPolicyConfig(minRxInterval=100, minTxInterval=100, echoRxInterval=100)
-    ospfconfig = OSPFIntfConfig()
-    ndo.add_l3out_intf_routing_policy(
-        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_BFD_100", bfdConfig=bfdconfig
-    )
-    ndo.add_l3out_intf_routing_policy(
-        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_OSPF_DEFAULT", ospfIntfConfig=ospfconfig
-    )
+def Example_L3Out():
     # L3out template
     ndo.create_l3out_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", "SILA", "TN_NUTTAWUT_TEST")
     ndo.create_l3out_template("TN_NUTTAWUT_TEST_TLS1_L3Out_Template", "TLS1", "TN_NUTTAWUT_TEST")
@@ -107,6 +26,7 @@ def Example_create_Tenant_Policies():
     ndo.add_domain_to_fabric_policy(
         "TLS1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM01", "VLAN_SERVER_CL_DOM01_01"
     )
+    ndo.add_domain_to_fabric_policy("TLS1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM02")
     # prepare L3Out config
     l3outconfig = L3OutConfig(
         name="L3OUT_SILA_TEST",
@@ -158,14 +78,69 @@ def Example_create_Tenant_Policies():
         ],
     )
     ndo.add_l3out_under_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", l3outconfig)
+    schema = ndo.find_schema_by_name("TN_NUTTAWUT_TEST_Schema01")
+    if schema is None:
+        return
+
+    ndo.create_ext_epg_under_template(
+        schema,
+        "Policy_All_Site_template",
+        "EPG_L3OUT_CUSTOMER",
+        "VRF_CUSTOMER",
+        "VRF_Contract_Stretch_Template",
+        [
+            {
+                "site": "SILA",
+                "l3OutTemplateName": "TN_NUTTAWUT_TEST_SILA_L3Out_Template",
+                "l3outName": "L3OUT_SILA_TEST",
+            },
+            {
+                "site": "TLS1",
+                "l3OutTemplateName": "TN_NUTTAWUT_TEST_TLS1_L3Out_Template",
+                "l3outName": "L3OUT_TLS_TN_NUTTAWUT",
+            },
+        ],
+        "external epg for test",
+    )
+    ndo.save_schema(schema)
 
 
-def Example_Service_Create():
-    # EXAMPLE HOW TO CREATE SERVICE
-    #
-    bd_subnet = BridgeDomainSubnet("10.0.0.1/24", "test from api")
-    bd_config = BridgeDomainParams(subnets=[bd_subnet])
-    l2_service.create(**params, bd_config=bd_config)
+def Example_create_Tenant_Policies():
+    # create tenant policy template
+    ndo.create_tenant_policies_template(
+        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", ["SILA", "TLS1"], "TN_NUTTAWUT_TEST"
+    )
+    # prepare prefixes config for RouteMap
+    prefixes_1 = [
+        RouteMapPrefix(prefix="10.100.0.0/24"),
+        RouteMapPrefix(prefix="10.200.0.0/24"),
+    ]
+    prefixes_default = [RouteMapPrefix(prefix="0.0.0.0/0", aggregate=True, fromPfxLen=0, toPfxLen=32)]
+    rnconfig = RouteMapConfig(
+        name="RM_TN_NUTTAWUT_TEST",
+        entryList=[
+            RouteMapEntry(
+                order=1,
+                name="1",
+                action="permit",
+                prefixes=prefixes_1,
+                attributes=RouteMapAttributes(
+                    setAsPath=RouteMapSetAsPath(criteria="prepend", pathASNs=[450001]), setMultiPath=True
+                ),
+            ),
+            RouteMapEntry(order=9, name="9", action="permit", prefixes=prefixes_default),
+        ],
+    )
+    ndo.add_route_map_policy_under_template("TN_NUTTAWUT_TEST_Tenant_Policies_Template", rnconfig)
+    # BFD or OSPF interface settings
+    bfdconfig = BFDPolicyConfig(minRxInterval=100, minTxInterval=100, echoRxInterval=100)
+    ospfconfig = OSPFIntfConfig()
+    ndo.add_l3out_intf_routing_policy(
+        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_BFD_100", bfdConfig=bfdconfig
+    )
+    ndo.add_l3out_intf_routing_policy(
+        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_OSPF_DEFAULT", ospfIntfConfig=ospfconfig
+    )
 
 
 def Example_Fabric_Template():
@@ -209,3 +184,4 @@ def Example_Fabric_Template():
 if __name__ == "__main__":
     # Example_Fabric_Template()
     Example_create_Tenant_Policies()
+    # Example_L3Out()
