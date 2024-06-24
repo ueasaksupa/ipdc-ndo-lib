@@ -14,8 +14,8 @@ def create(**kwargs):
         kwargs["connection"]["port"],
     )
     # prepare configuration opject
-    bd_config = BridgeDomainParams() if "bd_config" not in kwargs else kwargs["bd_config"]
-    vrf_config = VrfParams() if "vrf_config" not in kwargs else kwargs["vrf_config"]
+    bd_config = BridgeDomainConfig() if "bd_config" not in kwargs else kwargs["bd_config"]
+    vrf_config = VrfConfig() if "vrf_config" not in kwargs else kwargs["vrf_config"]
 
     tenant = ndo.create_tenant(kwargs["tenant_name"], kwargs["sites"])
     # get schema by name if schema was not been created before, It will be created automatically

@@ -442,13 +442,13 @@ class NDOTemplate:
         return filter_template[0]["contracts"][-1]
 
     def create_vrf_under_template(
-        self, schema: dict, template_name: str, vrf_name: str, contract_name: str, vrf_config: VrfParams | None = None
+        self, schema: dict, template_name: str, vrf_name: str, contract_name: str, vrf_config: VrfConfig | None = None
     ) -> Vrf:
         print(f"--- Creating VRF {vrf_name}")
         if vrf_config is None:
-            vrf_config = VrfParams()
-        elif not isinstance(vrf_config, VrfParams):
-            raise Exception("vrf_config must be object of VrfParams")
+            vrf_config = VrfConfig()
+        elif not isinstance(vrf_config, VrfConfig):
+            raise Exception("vrf_config must be object of VrfConfig")
 
         template = list(
             filter(
@@ -482,13 +482,13 @@ class NDOTemplate:
         template_name_bd: str,
         linked_vrf_name: str,
         bd_name: str,
-        bd_config: BridgeDomainParams | None = None,
+        bd_config: BridgeDomainConfig | None = None,
     ) -> BD:
         print(f"--- Creating BD under template {template_name_bd}")
         if bd_config is None:
-            bd_config = BridgeDomainParams()
-        elif not isinstance(bd_config, BridgeDomainParams):
-            raise Exception("bd_config must be object of BridgeDomainParams")
+            bd_config = BridgeDomainConfig()
+        elif not isinstance(bd_config, BridgeDomainConfig):
+            raise Exception("bd_config must be object of BridgeDomainConfig")
 
         filter_template = list(
             filter(

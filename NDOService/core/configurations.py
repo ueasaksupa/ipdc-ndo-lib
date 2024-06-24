@@ -1,43 +1,43 @@
 from dataclasses import dataclass, field
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 
 @dataclass
 class BridgeDomainSubnet:
     ip: str = ""
     description: str = ""
-    scope: str = "private"  # private, public
+    scope: Literal["private", "public"] = "private"
     shared: bool = False
     querier: bool = False
     noDefaultGateway: bool = False
     virtual: bool = False
     primary: bool = False
-    ipDPLearning: str = "enabled"  # enabled, disabled
+    ipDPLearning: Literal["enabled", "disabled"] = "enabled"
 
 
 @dataclass
-class BridgeDomainParams:
+class BridgeDomainConfig:
     description: str = ""
-    l2UnknownUnicast: str = "proxy"  # flood, proxy
+    l2UnknownUnicast: Literal["proxy", "flood"] = "proxy"
     intersiteBumTrafficAllow: bool = True
     optimizeWanBandwidth: bool = True
     l2Stretch: bool = True
     l3MCast: bool = False
-    unkMcastAct: str = "flood"  # flood, opt-flood
-    v6unkMcastAct: str = "flood"  # flood, opt-flood
+    unkMcastAct: Literal["opt-flood", "flood"] = "flood"
+    v6unkMcastAct: Literal["opt-flood", "flood"] = "flood"
     arpFlood: bool = True
-    multiDstPktAct: str = "bd-flood"  # bd-flood, encap-flood, drop
+    multiDstPktAct: Literal["bd-flood", "encap-flood", "drop"] = "bd-flood"
     unicastRouting: bool = True
     subnets: List[BridgeDomainSubnet] = field(default_factory=list)
 
 
 @dataclass
-class VrfParams:
+class VrfConfig:
     description: str = ""
     l3MCast: bool = False
     preferredGroup: bool = False
     vzAnyEnabled: bool = True
-    ipDataPlaneLearning: str = "enabled"  # enabled, disabled
+    ipDataPlaneLearning: Literal["enabled", "disabled"] = "enabled"
 
 
 @dataclass
@@ -162,7 +162,7 @@ class L3OutBGPPeerConfig:
     peerAddressV4: str
     peerAsn: int
     peerAddressV6: str | None = None
-    adminState: str = "enabled"
+    adminState: Literal["enabled", "disabled"] = "enabled"
     authEnabled: bool = False
     allowedSelfASCount: int = 3
     ebpgMultiHopTTL: int = 1
