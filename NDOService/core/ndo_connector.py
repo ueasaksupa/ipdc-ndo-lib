@@ -24,7 +24,7 @@ class NDOTemplate:
         # LOGIN
         self.login()
 
-    # INTERNAL UTIL METHODs
+    # ** INTERNAL ONLY ** UTIL METHODs
     def __get_port_resource_path(self, **kwargs):
         path = ""
         if kwargs["port_type"] == "vpc":
@@ -40,10 +40,7 @@ class NDOTemplate:
         return path
 
     def __append_fabric_intf_object(
-        self,
-        key: str,
-        template: dict,
-        port_config: PhysicalIntfResource | PortChannelResource | VPCResource,
+        self, key: str, template: dict, port_config: PhysicalIntfResource | PortChannelResource | VPCResource
     ):
         if not template[key]:
             template[key] = [asdict(port_config)]
@@ -54,6 +51,31 @@ class NDOTemplate:
             print(f"   |--- {key} name {port_config.name} already exist.")
             return
         template[key].append(asdict(port_config))
+
+    def __append_l3out_to_external_epg_site(
+        self, schema: dict, template_name: str, epg_name: str, l3outList: List[dict]
+    ) -> None:
+        for l3out in l3outList:
+            for site in schema["sites"]:
+                if site["siteId"] != self.sitename_id_map[l3out["site"]] or site["templateName"] != template_name:
+                    continue
+
+                l3outTemplate = self.find_l3out_template_by_name(l3out["l3OutTemplateName"])
+                if l3outTemplate is None:
+                    raise ValueError(f"L3out template {l3out['l3OutTemplateName']} does not exist.")
+                l3outObject = list(
+                    filter(lambda l: l["name"] == l3out["l3outName"], l3outTemplate["l3outTemplate"]["l3outs"])
+                )
+                if len(l3outObject) == 0:
+                    raise Exception(
+                        f"L3out {l3out['l3outName']} does not exist in template {l3out['l3OutTemplateName']}"
+                    )
+
+                sitePayload = {
+                    "externalEpgRef": {"templateName": template_name, "externalEpgName": epg_name},
+                    "l3outRef": l3outObject[0]["uuid"],
+                }
+                site["externalEpgs"].append(sitePayload)
 
     def __generate_rm_payload(self, rnConfig: RouteMapConfig):
         entryList = []
@@ -68,12 +90,36 @@ class NDOTemplate:
                         "aggregate": prefix.aggregate,
                     }
                 )
-            entryList.append(
-                {
-                    "rtMapContext": {"order": entry.order, "name": entry.name, "action": entry.action},
-                    "matchRule": [{"matchPrefixList": prefixes}],
-                }
-            )
+            entryPayload = {
+                "rtMapContext": {"order": entry.order, "name": entry.name, "action": entry.action},
+                "matchRule": [{"matchPrefixList": prefixes}],
+            }
+            if entry.attributes is not None:
+                entryPayload["setAction"] = [
+                    {
+                        "setPreference": entry.attributes.setPreference,
+                        "setWeight": entry.attributes.setWeight,
+                        "setMultiPath": entry.attributes.setMultiPath,
+                        "setNextHopPropagate": (
+                            True if entry.attributes.setMultiPath else entry.attributes.setNextHopPropagate
+                        ),
+                        "setAsPath": (
+                            [
+                                {
+                                    "criteria": entry.attributes.setAsPath.criteria,
+                                    "pathASNs": [
+                                        {"asn": asn, "order": i}
+                                        for i, asn in enumerate(entry.attributes.setAsPath.pathASNs, start=1)
+                                    ],
+                                    "asnCount": entry.attributes.setAsPath.asnCount,
+                                }
+                            ]
+                            if entry.attributes.setAsPath
+                            else None
+                        ),
+                    }
+                ]
+            entryList.append(entryPayload)
         completed_payload = {"name": rnConfig.name, "description": rnConfig.description, "rtMapEntryList": entryList}
         return completed_payload
 
@@ -102,12 +148,12 @@ class NDOTemplate:
         INTF_PAYLOAD["encap"] = {"encapType": intfConfig.encapType, "value": intfConfig.encapVal}
         return INTF_PAYLOAD
 
-    def __generate_l3out_sviintf(self, site_name: str, intfConfig: L3OutSviInterfaceConfig):
+    def __generate_l3out_sviintf(self, site_name: str, intfConfig: L3OutSviInterfaceConfig) -> dict:
         INTF_PAYLOAD = self.__generate_l3out_subintf(site_name, intfConfig)
         INTF_PAYLOAD["svi"] = {"encapScope": "local", "autostate": "disabled", "mode": intfConfig.sviMode}
         return INTF_PAYLOAD
 
-    def __generate_l3out_interface_payload(self, template: dict, payload: dict, l3outConfig: L3OutConfig):
+    def __generate_l3out_interface_payload(self, template: dict, payload: dict, l3outConfig: L3OutConfig) -> None:
         payload["interfaces"] = []
         payload["subInterfaces"] = []
         payload["sviInterfaces"] = []
@@ -129,7 +175,7 @@ class NDOTemplate:
             else:
                 raise ValueError(f"interface type {intf.type} is not supported")
 
-    def __generate_l3out_payload(self, template: dict, l3outConfig: L3OutConfig):
+    def __generate_l3out_payload(self, template: dict, l3outConfig: L3OutConfig) -> dict:
         vrf = self.find_template_object_by_name(
             l3outConfig.vrf, f"type=vrf&tenant-id={template['l3outTemplate']['tenantId']}"
         )
@@ -585,7 +631,7 @@ class NDOTemplate:
         epg_name: str,
         vrf_name: str,
         vrf_template: str,
-        l3outs: List[dict],
+        l3outList: List[dict],
         epg_desc: str = "",
     ) -> ExtEPG:
         print(f"--- Creating External EPG under template {template_name}")
@@ -609,25 +655,8 @@ class NDOTemplate:
         }
         # Add External EPG to template
         filter_template[0]["externalEpgs"].append(payload)
-
         # Add L3Out to site
-        for l3out in l3outs:
-            for site in schema["sites"]:
-                if site["siteId"] == self.sitename_id_map[l3out["site"]] and site["templateName"] == template_name:
-                    l3outTemplate = self.find_l3out_template_by_name(l3out["l3OutTemplateName"])
-                    if l3outTemplate is None:
-                        raise ValueError(f"L3out template {l3out["l3OutTemplateName"]} does not exist.")
-                    l3outObject = list(filter(lambda l:l["name"] == l3out["l3outName"],l3outTemplate["l3outTemplate"]["l3outs"]))
-                    if len(l3outObject) == 0:
-                        raise Exception(f"L3out {l3out["l3outName"]} does not exist in template {l3out["l3OutTemplateName"]}")
-                    
-                    sitePayload = {
-                        "externalEpgRef": {
-                            "templateName":template_name,"externalEpgName":epg_name
-                        },
-                        "l3outRef": l3outObject[0]["uuid"],
-                    }
-                    site["externalEpgs"].append(sitePayload)
+        self.__append_l3out_to_external_epg_site(schema, template_name, epg_name, l3outList)
 
         return filter_template[0]["externalEpgs"][-1]
 
@@ -752,7 +781,7 @@ class NDOTemplate:
             raise Exception(resp.json())
         return resp.json()
 
-    def add_route_map_policy(self, template_name: str, rnConfig: RouteMapConfig) -> None:
+    def add_route_map_policy_under_template(self, template_name: str, rnConfig: RouteMapConfig) -> None:
         print("--- Adding RouteMap policy")
         if not isinstance(rnConfig, RouteMapConfig):
             raise ValueError("rnConfig must be an object of class RouteMapConfig")
@@ -1101,24 +1130,27 @@ class NDOTemplate:
         policy_name: str,
         domain_type: Literal["l3Domains", "domains"],
         domain_name: str,
-        pool_name: str,
+        pool_name: str | None = None,
     ) -> None:
         print(f"--- Adding {domain_type} to fabric policy {policy_name}")
         if domain_type not in ["l3Domains", "domains"]:
-            raise Exception("only domain_type of l3Domain or domains is supported")
+            raise ValueError("only domain_type of l3Domain or domains is supported")
         policy = self.find_fabric_policy_by_name(policy_name)
-        if not policy:
-            raise Exception(f"Policy {policy_name} not exist, Please create it first.")
+        if policy is None:
+            raise ValueError(f"Policy {policy_name} not exist, Please create it first.")
 
         template = policy["fabricPolicyTemplate"]["template"]
         poolname_map = {}  # use for mapping pool_name to uuid
         for pool in [] if "vlanPools" not in template else template["vlanPools"]:
             poolname_map[pool["name"]] = pool["uuid"]
 
-        if pool_name not in poolname_map:
-            raise Exception(f"Vlan pool {pool_name} does not exist in the policy {policy_name}.")
+        if pool_name is not None and pool_name not in poolname_map:
+            raise ValueError(f"Vlan pool {pool_name} does not exist in the policy {policy_name}.")
 
-        payload = {"name": domain_name, "pool": poolname_map[pool_name]}
+        payload = {"name": domain_name}
+        if pool_name is not None:
+            payload["pool"] = poolname_map[pool_name]
+
         if domain_type not in template:
             template[domain_type] = [payload]
         else:

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import List, Literal, Optional
 
 
-@dataclass
+@dataclass(kw_only=True)
 class BridgeDomainSubnet:
     ip: str = ""
     description: str = ""
@@ -15,7 +15,7 @@ class BridgeDomainSubnet:
     ipDPLearning: Literal["enabled", "disabled"] = "enabled"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class BridgeDomainConfig:
     description: str = ""
     l2UnknownUnicast: Literal["proxy", "flood"] = "proxy"
@@ -83,7 +83,23 @@ class VPCResource:
     description: str = ""
 
 
-@dataclass
+@dataclass(kw_only=True)
+class RouteMapSetAsPath:
+    criteria: Literal["prepend", "prepend-last-as"]
+    pathASNs: List[int]
+    asnCount: int | None = None
+
+
+@dataclass(kw_only=True)
+class RouteMapAttributes:
+    setAsPath: RouteMapSetAsPath | None = None
+    setPreference: int | None = None
+    setNextHopPropagate: bool | None = None
+    setMultiPath: bool | None = None
+    setWeight: int | None = None
+
+
+@dataclass(kw_only=True)
 class RouteMapPrefix:
     prefix: str
     fromPfxLen: int = 0
@@ -91,15 +107,16 @@ class RouteMapPrefix:
     aggregate: bool = False
 
 
-@dataclass
+@dataclass(kw_only=True)
 class RouteMapEntry:
     order: int
     name: str
     action: Literal["permit", "deny"]
     prefixes: List[RouteMapPrefix]
+    attributes: RouteMapAttributes | None = None
 
 
-@dataclass
+@dataclass(kw_only=True)
 class RouteMapConfig:
     name: str
     entryList: List[RouteMapEntry]
