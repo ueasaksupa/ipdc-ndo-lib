@@ -58,7 +58,7 @@ class PhysicalIntfResource:
     name: str
     interfaces: str
     policy: str = ""
-    nodes: list[str] = field(default_factory=list)
+    nodes: List[str] = field(default_factory=list)
     interfaceDescriptions: List[IntfDescription] = field(default_factory=list)
     description: str = ""
 
@@ -79,13 +79,8 @@ class VPCResource:
     node1Details: VPCNodeDetails
     node2Details: VPCNodeDetails
     policy: str = ""
-    interfaceDescriptions: list[IntfDescription] = field(default_factory=list)
+    interfaceDescriptions: List[IntfDescription] = field(default_factory=list)
     description: str = ""
-
-
-@dataclass
-class L3OutConfig:
-    name: str
 
 
 @dataclass
@@ -101,13 +96,13 @@ class RouteMapEntry:
     order: int
     name: str
     action: Literal["permit", "deny"]
-    prefixes: list[RouteMapPrefix]
+    prefixes: List[RouteMapPrefix]
 
 
 @dataclass
 class RouteMapConfig:
     name: str
-    entryList: list[RouteMapEntry]
+    entryList: List[RouteMapEntry]
     description: str = ""
 
 
@@ -137,7 +132,7 @@ class OSPFIntfConfig:
     transmitDelay: int = 1
 
 
-@dataclass
+@dataclass(kw_only=True)
 class L3OutNodeConfig:
     nodeID: str
     routerID: str
@@ -145,7 +140,7 @@ class L3OutNodeConfig:
     useRouteIDAsLoopback: bool = False
 
 
-@dataclass
+@dataclass(kw_only=True)
 class L3OutBGPControl:
     allowSelfAS: bool = False
     asOverride: bool = False
@@ -156,42 +151,84 @@ class L3OutBGPControl:
     sendDomainPath: bool = False
 
 
-@dataclass
+@dataclass(kw_only=True)
 class L3OutBGPPeerControl:
     bfd: bool = True
     disableConnectedCheck: bool = False
 
 
-@dataclass
+@dataclass(kw_only=True)
 class L3OutBGPPeerConfig:
     peerAddressV4: str
     peerAsn: int
-    peerAddressV6: str = None
+    peerAddressV6: str | None = None
     adminState: str = "enabled"
     authEnabled: bool = False
-    allowedSelfASCount: str = 3
-    ebpgMultiHopTTL: str = 1
+    allowedSelfASCount: int = 3
+    ebpgMultiHopTTL: int = 1
     localAsnConfig: str = "none"
     bgpControls: L3OutBGPControl = field(default_factory=L3OutBGPControl)
     peerControls: L3OutBGPPeerControl = field(default_factory=L3OutBGPPeerControl)
 
 
-@dataclass
-class L3OutInterfaceConfig:
-    type: Literal["interfaces", "subInterfaces", "sviInterfaces"]
-    portType: Literal["port", "pc"]
-    encapVal: int
+@dataclass(kw_only=True)
+class L3OutIntPhysicalPort:
+    primaryV4: str
+    nodeID: str
+    portID: str
     bgpPeers: List[L3OutBGPPeerConfig]
-    encapType: Literal["vlan", "vxlan"] = "vlan"
-    primaryV4: str = None
-    primaryV6: str = None
-    portChannelName: str = None
-    nodeID: str = None
-    path: str = None
+    type: Literal["interfaces"] = "interfaces"
+    portType: Literal["port", "pc"] = "port"
+    primaryV6: str | None = None
     podID: str = "1"
 
 
-@dataclass
+@dataclass(kw_only=True)
+class L3OutIntPortChannel:
+    primaryV4: str
+    portChannelName: str
+    bgpPeers: List[L3OutBGPPeerConfig]
+    type: Literal["interfaces"] = "interfaces"
+    portType: Literal["port", "pc"] = "pc"
+    primaryV6: str | None = None
+
+
+@dataclass(kw_only=True)
+class L3OutSubIntPhysicalPort(L3OutIntPhysicalPort):
+    encapVal: int
+    type: Literal["subInterfaces"] = "subInterfaces"
+    encapType: Literal["vlan", "vxlan"] = "vlan"
+
+
+@dataclass(kw_only=True)
+class L3OutSubIntPortChannel(L3OutIntPortChannel):
+    encapVal: int
+    type: Literal["subInterfaces"] = "subInterfaces"
+    encapType: Literal["vlan", "vxlan"] = "vlan"
+
+
+@dataclass(kw_only=True)
+class L3OutSVIPhysicalPort(L3OutSubIntPhysicalPort):
+    encapVal: int
+    type: Literal["sviInterfaces"] = "sviInterfaces"
+    encapType: Literal["vlan", "vxlan"] = "vlan"
+    sviMode: Literal["trunk", "access", "access8021p"] = "trunk"
+
+
+@dataclass(kw_only=True)
+class L3OutSVIPortChannel(L3OutSubIntPortChannel):
+    encapVal: int
+    type: Literal["sviInterfaces"] = "sviInterfaces"
+    encapType: Literal["vlan", "vxlan"] = "vlan"
+    sviMode: Literal["trunk", "access", "access8021p"] = "trunk"
+
+
+type L3OutInterfaceConfig = L3OutIntPortChannel | L3OutIntPhysicalPort
+type L3OutSubInterfaceConfig = L3OutSubIntPhysicalPort | L3OutSubIntPortChannel
+type L3OutSviInterfaceConfig = L3OutSVIPhysicalPort | L3OutSVIPortChannel
+
+
+@dataclass(kw_only=True)
 class L3OutConfig:
     """
     Parameter documentation:
@@ -207,6 +244,8 @@ class L3OutConfig:
     vrf: str
     l3domain: str
     nodes: List[L3OutNodeConfig]
-    routingProtocol: Literal["bgp", "ospf"]
-    exportRouteMap: str
-    interfaces: List[L3OutInterfaceConfig]
+    routingProtocol: Literal["bgp", "static"]
+    interfaces: List[L3OutInterfaceConfig | L3OutSubInterfaceConfig | L3OutSviInterfaceConfig]
+    exportRouteMap: str | None = None
+    importRouteMap: str | None = None
+    importRouteControl: bool = False

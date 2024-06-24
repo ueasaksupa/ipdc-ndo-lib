@@ -116,15 +116,44 @@ def Example_create_Tenant_Policies():
             L3OutNodeConfig(nodeID="1101", routerID="10.0.0.1"),
         ],
         routingProtocol="bgp",
-        exportRouteMap="RN_TEST",
+        importRouteControl=True,
         interfaces=[
-            L3OutInterfaceConfig(
-                type="subInterfaces",
-                portType="pc",
+            L3OutIntPortChannel(
                 primaryV4="10.0.0.1/30",
-                encapVal=3000,
                 portChannelName="PC_SILA_BL_01",
                 bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.0.2", peerAsn=65001)],
+            ),
+            L3OutIntPhysicalPort(
+                primaryV4="10.0.1.1/30",
+                nodeID="1101",
+                portID="1/30",
+                bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.1.2", peerAsn=65001)],
+            ),
+            L3OutSubIntPortChannel(
+                primaryV4="10.0.2.1/30",
+                encapVal=3000,
+                portChannelName="PC_SILA_BL_02",
+                bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.2.2", peerAsn=65001)],
+            ),
+            L3OutSubIntPhysicalPort(
+                primaryV4="10.0.3.1/30",
+                encapVal=3000,
+                nodeID="1101",
+                portID="1/31",
+                bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.3.2", peerAsn=65001)],
+            ),
+            L3OutSVIPortChannel(
+                primaryV4="10.0.4.1/30",
+                encapVal=2111,
+                portChannelName="PC_SILA_BL_03",
+                bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.4.2", peerAsn=65001)],
+            ),
+            L3OutSVIPhysicalPort(
+                primaryV4="10.0.5.1/30",
+                encapVal=2222,
+                nodeID="1101",
+                portID="1/32",
+                bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.5.2", peerAsn=65001)],
             ),
         ],
     )
@@ -135,7 +164,7 @@ def Example_Service_Create():
     # EXAMPLE HOW TO CREATE SERVICE
     #
     bd_subnet = BridgeDomainSubnet("10.0.0.1/24", "test from api")
-    bd_config = BridgeDomainParams()
+    bd_config = BridgeDomainParams(subnets=[bd_subnet])
     l2_service.create(**params, bd_config=bd_config)
 
 
