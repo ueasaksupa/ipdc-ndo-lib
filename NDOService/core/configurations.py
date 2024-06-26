@@ -1,5 +1,23 @@
 from dataclasses import dataclass, field
-from typing import List, Literal, Optional
+from typing import List, Literal
+
+
+@dataclass(kw_only=True)
+class Endpoint:
+    """
+    Example Endpoint parameter
+    nodeId: 1101
+    port_type: "port"
+    port_name: 1/20
+    port_mode: "regular"
+    vlan: 2000
+    """
+
+    nodeId: str
+    port_type: Literal["port", "vpc", "dpc"]
+    port_name: str
+    port_mode: Literal["regular", "native", "untagged"]
+    vlan: int
 
 
 @dataclass(kw_only=True)

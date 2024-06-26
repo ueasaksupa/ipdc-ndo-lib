@@ -25,17 +25,18 @@ class NDOTemplate:
         self.login()
 
     # ** INTERNAL ONLY ** UTIL METHODs
-    def __get_port_resource_path(self, **kwargs):
+
+    def __get_port_resource_path(self, endpoint: Endpoint, site_name: str, pod: str):
         path = ""
-        if kwargs["port_type"] == "vpc":
-            vpc_resource = self.find_vpc_by_name(kwargs["port_name"], kwargs["site_name"])
+        if endpoint.port_type == "vpc":
+            vpc_resource = self.find_vpc_by_name(endpoint.port_name, site_name)
             if not vpc_resource:
                 raise Exception(
-                    f"VPC resource name {kwargs['port_name']} does not exist in the Fabric Resource Policy, Please create it first."
+                    f"VPC resource name {endpoint.port_name} does not exist in the Fabric Resource Policy, Please create it first."
                 )
             path = vpc_resource["path"]
-        elif kwargs["port_type"] == "port":
-            path = f"topology/{kwargs['pod']}/paths-{kwargs['node']}/pathep-[{kwargs['port_name']}]"
+        elif endpoint.port_type == "port":
+            path = f"topology/{pod}/paths-{endpoint.nodeId}/pathep-[eth{endpoint.port_name.replace('eth','')}]"
 
         return path
 
@@ -48,7 +49,7 @@ class NDOTemplate:
         # check whether the object name already exist.
         filter_object = list(filter(lambda i: i["name"] == port_config.name, template[key]))
         if len(filter_object) > 0:
-            print(f"   |--- {key} name {port_config.name} already exist.")
+            print(f"  |--- {key} name {port_config.name} already exist.")
             return
         template[key].append(asdict(port_config))
 
@@ -245,7 +246,7 @@ class NDOTemplate:
         # Get all
         resp: list = self.session.get(url).json()["tenants"]
         # filter by name
-        filter_tenants = list(filter(lambda t: t["name"].upper() == tenant_name.upper(), resp))
+        filter_tenants = list(filter(lambda t: t["name"] == tenant_name, resp))
         if len(filter_tenants) == 0:
             return None
 
@@ -256,12 +257,7 @@ class NDOTemplate:
         # Get all
         resp: list = self.session.get(url).json()["schemas"]
         # filter by name
-        filter_schemas = list(
-            filter(
-                lambda s: s["displayName"].upper() == schema_name.upper(),
-                resp,
-            )
-        )
+        filter_schemas = list(filter(lambda s: s["displayName"] == schema_name, resp))
         if len(filter_schemas) > 0:
             # re-query to get full schema object
             return self.session.get(f"{self.base_path}{PATH_SCHEMAS}/{filter_schemas[0]['id']}").json()
@@ -273,7 +269,7 @@ class NDOTemplate:
         # Get all
         resp: list = self.session.get(url).json()
         # filter by name
-        filtered = list(filter(lambda t: t["templateName"].upper() == l3out_name.upper(), resp))
+        filtered = list(filter(lambda t: t["templateName"] == l3out_name, resp))
         if len(filtered) > 0:
             # re-query to get full object
             return self.session.get(f"{self.base_path}{PATH_TEMPLATES}/{filtered[0]['templateId']}").json()
@@ -285,7 +281,7 @@ class NDOTemplate:
         # Get all
         resp: list = self.session.get(url).json()
         # filter by name
-        filtered = list(filter(lambda t: t["templateName"].upper() == name.upper(), resp))
+        filtered = list(filter(lambda t: t["templateName"] == name, resp))
         if len(filtered) > 0:
             # re-query to get full object
             return self.session.get(f"{self.base_path}{PATH_TEMPLATES}/{filtered[0]['templateId']}").json()
@@ -311,9 +307,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=schema)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
         return resp.json()
 
-    def create_tenant(self, tenant_name: str, sites: list, tenant_desc: str = "") -> Tenant:
+    def create_tenant(self, tenant_name: str, sites: list[str], tenant_desc: str = "") -> Tenant:
         print(f"--- Creating tenant {tenant_name}")
 
         tenant = self.find_tenant_by_name(tenant_name)
@@ -322,11 +319,11 @@ class NDOTemplate:
             return tenant
 
         siteAssociations = []
-        for target_site in sites:
-            if target_site["name"] not in self.sitename_id_map:
-                raise Exception(f"Site {target_site['name']} not exist in the network.")
+        for sitename in sites:
+            if sitename not in self.sitename_id_map:
+                raise Exception(f"Site {sitename} not exist in the network.")
             site_payload = {
-                "siteId": self.sitename_id_map[target_site["name"]],
+                "siteId": self.sitename_id_map[sitename],
                 "securityDomains": None,
                 "azureAccount": None,
                 "awsAccount": None,
@@ -344,7 +341,11 @@ class NDOTemplate:
         }
 
         url = f"{self.base_path}{PATH_TENANTS}?enableVersionCheck=true"
-        return self.session.post(url, json=payload).json()
+        resp = self.session.post(url, json=payload)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+        print(f"  |--- Done")
+        return resp.json()
 
     def create_schema(self, schema_name: str, schema_desc: str = "") -> Schema:
         print(f"--- Creating schema {schema_name}")
@@ -356,19 +357,18 @@ class NDOTemplate:
 
         url = f"{self.base_path}{PATH_SCHEMAS}"
         payload = {"displayName": schema_name, "description": schema_desc}
-        return self.session.post(url, json=payload).json()
+        resp = self.session.post(url, json=payload)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+        print(f"  |--- Done")
+        return resp.json()
 
     def create_template(self, schema: dict, template_name: str, tenant_id: str) -> Template:
         print(f"--- Creating template {template_name}")
 
         if "templates" not in schema:
             schema["templates"] = []
-        filter_template = list(
-            filter(
-                lambda d: d["name"].upper() == template_name.upper(),
-                schema["templates"],
-            )
-        )
+        filter_template = list(filter(lambda d: d["name"] == template_name, schema["templates"]))
 
         if len(filter_template) != 0:
             print(f"  |--- template {template_name} is already exists")
@@ -382,47 +382,40 @@ class NDOTemplate:
         }
 
         schema["templates"].append(payload)
+        print(f"  |--- Done")
         return schema["templates"][-1]
 
-    def add_site_to_template(self, schema: dict, template_name: str, target_sites: list) -> None:
-        for target_site in target_sites:
-            print(f"--- Adding site {target_site['name']} to template {template_name}")
+    def add_site_to_template(self, schema: dict, template_name: str, sites: list[str]) -> None:
+        for site in sites:
+            print(f"--- Adding site {site} to template {template_name}")
             try:
-                target_site_id = self.sitename_id_map[target_site["name"]]
+                site_id = self.sitename_id_map[site]
                 filter_site = list(
-                    filter(
-                        lambda el: el["siteId"] == target_site_id
-                        and el["templateName"].upper() == template_name.upper(),
-                        schema["sites"],
-                    )
+                    filter(lambda el: el["siteId"] == site_id and el["templateName"] == template_name, schema["sites"])
                 )
 
                 if len(filter_site) != 0:
-                    print(f"  |--- Site {target_site['name']} already exist in the template {template_name}")
+                    print(f"  |--- Site {site} already exist in the template {template_name}")
                     continue
 
                 payload = {
-                    "name": target_site["name"],
-                    "siteId": target_site_id,
+                    "name": site,
+                    "siteId": site_id,
                     "templateName": template_name,
                 }
                 schema["sites"].append(payload)
+                print(f"  |--- Done")
             except Exception:
-                raise Exception(f"Site {target_site['name']} does not exist")
+                raise Exception(f"Site {site} does not exist")
 
     def create_filter_under_template(self, schema: dict, template_name: str, filter_name: str) -> Filter:
         print(f"--- Creating filter {filter_name}")
 
-        filter_template = list(
-            filter(
-                lambda t: t["name"].upper() == template_name.upper(),
-                schema["templates"],
-            )
-        )
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(filter_template) == 0:
             raise Exception(f"Template {template_name} does not exist.")
 
-        filter_object = list(filter(lambda d: d["name"].upper() == filter_name.upper(), filter_template[0]["filters"]))
+        filter_object = list(filter(lambda d: d["name"] == filter_name, filter_template[0]["filters"]))
         if len(filter_object) != 0:
             print(f"  |--- Filter {filter_name} is already exist")
             return filter_object[0]
@@ -450,6 +443,7 @@ class NDOTemplate:
         }
 
         filter_template[0]["filters"].append(payload)
+        print(f"  |--- Done")
         return filter_template[0]["filters"][-1]
 
     def create_contract_under_template(
@@ -457,16 +451,11 @@ class NDOTemplate:
     ) -> Contract:
         print(f"--- Creating contract {contract_name}")
 
-        filter_template = list(
-            filter(
-                lambda t: t["name"].upper() == template_name.upper(),
-                schema["templates"],
-            )
-        )
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(filter_template) == 0:
-            raise Exception(f"Template {template_name} does not exist.")
+            raise ValueError(f"Template {template_name} does not exist.")
 
-        contract = list(filter(lambda d: d["name"].upper() == contract_name.upper(), filter_template[0]["contracts"]))
+        contract = list(filter(lambda d: d["name"] == contract_name, filter_template[0]["contracts"]))
         if len(contract) != 0:
             print(f"  |--- Contract {contract_name} is already exist")
             return contract[0]
@@ -485,6 +474,7 @@ class NDOTemplate:
         }
 
         filter_template[0]["contracts"].append(payload)
+        print(f"  |--- Done")
         return filter_template[0]["contracts"][-1]
 
     def create_vrf_under_template(
@@ -494,18 +484,13 @@ class NDOTemplate:
         if vrf_config is None:
             vrf_config = VrfConfig()
         elif not isinstance(vrf_config, VrfConfig):
-            raise Exception("vrf_config must be object of VrfConfig")
+            raise ValueError("vrf_config must be object of VrfConfig")
 
-        template = list(
-            filter(
-                lambda t: t["name"].upper() == template_name.upper(),
-                schema["templates"],
-            )
-        )
+        template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(template) == 0:
-            raise Exception(f"Template {template_name} does not exist.")
+            raise ValueError(f"Template {template_name} does not exist.")
 
-        filter_vrf = list(filter(lambda d: d["name"].upper() == vrf_name.upper(), template[0]["vrfs"]))
+        filter_vrf = list(filter(lambda d: d["name"] == vrf_name, template[0]["vrfs"]))
         if len(filter_vrf) != 0:
             print(f"  |--- VRF {vrf_name} is already exist")
             return filter_vrf[0]
@@ -519,6 +504,7 @@ class NDOTemplate:
         payload.update(asdict(vrf_config))
 
         template[0]["vrfs"].append(payload)
+        print(f"  |--- Done")
         return template[0]["vrfs"][-1]
 
     def create_bridge_domain_under_template(
@@ -534,25 +520,15 @@ class NDOTemplate:
         if bd_config is None:
             bd_config = BridgeDomainConfig()
         elif not isinstance(bd_config, BridgeDomainConfig):
-            raise Exception("bd_config must be object of BridgeDomainConfig")
+            raise ValueError("bd_config must be object of BridgeDomainConfig")
 
-        filter_template = list(
-            filter(
-                lambda t: t["name"].upper() == template_name_bd.upper(),
-                schema["templates"],
-            )
-        )
+        filter_template = list(filter(lambda t: t["name"] == template_name_bd, schema["templates"]))
         if len(filter_template) == 0:
-            raise Exception(f"Template {template_name_bd} does not exist.")
+            raise ValueError(f"Template {template_name_bd} does not exist.")
 
-        filter_bd = list(
-            filter(
-                lambda d: d["name"].upper() == bd_name.upper(),
-                filter_template[0]["bds"],
-            )
-        )
+        filter_bd = list(filter(lambda d: d["name"] == bd_name, filter_template[0]["bds"]))
         if len(filter_bd) != 0:
-            print(f"   |--- BD {bd_name} is already exist in template {template_name_bd}")
+            print(f"  |--- BD {bd_name} is already exist in template {template_name_bd}")
             return filter_bd[0]
 
         # "vrfRef": f"/schemas/{schema['id']}/templates/{template_name_vrf}/vrfs/{linked_vrf_name}",
@@ -564,17 +540,18 @@ class NDOTemplate:
         payload.update(asdict(bd_config))
 
         filter_template[0]["bds"].append(payload)
+        print(f"  |--- Done")
         return filter_template[0]["bds"][-1]
 
     def create_anp_under_template(self, schema: dict, template_name: str, anp_name: str, anp_desc: str = "") -> ANP:
         print(f"--- Creating ANP under template {template_name}")
-        filter_template = list(filter(lambda t: t["name"].upper() == template_name.upper(), schema["templates"]))
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(filter_template) == 0:
-            raise Exception(f"Template {template_name} does not exist.")
+            raise ValueError(f"Template {template_name} does not exist.")
 
-        filter_anp = list(filter(lambda anp: anp["name"].upper() == anp_name.upper(), filter_template[0]["anps"]))
+        filter_anp = list(filter(lambda anp: anp["name"] == anp_name, filter_template[0]["anps"]))
         if len(filter_anp) != 0:
-            print(f"   |--- ANP {anp_name} is already exist in template {template_name}")
+            print(f"  |--- ANP {anp_name} is already exist in template {template_name}")
             return filter_anp[0]
 
         payload = {
@@ -584,6 +561,7 @@ class NDOTemplate:
             "epgs": [],
         }
         filter_template[0]["anps"].append(payload)
+        print(f"  |--- Done")
         return filter_template[0]["anps"][-1]
 
     def create_epg_under_template(
@@ -596,10 +574,10 @@ class NDOTemplate:
         epg_desc: str = "",
     ) -> EPG:
         print(f"--- Creating EPG under ANP {anp['name']}")
-        filter_epg = list(filter(lambda epg: epg["name"].upper() == epg_name.upper(), anp["epgs"]))
+        filter_epg = list(filter(lambda epg: epg["name"] == epg_name, anp["epgs"]))
 
         if len(filter_epg) != 0:
-            print(f"   |--- EPG {epg_name} is already exist in ANP {anp['name']}")
+            print(f"  |--- EPG {epg_name} is already exist in ANP {anp['name']}")
             return filter_epg[0]
 
         # TODO
@@ -622,6 +600,7 @@ class NDOTemplate:
             "epgType": "application",
         }
         anp["epgs"].append(payload)
+        print(f"  |--- Done")
         return anp["epgs"][-1]
 
     def create_ext_epg_under_template(
@@ -635,15 +614,13 @@ class NDOTemplate:
         epg_desc: str = "",
     ) -> ExtEPG:
         print(f"--- Creating External EPG under template {template_name}")
-        filter_template = list(filter(lambda t: t["name"].upper() == template_name.upper(), schema["templates"]))
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(filter_template) == 0:
-            raise Exception(f"Template {template_name} does not exist.")
+            raise ValueError(f"Template {template_name} does not exist.")
 
-        filter_eepg = list(
-            filter(lambda anp: anp["name"].upper() == epg_name.upper(), filter_template[0]["externalEpgs"])
-        )
+        filter_eepg = list(filter(lambda anp: anp["name"] == epg_name, filter_template[0]["externalEpgs"]))
         if len(filter_eepg) != 0:
-            print(f"   |--- External EPG {epg_name} is already exist in template {template_name}")
+            print(f"  |--- External EPG {epg_name} is already exist in template {template_name}")
             return filter_eepg[0]
 
         payload = {
@@ -657,7 +634,7 @@ class NDOTemplate:
         filter_template[0]["externalEpgs"].append(payload)
         # Add L3Out to site
         self.__append_l3out_to_external_epg_site(schema, template_name, epg_name, l3outList)
-
+        print(f"  |--- Done")
         return filter_template[0]["externalEpgs"][-1]
 
     def add_phy_domain_to_epg(
@@ -671,7 +648,7 @@ class NDOTemplate:
     ) -> None:
         print(f"--- Adding domain {domain} to site {site_name}")
         if site_name not in self.sitename_id_map:
-            raise Exception(f"Site {site_name} does not exist.")
+            raise ValueError(f"Site {site_name} does not exist.")
 
         # filter target epg from schema object
         target_site_id = self.sitename_id_map[site_name]
@@ -681,11 +658,11 @@ class NDOTemplate:
 
         target_anp = list(filter(lambda a: f"/anps/{anp_name}" in a["anpRef"], target_template[0]["anps"]))
         if len(target_anp) == 0:
-            raise Exception(f"ANP {anp_name} does not exist.")
+            raise ValueError(f"ANP {anp_name} does not exist.")
 
         target_epg = list(filter(lambda e: f"/epgs/{epg_name}" in e["epgRef"], target_anp[0]["epgs"]))
         if len(target_epg) == 0:
-            raise Exception(f"EPG {epg_name} does not exist.")
+            raise ValueError(f"EPG {epg_name} does not exist.")
 
         payload = {
             "dn": f"uni/phys-{domain}",
@@ -696,9 +673,9 @@ class NDOTemplate:
         }
         filtered_domain = list(filter(lambda d: domain in d["dn"], target_epg[0]["domainAssociations"]))
         if len(filtered_domain) != 0:
-            print(f"   |--- Domain {domain} is already exist.")
+            print(f"  |--- Domain {domain} is already exist.")
             return
-
+        print(f"  |--- Done")
         target_epg[0]["domainAssociations"].append(payload)
 
     def add_static_port_to_epg(
@@ -708,12 +685,12 @@ class NDOTemplate:
         anp_name: str,
         epg_name: str,
         site_name: str,
-        port_configurations: list[dict],
+        port_configs: list[Endpoint],
         pod: str = "pod-1",
     ) -> None:
         print(f"--- Adding Static port to site {site_name}")
         if site_name not in self.sitename_id_map:
-            raise Exception(f"Site {site_name} does not exist.")
+            raise ValueError(f"Site {site_name} does not exist.")
 
         # filter target epg from schema object
         target_site_id = self.sitename_id_map[site_name]
@@ -723,28 +700,29 @@ class NDOTemplate:
 
         target_anp = list(filter(lambda a: f"/anps/{anp_name}" in a["anpRef"], target_template[0]["anps"]))
         if len(target_anp) == 0:
-            raise Exception(f"ANP {anp_name} does not exist.")
+            raise ValueError(f"ANP {anp_name} does not exist.")
 
         target_epg = list(filter(lambda e: f"/epgs/{epg_name}" in e["epgRef"], target_anp[0]["epgs"]))
         if len(target_epg) == 0:
-            raise Exception(f"EPG {epg_name} does not exist.")
+            raise ValueError(f"EPG {epg_name} does not exist.")
 
-        for conf in port_configurations:
-            print(f"   |--- Adding port {conf['node']}/{conf['port_name']}/")
+        for endpoint in port_configs:
+            print(f"  |--- Adding port {endpoint.nodeId}/{endpoint.port_name}/")
 
-            path = self.__get_port_resource_path(**conf, site_name=site_name, pod=pod)
-            filter_port = list(filter(lambda p: p["path"].upper() == path.upper(), target_epg[0]["staticPorts"]))
+            path = self.__get_port_resource_path(endpoint=endpoint, site_name=site_name, pod=pod)
+            filter_port = list(filter(lambda p: p["path"] == path, target_epg[0]["staticPorts"]))
             if len(filter_port) != 0:
-                print(f"   |--- Port {conf['port_name']} on {conf['node']} is already exist.")
+                print(f"  |--- Port {endpoint.port_name} on {endpoint.nodeId} is already exist.")
                 continue
 
             payload = {
-                "type": conf["port_type"],
+                "type": endpoint.port_type,
                 "path": path,
-                "portEncapVlan": conf["vlan"],
+                "portEncapVlan": endpoint.vlan,
                 "deploymentImmediacy": "immediate",
-                "mode": conf["port_mode"],
+                "mode": endpoint.port_mode,
             }
+            print(f"  |--- Done")
             target_epg[0]["staticPorts"].append(payload)
 
     # Tenant policies template
@@ -754,15 +732,15 @@ class NDOTemplate:
         print(f"--- Creating Tenant policies template {template_name}")
         for site in sites:
             if site not in self.sitename_id_map:
-                raise Exception(f"site {site} does not exist.")
+                raise ValueError(f"site {site} does not exist.")
 
         tenant = self.find_tenant_by_name(tenant_name)
         if not tenant:
-            raise Exception(f"tenant {tenant_name} does not exist.")
+            raise ValueError(f"tenant {tenant_name} does not exist.")
 
         template = self.find_tenant_policies_template_by_name(template_name)
         if template:
-            print(f"   |--- Template already exist")
+            print(f"  |--- Template already exist")
             return template
 
         url = f"{self.base_path}{PATH_TEMPLATES}"
@@ -779,6 +757,7 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
         return resp.json()
 
     def add_route_map_policy_under_template(self, template_name: str, rnConfig: RouteMapConfig) -> None:
@@ -788,7 +767,7 @@ class NDOTemplate:
 
         template = self.find_tenant_policies_template_by_name(template_name)
         if template is None:
-            raise Exception(f"template {template_name} does not exist")
+            raise ValueError(f"template {template_name} does not exist")
 
         if "routeMapPolicies" not in template["tenantPolicyTemplate"]["template"]:
             template["tenantPolicyTemplate"]["template"]["routeMapPolicies"] = [self.__generate_rm_payload(rnConfig)]
@@ -796,7 +775,7 @@ class NDOTemplate:
             rm_policies: list = template["tenantPolicyTemplate"]["template"]["routeMapPolicies"]
             filtered_rm = list(filter(lambda rm: rm["name"] == rnConfig.name, rm_policies))
             if len(filtered_rm) > 0:
-                print(f"   |--- RouteMap {rnConfig.name} already exist.")
+                print(f"  |--- RouteMap {rnConfig.name} already exist.")
                 return
             rm_policies.append(self.__generate_rm_payload(rnConfig))
 
@@ -804,6 +783,7 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
 
     def add_l3out_intf_routing_policy(
         self,
@@ -814,11 +794,11 @@ class NDOTemplate:
     ) -> None:
         print("--- Adding Interface policy")
         if bfdConfig == None and ospfIntfConfig == None:
-            raise Exception("Either bfdConfig or ospfIntfConfig is required.")
+            raise ValueError("Either bfdConfig or ospfIntfConfig is required.")
 
         template = self.find_tenant_policies_template_by_name(template_name)
         if template is None:
-            raise Exception(f"template {template_name} does not exist")
+            raise ValueError(f"template {template_name} does not exist")
 
         payload: dict[str, Any] = {"name": pol_name}
         if bfdConfig != None:
@@ -846,7 +826,7 @@ class NDOTemplate:
             policies: list = template["tenantPolicyTemplate"]["template"]["l3OutIntfPolGroups"]
             filtered_pol = list(filter(lambda pol: pol["name"] == pol_name, policies))
             if len(filtered_pol) > 0:
-                print(f"   |--- Interface policy {pol_name} already exist.")
+                print(f"  |--- Interface policy {pol_name} already exist.")
                 return
             policies.append(payload)
 
@@ -854,20 +834,21 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
 
     # L3OUT template
     def create_l3out_template(self, template_name: str, site_name: str, tenant_name: str) -> L3OutTemplate:
         print(f"--- Creating L3outTemplate {template_name}")
         if site_name not in self.sitename_id_map:
-            raise Exception(f"site {site_name} does not exist.")
+            raise ValueError(f"site {site_name} does not exist.")
 
         tenant = self.find_tenant_by_name(tenant_name)
         if not tenant:
-            raise Exception(f"tenant {tenant_name} does not exist.")
+            raise ValueError(f"tenant {tenant_name} does not exist.")
 
         l3out = self.find_l3out_template_by_name(template_name)
         if l3out:
-            print(f"   |--- Template already exist")
+            print(f"  |--- Template already exist")
             return l3out
 
         url = f"{self.base_path}/{PATH_TEMPLATES}"
@@ -884,6 +865,7 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
         return resp.json()
 
     def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig) -> None:
@@ -892,16 +874,16 @@ class NDOTemplate:
             raise ValueError("l3outConfig must be an object of class L3OutConfig")
 
         template = self.find_l3out_template_by_name(template_name)
+        if template is None:
+            raise ValueError(f"template {template_name} does not exist.")
 
-        if not template:
-            raise Exception(f"template {template_name} does not exist.")
         if "l3outs" not in template["l3outTemplate"]:
             template["l3outTemplate"]["l3outs"] = []
 
         l3outs: list = template["l3outTemplate"]["l3outs"]
         filtered = list(filter(lambda l: l["name"] == l3outConfig.name, l3outs))
         if len(filtered) != 0:
-            print(f"   |--- L3out {l3outConfig.name} already exist.")
+            print(f"  |--- L3out {l3outConfig.name} already exist.")
             return
 
         payload = self.__generate_l3out_payload(template, l3outConfig)
@@ -910,11 +892,12 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             print(resp.json())
+        print(f"  |--- Done")
 
     # Fabric Template
     def find_vpc_by_name(self, vpc_name: str, site_name: str) -> VPCResourcePolicy | None:
         if site_name not in self.sitename_id_map:
-            raise Exception(f"Site {site_name} does not exist.")
+            raise ValueError(f"Site {site_name} does not exist.")
 
         url = f"{self.base_path}{PATH_VPC_SUMMARY_SITE}/{self.sitename_id_map[site_name]}"
         resp = self.session.get(url).json()
@@ -929,7 +912,7 @@ class NDOTemplate:
 
     def find_pc_by_name(self, pc_name: str, site_name: str) -> VPCResourcePolicy | None:
         if site_name not in self.sitename_id_map:
-            raise Exception(f"Site {site_name} does not exist.")
+            raise ValueError(f"Site {site_name} does not exist.")
 
         url = f"{self.base_path}{PATH_PC_SUMMARY_SITE}/{self.sitename_id_map[site_name]}"
         resp = self.session.get(url).json()
@@ -990,7 +973,7 @@ class NDOTemplate:
         self, domain_name: str, site_name: str | None = None, site_id: str | None = None, type: str = ""
     ) -> dict | None:
         if not site_name and not site_id:
-            raise Exception("Either Sitename or SiteID is required.")
+            raise ValueError("Either Sitename or SiteID is required.")
 
         url = f"{self.base_path}{PATH_DOMAINSUM_SITE}/{site_id if site_id is not None else self.sitename_id_map[site_name]}?types={type}"
         resp = self.session.get(url).json()
@@ -1004,7 +987,7 @@ class NDOTemplate:
         print(f"--- Creating policy {name} on site {site}")
 
         if site not in self.sitename_id_map:
-            raise Exception(f"Site {site} does not exist.")
+            raise ValueError(f"Site {site} does not exist.")
 
         policy = self.find_fabric_policy_by_name(name)
         if policy:
@@ -1021,13 +1004,14 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
         return resp.json()
 
     def create_fabric_resource(self, name: str, site: str) -> FabricPolicy:
         print(f"--- Creating resource policy {name} on site {site}")
 
         if site not in self.sitename_id_map:
-            raise Exception(f"Site {site} does not exist.")
+            raise ValueError(f"Site {site} does not exist.")
 
         policy = self.find_fabric_resource_by_name(name)
         if policy:
@@ -1047,13 +1031,14 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
         return resp.json()
 
     def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int] = []) -> None:
         print(f"--- Adding vlans {','.join([str(v) for v in vlans])} to pool {pool_name}")
         policy = self.find_fabric_policy_by_name(policy_name)
         if not policy:
-            raise Exception(f"Policy {policy_name} not exist, Please create it first.")
+            raise ValueError(f"Policy {policy_name} not exist, Please create it first.")
 
         payload = {
             "name": pool_name,
@@ -1078,8 +1063,8 @@ class NDOTemplate:
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
         resp = self.session.put(url, json=policy)
         if resp.status_code >= 400:
-            print(f"   |--- {resp.json()}")
             raise Exception(resp.json())
+        print(f"  |--- Done")
 
     def add_port_to_fabric_resource(
         self,
@@ -1091,21 +1076,21 @@ class NDOTemplate:
         # find resource template
         resource = self.find_fabric_resource_by_name(resource_name)
         if not resource:
-            raise Exception(f"Fabric resource {resource_name} does not exist.")
+            raise ValueError(f"Fabric resource {resource_name} does not exist.")
 
         template = resource["fabricResourceTemplate"]["template"]
         if isinstance(port_config, PhysicalIntfResource):
             # find policy ID
             policy_id = self.find_phyintf_setting_id_by_name(intf_policy_name)
             if policy_id is None:
-                raise Exception(f"policy {intf_policy_name} does not exist. Please create it before using.")
+                raise ValueError(f"policy {intf_policy_name} does not exist. Please create it before using.")
             port_config.policy = policy_id["uuid"]
             self.__append_fabric_intf_object("interfaceProfiles", template, port_config)
         elif isinstance(port_config, PortChannelResource):
             # find policy ID
             policy_id = self.find_pc_intf_setting_id_by_name(intf_policy_name)
             if policy_id is None:
-                raise Exception(f"policy {intf_policy_name} does not exist. Please create it before using.")
+                raise ValueError(f"policy {intf_policy_name} does not exist. Please create it before using.")
             port_config.policy = policy_id["uuid"]
             self.__append_fabric_intf_object("portChannels", template, port_config)
         elif isinstance(port_config, VPCResource):
@@ -1116,7 +1101,7 @@ class NDOTemplate:
             port_config.policy = policy_id["uuid"]
             self.__append_fabric_intf_object("virtualPortChannels", template, port_config)
         else:
-            raise Exception(
+            raise ValueError(
                 "port_config is not valid, you must pass an object of types PhysicalIntfResource | PortChannelResource | VPCResource"
             )
 
@@ -1124,6 +1109,7 @@ class NDOTemplate:
         resp = self.session.put(url, json=resource)
         if resp.status_code >= 400:
             raise Exception(resp.json())
+        print(f"  |--- Done")
 
     def add_domain_to_fabric_policy(
         self,
@@ -1156,12 +1142,13 @@ class NDOTemplate:
         else:
             target = list(filter(lambda pol: pol["name"] == domain_name, template[domain_type]))
             if len(target) != 0:
-                print(f"   |--- {domain_type} name {domain_name} already exist.")
+                print(f"  |--- {domain_type} name {domain_name} already exist.")
                 return
             template[domain_type].append(payload)
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
         resp = self.session.put(url, json=policy)
         if resp.status_code >= 400:
-            print(f"   |--- {resp.json()}")
+            print(f"  |--- {resp.json()}")
             raise Exception(resp.json())
+        print(f"  |--- Done")
