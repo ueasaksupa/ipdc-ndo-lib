@@ -54,23 +54,21 @@ class NDOTemplate:
         template[key].append(asdict(port_config))
 
     def __append_l3out_to_external_epg_site(
-        self, schema: dict, template_name: str, epg_name: str, l3outList: List[dict]
+        self, schema: dict, template_name: str, epg_name: str, l3outList: List[EEPGL3OutInfo]
     ) -> None:
         for l3out in l3outList:
             for site in schema["sites"]:
-                if site["siteId"] != self.sitename_id_map[l3out["site"]] or site["templateName"] != template_name:
+                if site["siteId"] != self.sitename_id_map[l3out.site] or site["templateName"] != template_name:
                     continue
 
-                l3outTemplate = self.find_l3out_template_by_name(l3out["l3OutTemplateName"])
+                l3outTemplate = self.find_l3out_template_by_name(l3out.l3outTemplate)
                 if l3outTemplate is None:
-                    raise ValueError(f"L3out template {l3out['l3OutTemplateName']} does not exist.")
+                    raise ValueError(f"L3out template {l3out.l3outTemplate} does not exist.")
                 l3outObject = list(
-                    filter(lambda l: l["name"] == l3out["l3outName"], l3outTemplate["l3outTemplate"]["l3outs"])
+                    filter(lambda l: l["name"] == l3out.l3outName, l3outTemplate["l3outTemplate"]["l3outs"])
                 )
                 if len(l3outObject) == 0:
-                    raise Exception(
-                        f"L3out {l3out['l3outName']} does not exist in template {l3out['l3OutTemplateName']}"
-                    )
+                    raise Exception(f"L3out {l3out.l3outName} does not exist in template {l3out.l3outTemplate}")
 
                 sitePayload = {
                     "externalEpgRef": {"templateName": template_name, "externalEpgName": epg_name},
@@ -610,7 +608,7 @@ class NDOTemplate:
         epg_name: str,
         vrf_name: str,
         vrf_template: str,
-        l3outList: List[dict],
+        l3outToSiteInfo: List[EEPGL3OutInfo],
         epg_desc: str = "",
     ) -> ExtEPG:
         print(f"--- Creating External EPG under template {template_name}")
@@ -633,7 +631,7 @@ class NDOTemplate:
         # Add External EPG to template
         filter_template[0]["externalEpgs"].append(payload)
         # Add L3Out to site
-        self.__append_l3out_to_external_epg_site(schema, template_name, epg_name, l3outList)
+        self.__append_l3out_to_external_epg_site(schema, template_name, epg_name, l3outToSiteInfo)
         print(f"  |--- Done")
         return filter_template[0]["externalEpgs"][-1]
 

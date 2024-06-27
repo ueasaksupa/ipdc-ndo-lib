@@ -26,7 +26,6 @@ def Example_L3Out():
     ndo.add_domain_to_fabric_policy(
         "TLS1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM01", "VLAN_SERVER_CL_DOM01_01"
     )
-    ndo.add_domain_to_fabric_policy("TLS1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM02")
     # prepare L3Out config
     l3outconfig = L3OutConfig(
         name="L3OUT_SILA_TEST",
@@ -82,24 +81,25 @@ def Example_L3Out():
     if schema is None:
         return
 
+    EEPG_L3OUT_INFO = [
+        EEPGL3OutInfo(
+            site="SILA",
+            l3outTemplate="TN_NUTTAWUT_TEST_SILA_L3Out_Template",
+            l3outName="L3OUT_SILA_TEST",
+        ),
+        EEPGL3OutInfo(
+            site="TLS1",
+            l3outTemplate="TN_NUTTAWUT_TEST_TLS1_L3Out_Template",
+            l3outName="L3OUT_TLS_TN_NUTTAWUT",
+        ),
+    ]
     ndo.create_ext_epg_under_template(
         schema,
         "Policy_All_Site_template",
         "EPG_L3OUT_CUSTOMER",
         "VRF_CUSTOMER",
         "VRF_Contract_Stretch_Template",
-        [
-            {
-                "site": "SILA",
-                "l3OutTemplateName": "TN_NUTTAWUT_TEST_SILA_L3Out_Template",
-                "l3outName": "L3OUT_SILA_TEST",
-            },
-            {
-                "site": "TLS1",
-                "l3OutTemplateName": "TN_NUTTAWUT_TEST_TLS1_L3Out_Template",
-                "l3outName": "L3OUT_TLS_TN_NUTTAWUT",
-            },
-        ],
+        EEPG_L3OUT_INFO,
         "external epg for test",
     )
     ndo.save_schema(schema)

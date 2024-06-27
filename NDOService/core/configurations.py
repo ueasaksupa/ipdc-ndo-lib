@@ -284,3 +284,10 @@ class L3OutConfig:
     exportRouteMap: str | None = None
     importRouteMap: str | None = None
     importRouteControl: bool = False
+
+
+@dataclass(kw_only=True)
+class EEPGL3OutInfo:
+    site: str
+    l3outTemplate: str
+    l3outName: str
