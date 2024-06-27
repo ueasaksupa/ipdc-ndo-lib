@@ -366,7 +366,7 @@ class NDOTemplate:
     def create_template(self, schema: dict, template_name: str, tenant_id: str) -> Template:
         print(f"--- Creating template {template_name}")
 
-        if "templates" not in schema:
+        if "templates" not in schema or not schema["templates"]:
             schema["templates"] = []
         filter_template = list(filter(lambda d: d["name"] == template_name, schema["templates"]))
 
@@ -573,7 +573,7 @@ class NDOTemplate:
         epg_name: str,
         epg_desc: str = "",
     ) -> EPG:
-        print(f"--- Creating EPG under ANP {anp['name']}")
+        print(f"--- Creating EPG {epg_name} under ANP {anp['name']}")
         filter_epg = list(filter(lambda epg: epg["name"] == epg_name, anp["epgs"]))
 
         if len(filter_epg) != 0:
@@ -707,7 +707,7 @@ class NDOTemplate:
             raise ValueError(f"EPG {epg_name} does not exist.")
 
         for endpoint in port_configs:
-            print(f"  |--- Adding port {endpoint.nodeId}/{endpoint.port_name}/")
+            print(f"  |--- Adding port {endpoint.port_name}, nodeId {endpoint.nodeId}")
 
             path = self.__get_port_resource_path(endpoint=endpoint, site_name=site_name, pod=pod)
             filter_port = list(filter(lambda p: p["path"] == path, target_epg[0]["staticPorts"]))
