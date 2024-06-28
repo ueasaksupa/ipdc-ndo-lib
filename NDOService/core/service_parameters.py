@@ -86,7 +86,7 @@ class TenantPolicyTenplate:
 class L2ServiceParameters:
     connection: NDOConnection
     tenant_name: str
-    tenant_sites: List[str]
+    tenant_sites: List[str] | None = None
     schema_name: str
     templates: List[VRFTemplate | SingleEPGTemplate]
 
@@ -95,7 +95,7 @@ class L2ServiceParameters:
 class L3ServiceParameters:
     connection: NDOConnection
     tenant_name: str
-    tenant_sites: List[str]
+    tenant_sites: List[str] | None = None
     schema_name: str
     templates: List[VRFTemplate | MultiEPGTemplate]
 
@@ -104,7 +104,7 @@ class L3ServiceParameters:
 class L3OutServiceParameters:
     connection: NDOConnection
     tenant_name: str
-    tenant_sites: List[str]
+    tenant_sites: List[str] | None = None
     schema_name: str
     templates: List[VRFTemplate | MultiEPGTemplate]
     l3outTemplatePerSite: List[L3OutTemplatePerSite]

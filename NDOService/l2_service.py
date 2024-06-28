@@ -16,8 +16,11 @@ def create(srvParams: L2ServiceParameters):
         srvParams.connection.password,
         srvParams.connection.port,
     )
+    # prepare sites for tenant creation
+    allSiteList: list[str] = list(map(lambda s: s["name"], ndo.get_all_sites()["sites"]))
+    tenant_sites = allSiteList if srvParams.tenant_sites is None else srvParams.tenant_sites
     # create Tenant
-    tenant = ndo.create_tenant(srvParams.tenant_name, srvParams.tenant_sites)
+    tenant = ndo.create_tenant(srvParams.tenant_name, tenant_sites)
     # get schema by name if schema was not been created before, It will be created automatically
     schema = ndo.create_schema(srvParams.schema_name)
 
