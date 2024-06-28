@@ -17,7 +17,7 @@ def create(srvParams: L3OutServiceParameters):
         srvParams.connection.port,
     )
     # prepare sites for tenant creation
-    allSiteList: list[str] = list(map(lambda s: s["name"], ndo.get_all_sites()["sites"]))
+    allSiteList: list[str] = list(map(lambda s: s["name"], ndo.get_all_sites()))
     tenant_sites = allSiteList if srvParams.tenant_sites is None else srvParams.tenant_sites
     # create Tenant
     tenant = ndo.create_tenant(srvParams.tenant_name, tenant_sites)
