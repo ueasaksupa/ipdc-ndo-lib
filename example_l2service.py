@@ -7,25 +7,25 @@ from NDOService.core.service_parameters import *
 This is the example how to call the method to create l2 service on NDO.
 """
 ENDPOINTS = [
-    SiteEndpoints(
+    SiteStaticPorts(
         name="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[
+        staticPorts=[
             Endpoint(nodeId="3101", port_type="port", port_name="1/12", port_mode="regular", vlan=2103),
             Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2103),
         ],
     ),
-    SiteEndpoints(
+    SiteStaticPorts(
         name="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2103)],
+        staticPorts=[Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2103)],
     ),
 ]
+
 
 params = L2ServiceParameters(
     connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
     tenant_name="TN_NUTTAWUT",
-    tenant_sites=["SILA", "TLS1"],
     schema_name="TN_NUTTAWUT_Schema01",
     templates=[
         VRFTemplate(
@@ -45,9 +45,8 @@ params = L2ServiceParameters(
                 anp_name="AP_CUSTOMER",
                 epg=TemplateEPG(
                     name="EPG_L2_DB_1",
-                    endpointPerSite=ENDPOINTS,
+                    staticPortPerSite=ENDPOINTS,
                 ),
-                bdConfig=BridgeDomainConfig(unicastRouting=False, l2UnknownUnicast="flood"),
             ),
         ),
     ],

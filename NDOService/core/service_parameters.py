@@ -12,10 +12,10 @@ class NDOConnection:
 
 
 @dataclass(kw_only=True)
-class SiteEndpoints:
+class SiteStaticPorts:
     name: str
     epg_phy_domain: str
-    endpoints: List[Endpoint]
+    staticPorts: List[Endpoint]
 
 
 @dataclass(kw_only=True)
@@ -29,7 +29,7 @@ class TemplateExternalEPG:
 @dataclass(kw_only=True)
 class TemplateEPG:
     name: str
-    endpointPerSite: List[SiteEndpoints]
+    staticPortPerSite: List[SiteStaticPorts]
 
 
 @dataclass(kw_only=True)
@@ -78,6 +78,7 @@ class L3OutTemplatePerSite:
 @dataclass(kw_only=True)
 class TenantPolicyTenplate:
     name: str
+    site: str
     routemapConfig: RouteMapConfig
     bfdConfig: BFDPolicyConfig | None = None
 
@@ -108,4 +109,4 @@ class L3OutServiceParameters:
     schema_name: str
     templates: List[VRFTemplate | MultiEPGTemplate]
     l3outTemplatePerSite: List[L3OutTemplatePerSite]
-    tenantPolTemplate: TenantPolicyTenplate
+    tenantPolTemplates: List[TenantPolicyTenplate]

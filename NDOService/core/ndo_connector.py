@@ -76,7 +76,7 @@ class NDOTemplate:
                 }
                 site["externalEpgs"].append(sitePayload)
 
-    def __generate_rm_payload(self, rnConfig: RouteMapConfig):
+    def __generate_routeMap_payload(self, rnConfig: RouteMapConfig):
         entryList = []
         for entry in rnConfig.entryList:
             prefixes = []
@@ -94,30 +94,32 @@ class NDOTemplate:
                 "matchRule": [{"matchPrefixList": prefixes}],
             }
             if entry.attributes is not None:
-                entryPayload["setAction"] = [
-                    {
-                        "setPreference": entry.attributes.setPreference,
-                        "setWeight": entry.attributes.setWeight,
-                        "setMultiPath": entry.attributes.setMultiPath,
-                        "setNextHopPropagate": (
-                            True if entry.attributes.setMultiPath else entry.attributes.setNextHopPropagate
-                        ),
-                        "setAsPath": (
-                            [
-                                {
-                                    "criteria": entry.attributes.setAsPath.criteria,
-                                    "pathASNs": [
-                                        {"asn": asn, "order": i}
-                                        for i, asn in enumerate(entry.attributes.setAsPath.pathASNs, start=1)
-                                    ],
-                                    "asnCount": entry.attributes.setAsPath.asnCount,
-                                }
-                            ]
-                            if entry.attributes.setAsPath
-                            else None
-                        ),
-                    }
-                ]
+                actionFields = {}
+                if entry.attributes.setNextHopPropagate is not None:
+                    actionFields["setNextHopPropagate"] = entry.attributes.setNextHopPropagate
+                if entry.attributes.setPreference is not None:
+                    actionFields["setPreference"] = entry.attributes.setPreference
+                if entry.attributes.setWeight is not None:
+                    actionFields["setWeight"] = entry.attributes.setWeight
+                if entry.attributes.setMultiPath is not None:
+                    actionFields["setMultiPath"] = entry.attributes.setMultiPath
+                    actionFields["setNextHopPropagate"] = entry.attributes.setNextHopPropagate
+                if entry.attributes.setAsPath is not None:
+                    actionFields["setAsPath"] = (
+                        [
+                            {
+                                "criteria": entry.attributes.setAsPath.criteria,
+                                "pathASNs": [
+                                    {"asn": asn, "order": i}
+                                    for i, asn in enumerate(entry.attributes.setAsPath.pathASNs, start=1)
+                                ],
+                                "asnCount": entry.attributes.setAsPath.asnCount,
+                            }
+                        ]
+                        if entry.attributes.setAsPath
+                        else None
+                    )
+                entryPayload["setAction"] = [actionFields]
             entryList.append(entryPayload)
         completed_payload = {"name": rnConfig.name, "description": rnConfig.description, "rtMapEntryList": entryList}
         return completed_payload
@@ -212,6 +214,7 @@ class NDOTemplate:
             ),
             "importRouteControl": l3outConfig.importRouteControl,
             "nodes": list(map(lambda obj: asdict(obj), l3outConfig.nodes)),
+            "pim": l3outConfig.pimEnabled,
         }
         self.__generate_l3out_interface_payload(template, payload, l3outConfig)
         # pprint(payload)
@@ -562,44 +565,37 @@ class NDOTemplate:
         print(f"  |--- Done")
         return filter_template[0]["anps"][-1]
 
-    def create_epg_under_template(
-        self,
-        schema: dict,
-        anp: dict,
-        linked_template: str,
-        linked_bd: str,
-        epg_name: str,
-        epg_desc: str = "",
-    ) -> EPG:
-        print(f"--- Creating EPG {epg_name} under ANP {anp['name']}")
-        filter_epg = list(filter(lambda epg: epg["name"] == epg_name, anp["epgs"]))
+    def create_epg_under_template(self, schema: dict, anp_obj: dict, epg_name: str, epg_config: EPGConfig) -> EPG:
+        if not isinstance(epg_config, EPGConfig):
+            raise ValueError("epg_config must be instance of EPGConfig")
+
+        print(f"--- Creating EPG {epg_name} under ANP {anp_obj['name']}")
+        filter_epg = list(filter(lambda epg: epg["name"] == epg_name, anp_obj["epgs"]))
 
         if len(filter_epg) != 0:
-            print(f"  |--- EPG {epg_name} is already exist in ANP {anp['name']}")
+            print(f"  |--- EPG {epg_name} is already exist in ANP {anp_obj['name']}")
             return filter_epg[0]
 
         # TODO
         # Parameterized flags
         payload = {
+            "epgType": "application",
             "name": epg_name,
             "displayName": epg_name,
-            "description": epg_desc,
-            "bdRef": {"schemaID": schema["id"], "templateName": linked_template, "bdName": linked_bd},
-            "contractRelationships": [],
-            "subnets": [],
-            "uSegEpg": False,
-            "uSegAttrs": [],
-            "intraEpg": "unenforced",
-            "prio": "unspecified",
-            "proxyArp": False,
-            "mCastSource": False,
-            "preferredGroup": False,
-            "selectors": [],
-            "epgType": "application",
+            "description": epg_config.epg_desc,
+            "bdRef": {
+                "schemaID": schema["id"],
+                "templateName": epg_config.linked_template,
+                "bdName": epg_config.linked_bd,
+            },
+            "intraEpg": epg_config.intraEpg,
+            "proxyArp": epg_config.proxyArp,
+            "mCastSource": epg_config.mCastSource,
+            "preferredGroup": epg_config.preferredGroup,
         }
-        anp["epgs"].append(payload)
+        anp_obj["epgs"].append(payload)
         print(f"  |--- Done")
-        return anp["epgs"][-1]
+        return anp_obj["epgs"][-1]
 
     def create_ext_epg_under_template(
         self,
@@ -768,14 +764,16 @@ class NDOTemplate:
             raise ValueError(f"template {template_name} does not exist")
 
         if "routeMapPolicies" not in template["tenantPolicyTemplate"]["template"]:
-            template["tenantPolicyTemplate"]["template"]["routeMapPolicies"] = [self.__generate_rm_payload(rnConfig)]
+            template["tenantPolicyTemplate"]["template"]["routeMapPolicies"] = [
+                self.__generate_routeMap_payload(rnConfig)
+            ]
         else:
             rm_policies: list = template["tenantPolicyTemplate"]["template"]["routeMapPolicies"]
             filtered_rm = list(filter(lambda rm: rm["name"] == rnConfig.name, rm_policies))
             if len(filtered_rm) > 0:
                 print(f"  |--- RouteMap {rnConfig.name} already exist.")
                 return
-            rm_policies.append(self.__generate_rm_payload(rnConfig))
+            rm_policies.append(self.__generate_routeMap_payload(rnConfig))
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
         resp = self.session.put(url, json=template)

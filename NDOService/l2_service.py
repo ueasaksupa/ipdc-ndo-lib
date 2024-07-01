@@ -46,7 +46,11 @@ def create(srvParams: L2ServiceParameters):
 
         if isinstance(template, SingleEPGTemplate):
             # create Bridge-Domain under template
-            bd_config = BridgeDomainConfig() if template.bd.bdConfig is None else template.bd.bdConfig
+            bd_config = (
+                BridgeDomainConfig(unicastRouting=False, l2UnknownUnicast="flood")
+                if template.bd.bdConfig is None
+                else template.bd.bdConfig
+            )
             ndo.create_bridge_domain_under_template(
                 schema,
                 template.bd.linkedVrfTemplate,
@@ -58,14 +62,21 @@ def create(srvParams: L2ServiceParameters):
             # create Application Profile under template
             anp = ndo.create_anp_under_template(schema, template.name, template.bd.anp_name)
             # create EPG under ANP
-            ndo.create_epg_under_template(schema, anp, template.name, template.bd.name, template.bd.epg.name)
-
+            ndo.create_epg_under_template(
+                schema,
+                anp,
+                template.bd.epg.name,
+                EPGConfig(
+                    linked_template=template.name,
+                    linked_bd=template.bd.name,
+                ),
+            )
             # update schema
             schema = ndo.save_schema(schema)
 
             # ----- ADD PHYSICAL PORT FOR EACH ENDPOINT PER SITE ------
             # add physical domain and device port to EPG per site
-            for siteInfo in template.bd.epg.endpointPerSite:
+            for siteInfo in template.bd.epg.staticPortPerSite:
                 ndo.add_phy_domain_to_epg(
                     schema,
                     template.name,
@@ -80,7 +91,7 @@ def create(srvParams: L2ServiceParameters):
                     template.bd.anp_name,
                     template.bd.epg.name,
                     siteInfo.name,
-                    siteInfo.endpoints,
+                    siteInfo.staticPorts,
                 )
 
             # update schema

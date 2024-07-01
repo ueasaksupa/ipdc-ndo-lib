@@ -8,41 +8,40 @@ This is the example how to call the method to create l2 service on NDO.
 """
 
 ENDPOINTS_EPG_1 = [
-    SiteEndpoints(
+    SiteStaticPorts(
         name="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[
-            Endpoint(nodeId="3101", port_type="port", port_name="1/14", port_mode="regular", vlan=2104),
-            Endpoint(nodeId="3101", port_type="port", port_name="1/15", port_mode="regular", vlan=2104),
+        staticPorts=[
+            Endpoint(nodeId="3101", port_type="port", port_name="1/12", port_mode="regular", vlan=2104),
+            Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2104),
         ],
     ),
-    SiteEndpoints(
+    SiteStaticPorts(
         name="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[Endpoint(nodeId="3101", port_type="port", port_name="1/14", port_mode="regular", vlan=2104)],
+        staticPorts=[Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2104)],
     ),
 ]
 
 ENDPOINTS_EPG_2 = [
-    SiteEndpoints(
+    SiteStaticPorts(
         name="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[
-            Endpoint(nodeId="3101", port_type="port", port_name="1/16", port_mode="regular", vlan=2104),
-            Endpoint(nodeId="3101", port_type="port", port_name="1/17", port_mode="regular", vlan=2104),
+        staticPorts=[
+            Endpoint(nodeId="3101", port_type="port", port_name="1/14", port_mode="regular", vlan=2104),
+            Endpoint(nodeId="3101", port_type="port", port_name="1/15", port_mode="regular", vlan=2104),
         ],
     ),
-    SiteEndpoints(
+    SiteStaticPorts(
         name="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[Endpoint(nodeId="3101", port_type="port", port_name="1/15", port_mode="regular", vlan=2104)],
+        staticPorts=[Endpoint(nodeId="3101", port_type="port", port_name="1/14", port_mode="regular", vlan=2104)],
     ),
 ]
 
 params = L3ServiceParameters(
     connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
     tenant_name="TN_NUTTAWUT",
-    tenant_sites=["SILA", "TLS1"],
     schema_name="TN_NUTTAWUT_Schema01",
     templates=[
         VRFTemplate(
@@ -61,11 +60,12 @@ params = L3ServiceParameters(
                     linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUSTOMER",
                     anp_name="AP_CUSTOMER",
-                    epg=TemplateEPG(name="EPG_L3_SERVER_1", endpointPerSite=ENDPOINTS_EPG_1),
+                    epg=TemplateEPG(name="EPG_L3_SERVER_1", staticPortPerSite=ENDPOINTS_EPG_1),
                     bdConfig=BridgeDomainConfig(
+                        arpFlood=False,
                         subnets=[
-                            BridgeDomainSubnet(ip="10.100.0.1/24", description="test from api"),
-                        ]
+                            BridgeDomainSubnet(ip="10.100.0.1/24", description="test from api", scope="public"),
+                        ],
                     ),
                 ),
                 TemplateBridgeDomain(
@@ -73,11 +73,12 @@ params = L3ServiceParameters(
                     linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUSTOMER",
                     anp_name="AP_CUSTOMER",
-                    epg=TemplateEPG(name="EPG_L3_SERVER_2", endpointPerSite=ENDPOINTS_EPG_2),
+                    epg=TemplateEPG(name="EPG_L3_SERVER_2", staticPortPerSite=ENDPOINTS_EPG_2),
                     bdConfig=BridgeDomainConfig(
+                        arpFlood=False,
                         subnets=[
-                            BridgeDomainSubnet(ip="10.200.0.1/24", description="test from api"),
-                        ]
+                            BridgeDomainSubnet(ip="10.200.0.1/24", description="test from api", scope="public"),
+                        ],
                     ),
                 ),
             ],

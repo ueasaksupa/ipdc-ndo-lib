@@ -8,34 +8,34 @@ This is the example how to call the method to create l2 service on NDO.
 """
 
 ENDPOINTS_EPG_1 = [
-    SiteEndpoints(
+    SiteStaticPorts(
         name="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[
+        staticPorts=[
             Endpoint(nodeId="3102", port_type="port", port_name="1/14", port_mode="regular", vlan=2105),
             Endpoint(nodeId="3102", port_type="port", port_name="1/15", port_mode="regular", vlan=2105),
         ],
     ),
-    SiteEndpoints(
+    SiteStaticPorts(
         name="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[Endpoint(nodeId="3102", port_type="port", port_name="1/14", port_mode="regular", vlan=2105)],
+        staticPorts=[Endpoint(nodeId="3102", port_type="port", port_name="1/14", port_mode="regular", vlan=2105)],
     ),
 ]
 
 ENDPOINTS_EPG_2 = [
-    SiteEndpoints(
+    SiteStaticPorts(
         name="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[
+        staticPorts=[
             Endpoint(nodeId="3102", port_type="port", port_name="1/16", port_mode="regular", vlan=2105),
             Endpoint(nodeId="3102", port_type="port", port_name="1/17", port_mode="regular", vlan=2105),
         ],
     ),
-    SiteEndpoints(
+    SiteStaticPorts(
         name="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        endpoints=[Endpoint(nodeId="3102", port_type="port", port_name="1/15", port_mode="regular", vlan=2105)],
+        staticPorts=[Endpoint(nodeId="3102", port_type="port", port_name="1/15", port_mode="regular", vlan=2105)],
     ),
 ]
 
@@ -45,15 +45,14 @@ L3OUT_SILA_CONFIG = L3OutConfig(
     l3domain="L3_DOMAIN_BL_DOM01",
     nodes=[L3OutNodeConfig(nodeID="1101", routerID="10.1.1.1")],
     routingProtocol="bgp",
-    importRouteControl=True,
+    exportRouteMap="RM_SILA_TN_NUTTAWUT",
     interfaces=[
-        L3OutSubIntPhysicalPort(
-            primaryV4="10.0.3.1/30",
+        L3OutSubIntPortChannel(
+            primaryV4="10.0.2.1/30",
             encapVal=3000,
-            nodeID="1101",
-            portID="1/31",
-            bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.3.2", peerAsn=65001)],
-        )
+            portChannelName="PC_SILA_BL_01",
+            bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.2.2", peerAsn=65001)],
+        ),
     ],
 )
 
@@ -63,29 +62,48 @@ L3OUT_TLS1_CONFIG = L3OutConfig(
     l3domain="L3_DOMAIN_BL_DOM01",
     nodes=[L3OutNodeConfig(nodeID="1101", routerID="10.2.2.2")],
     routingProtocol="bgp",
+    exportRouteMap="RM_TLS1_TN_NUTTAWUT",
     importRouteControl=True,
+    importRouteMap="RM_TLS1_TN_NUTTAWUT",
     interfaces=[
-        L3OutSubIntPhysicalPort(
-            primaryV4="10.0.3.1/30",
+        L3OutSubIntPortChannel(
+            primaryV4="10.0.2.1/30",
             encapVal=3000,
-            nodeID="1101",
-            portID="1/31",
-            bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.3.2", peerAsn=65001)],
-        )
+            portChannelName="PC_TLS1_BL_01",
+            bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.2.2", peerAsn=65001)],
+        ),
     ],
 )
 
-ROUTE_MAP_CONFIG = RouteMapConfig(
-    name="RM_TN_NUTTAWUT_TEST",
+ROUTE_MAP_CONFIG_S = RouteMapConfig(
+    name="RM_SILA_TN_NUTTAWUT",
     entryList=[
         RouteMapEntry(
             order=1,
             name="1",
             action="permit",
-            prefixes=[
-                RouteMapPrefix(prefix="10.101.0.0/24"),
-                RouteMapPrefix(prefix="10.201.0.0/24"),
-            ],
+            prefixes=[RouteMapPrefix(prefix="10.201.0.0/24")],
+            attributes=RouteMapAttributes(
+                setAsPath=RouteMapSetAsPath(criteria="prepend", pathASNs=[450001]), setMultiPath=True
+            ),
+        ),
+        RouteMapEntry(
+            order=9,
+            name="9",
+            action="permit",
+            prefixes=[RouteMapPrefix(prefix="0.0.0.0/0", aggregate=True, fromPfxLen=0, toPfxLen=32)],
+        ),
+    ],
+)
+
+ROUTE_MAP_CONFIG_T = RouteMapConfig(
+    name="RM_TLS1_TN_NUTTAWUT",
+    entryList=[
+        RouteMapEntry(
+            order=1,
+            name="1",
+            action="permit",
+            prefixes=[RouteMapPrefix(prefix="10.101.0.0/24")],
             attributes=RouteMapAttributes(
                 setAsPath=RouteMapSetAsPath(criteria="prepend", pathASNs=[450001]), setMultiPath=True
             ),
@@ -104,9 +122,10 @@ params = L3OutServiceParameters(
     tenant_name="TN_NUTTAWUT",
     tenant_sites=["SILA", "TLS1"],
     schema_name="TN_NUTTAWUT_Schema01",
-    tenantPolTemplate=TenantPolicyTenplate(
-        name="TN_NUTTAWUT_Tenant_Policies_Template", routemapConfig=ROUTE_MAP_CONFIG
-    ),
+    tenantPolTemplates=[
+        TenantPolicyTenplate(name="TN_NUTTAWUT_Tenant_Policies_SILA", site="SILA", routemapConfig=ROUTE_MAP_CONFIG_S),
+        TenantPolicyTenplate(name="TN_NUTTAWUT_Tenant_Policies_TLS1", site="TLS1", routemapConfig=ROUTE_MAP_CONFIG_T),
+    ],
     l3outTemplatePerSite=[
         L3OutTemplatePerSite(name="TN_NUTTAWUT_TEST_SILA_L3Out_Template", site="SILA", l3outConfig=L3OUT_SILA_CONFIG),
         L3OutTemplatePerSite(name="TN_NUTTAWUT_TEST_TLS1_L3Out_Template", site="TLS1", l3outConfig=L3OUT_TLS1_CONFIG),
@@ -128,11 +147,9 @@ params = L3OutServiceParameters(
                     linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",
-                    epg=TemplateEPG(name="EPG_L3_SERVER_3_EXT", endpointPerSite=ENDPOINTS_EPG_1),
+                    epg=TemplateEPG(name="EPG_L3_SERVER_3_EXT", staticPortPerSite=ENDPOINTS_EPG_1),
                     bdConfig=BridgeDomainConfig(
-                        subnets=[
-                            BridgeDomainSubnet(ip="10.101.0.1/24", description="test from api"),
-                        ]
+                        subnets=[BridgeDomainSubnet(ip="10.101.0.1/24", description="test from api")]
                     ),
                 ),
                 TemplateBridgeDomain(
@@ -140,11 +157,9 @@ params = L3OutServiceParameters(
                     linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",
-                    epg=TemplateEPG(name="EPG_L3_SERVER_4_EXT", endpointPerSite=ENDPOINTS_EPG_2),
+                    epg=TemplateEPG(name="EPG_L3_SERVER_4_EXT", staticPortPerSite=ENDPOINTS_EPG_2),
                     bdConfig=BridgeDomainConfig(
-                        subnets=[
-                            BridgeDomainSubnet(ip="10.201.0.1/24", description="test from api"),
-                        ]
+                        subnets=[BridgeDomainSubnet(ip="10.201.0.1/24", description="test from api")]
                     ),
                 ),
             ],

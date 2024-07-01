@@ -25,9 +25,10 @@ def create(srvParams: L3OutServiceParameters):
     schema = ndo.create_schema(srvParams.schema_name)
 
     # ----- CREATE TENANT POLICY TEMPLATE ------
-    tPolicy = srvParams.tenantPolTemplate
-    ndo.create_tenant_policies_template(tPolicy.name, tenant_sites, srvParams.tenant_name)
-    ndo.add_route_map_policy_under_template(tPolicy.name, tPolicy.routemapConfig)
+    tPolicy = srvParams.tenantPolTemplates
+    for pol in tPolicy:
+        ndo.create_tenant_policies_template(pol.name, [pol.site], srvParams.tenant_name)
+        ndo.add_route_map_policy_under_template(pol.name, pol.routemapConfig)
 
     # ----- CREATE TEMPLATE ------
     for template in srvParams.templates:
@@ -67,6 +68,7 @@ def create(srvParams: L3OutServiceParameters):
             # create Bridge-Domain under template
             for bd in template.bds:
                 bd_config = BridgeDomainConfig() if bd.bdConfig is None else bd.bdConfig
+                bd_config.arpFlood = False
                 ndo.create_bridge_domain_under_template(
                     schema,
                     bd.linkedVrfTemplate,
@@ -78,14 +80,15 @@ def create(srvParams: L3OutServiceParameters):
                 # create Application Profile under template
                 anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)
                 # create EPG under ANP
-                ndo.create_epg_under_template(schema, anp, template.name, bd.name, bd.epg.name)
-
+                ndo.create_epg_under_template(
+                    schema, anp, bd.epg.name, EPGConfig(linked_template=template.name, linked_bd=bd.name)
+                )
                 # update schema
                 schema = ndo.save_schema(schema)
 
                 # ----- ADD PHYSICAL PORT FOR EACH ENDPOINT PER SITE ------
                 # add physical domain and device port to EPG per site
-                for siteInfo in bd.epg.endpointPerSite:
+                for siteInfo in bd.epg.staticPortPerSite:
                     ndo.add_phy_domain_to_epg(
                         schema,
                         template.name,
@@ -100,7 +103,7 @@ def create(srvParams: L3OutServiceParameters):
                         bd.anp_name,
                         bd.epg.name,
                         siteInfo.name,
-                        siteInfo.endpoints,
+                        siteInfo.staticPorts,
                     )
                 # update schema
                 schema = ndo.save_schema(schema)

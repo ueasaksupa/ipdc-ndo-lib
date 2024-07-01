@@ -5,12 +5,12 @@ from typing import List, Literal
 @dataclass(kw_only=True)
 class Endpoint:
     """
-    Example Endpoint parameter
-    nodeId: 1101
-    port_type: "port"
-    port_name: 1/20
-    port_mode: "regular"
-    vlan: 2000
+    ### Example Endpoint parameter
+    - nodeId: 1101
+    - port_type: "port"
+    - port_name: 1/20
+    - port_mode: "regular"
+    - vlan: 2000
     """
 
     nodeId: str
@@ -21,10 +21,27 @@ class Endpoint:
 
 
 @dataclass(kw_only=True)
+class EPGConfig:
+    epg_desc: str = ""
+    linked_template: str
+    linked_bd: str
+    proxyArp: bool = False
+    mCastSource: bool = False
+    preferredGroup: bool = False
+    intraEpg: Literal["unenforced", "enforced"] = "unenforced"
+
+
+@dataclass(kw_only=True)
 class BridgeDomainSubnet:
+    """
+    ### Note scope defination :
+    - scope private is equal to `Private to VRF`
+    - scope public is equal to `Advertised Externally`
+    """
+
     ip: str = ""
     description: str = ""
-    scope: Literal["private", "public"] = "private"
+    scope: Literal["private", "public"] = "public"
     shared: bool = False
     querier: bool = False
     noDefaultGateway: bool = False
@@ -267,12 +284,13 @@ type L3OutSviInterfaceConfig = L3OutSVIPhysicalPort | L3OutSVIPortChannel
 class L3OutConfig:
     """
     Parameter documentation:
-    name : the name of L3OUT template
-    vrf : the VRF name for this L3OUT
-    nodes : List of L3OutNodeConfig object
-    routingProtocol : either bgp or ospf
-    exportRouteMap : name of route map in Tenant policy
-    interfaces : List of L3OutInterfaceConfig object
+    - name : the name of L3OUT template
+    - vrf : the VRF name for this L3OUT
+    - nodes : List of L3OutNodeConfig object
+    - routingProtocol : either bgp or ospf
+    - exportRouteMap : name of route map in Tenant policy
+    - interfaces : List of L3OutInterfaceConfig object
+    - pimEnabled : PIM setting default is disabled
     """
 
     name: str
@@ -284,6 +302,7 @@ class L3OutConfig:
     exportRouteMap: str | None = None
     importRouteMap: str | None = None
     importRouteControl: bool = False
+    pimEnabled: bool = False
 
 
 @dataclass(kw_only=True)
