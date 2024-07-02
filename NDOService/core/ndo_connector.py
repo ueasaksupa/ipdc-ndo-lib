@@ -26,24 +26,28 @@ class NDOTemplate:
 
     # ** INTERNAL ONLY ** UTIL METHODs
 
-    def __get_port_resource_path(self, endpoint: Endpoint, site_name: str, pod: str):
+    def __get_port_resource_path(
+        self, staticport: StaticPortPhy | StaticPortPC | StaticPortVPC, site_name: str, pod: str
+    ):
         path = ""
-        if endpoint.port_type == "vpc":
-            vpc_resource = self.find_vpc_by_name(endpoint.port_name, site_name)
+        if staticport.port_type == "vpc":
+            vpc_resource = self.find_vpc_by_name(staticport.port_name, site_name)
             if not vpc_resource:
                 raise Exception(
-                    f"VPC resource name {endpoint.port_name} does not exist in the Fabric Resource Policy."
+                    f"VPC resource name {staticport.port_name} does not exist in the Fabric Resource Policy."
                 )
             path = vpc_resource["path"]
-        elif endpoint.port_type == "dpc":
-            pc_resource = self.find_pc_by_name(endpoint.port_name, site_name)
+        elif staticport.port_type == "dpc":
+            pc_resource = self.find_pc_by_name(staticport.port_name, site_name)
             if not pc_resource:
-                raise Exception(f"PC resource name {endpoint.port_name} does not exist in the Fabric Resource Policy.")
+                raise Exception(
+                    f"PC resource name {staticport.port_name} does not exist in the Fabric Resource Policy."
+                )
             path = pc_resource["path"]
-        elif endpoint.port_type == "port":
-            path = f"topology/{pod}/paths-{endpoint.nodeId}/pathep-[eth{endpoint.port_name.replace('eth','')}]"
+        elif staticport.port_type == "port":
+            path = f"topology/{pod}/paths-{staticport.nodeId}/pathep-[eth{staticport.port_name.replace('eth','')}]"
         else:
-            raise ValueError(f"port_type {endpoint.port_type} is not supported")
+            raise ValueError(f"port_type {staticport.port_type} is not supported")
 
         return path
 
@@ -687,7 +691,7 @@ class NDOTemplate:
         anp_name: str,
         epg_name: str,
         site_name: str,
-        port_configs: list[Endpoint],
+        port_configs: list[StaticPortPhy | StaticPortPC | StaticPortVPC],
         pod: str = "pod-1",
     ) -> None:
         print(f"--- Adding Static port to site {site_name}")
@@ -708,21 +712,20 @@ class NDOTemplate:
         if len(target_epg) == 0:
             raise ValueError(f"EPG {epg_name} does not exist.")
 
-        for endpoint in port_configs:
-            print(f"  |--- Adding port {endpoint.port_name}, nodeId {endpoint.nodeId}")
-
-            path = self.__get_port_resource_path(endpoint=endpoint, site_name=site_name, pod=pod)
+        for port in port_configs:
+            print(f"  |--- Adding port {port.port_name}")
+            path = self.__get_port_resource_path(staticport=port, site_name=site_name, pod=pod)
             filter_port = list(filter(lambda p: p["path"] == path, target_epg[0]["staticPorts"]))
             if len(filter_port) != 0:
-                print(f"  |--- Port {endpoint.port_name} on {endpoint.nodeId} is already exist.")
+                print(f"  |--- Port {port.port_name} is already exist.")
                 continue
 
             payload = {
-                "type": endpoint.port_type,
+                "type": port.port_type,
                 "path": path,
-                "portEncapVlan": endpoint.vlan,
+                "portEncapVlan": port.vlan,
                 "deploymentImmediacy": "immediate",
-                "mode": endpoint.port_mode,
+                "mode": port.port_mode,
             }
             print(f"  |--- Done")
             target_epg[0]["staticPorts"].append(payload)

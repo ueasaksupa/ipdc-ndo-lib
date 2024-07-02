@@ -3,12 +3,12 @@ from .core.ndo_connector import NDOTemplate
 from NDOService.core.service_parameters import *
 
 
-def create(srvParams: L3ServiceParameters):
+def create(srvParams: ServiceL3Parameters):
     """
     For create L2 service
     """
-    if not isinstance(srvParams, L3ServiceParameters):
-        raise ValueError("srvParams must be instance of L3ServiceParameters class.")
+    if not isinstance(srvParams, ServiceL3Parameters):
+        raise ValueError("srvParams must be instance of ServiceL3Parameters class.")
 
     ndo = NDOTemplate(
         srvParams.connection.host,
@@ -76,14 +76,14 @@ def create(srvParams: L3ServiceParameters):
                         bd.anp_name,
                         bd.epg.name,
                         siteInfo.epg_phy_domain,
-                        siteInfo.name,
+                        siteInfo.sitename,
                     )
                     ndo.add_static_port_to_epg(
                         schema,
                         template.name,
                         bd.anp_name,
                         bd.epg.name,
-                        siteInfo.name,
+                        siteInfo.sitename,
                         siteInfo.staticPorts,
                     )
                 # update schema

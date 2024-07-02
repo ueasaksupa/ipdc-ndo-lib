@@ -32,7 +32,10 @@ def Example_L3Out():
         vrf="VRF_CUSTOMER",
         l3domain="L3_DOMAIN_BL_DOM01",
         nodes=[
-            L3OutNodeConfig(nodeID="1101", routerID="10.0.0.1"),
+            L3OutNodeConfig(
+                nodeID="1101",
+                routerID="10.0.0.1",
+            ),
         ],
         routingProtocol="bgp",
         importRouteControl=True,

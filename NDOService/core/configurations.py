@@ -3,18 +3,25 @@ from typing import List, Literal
 
 
 @dataclass(kw_only=True)
-class Endpoint:
-    """
-    ### Example Endpoint parameter
-    - nodeId: 1101
-    - port_type: "port"
-    - port_name: 1/20
-    - port_mode: "regular"
-    - vlan: 2000
-    """
-
+class StaticPortPhy:
     nodeId: str
-    port_type: Literal["port", "vpc", "dpc"]
+    port_type: Literal["port"] = "port"
+    port_name: str
+    port_mode: Literal["regular", "native", "untagged"]
+    vlan: int
+
+
+@dataclass(kw_only=True)
+class StaticPortPC:
+    port_type: Literal["dpc"] = "dpc"
+    port_name: str
+    port_mode: Literal["regular", "native", "untagged"]
+    vlan: int
+
+
+@dataclass(kw_only=True)
+class StaticPortVPC:
+    port_type: Literal["vpc"] = "vpc"
     port_name: str
     port_mode: Literal["regular", "native", "untagged"]
     vlan: int
@@ -185,11 +192,45 @@ class OSPFIntfConfig:
 
 
 @dataclass(kw_only=True)
+class L3OutStaticRouteNextHop:
+    """
+    ### Parameter Notes:
+    preference : is `Administrative Distance`
+    """
+
+    nextHopIP: str
+    preference: int = 0
+
+
+@dataclass(kw_only=True)
+class L3OutStaticRouteConfig:
+    """
+    ### Parameter Notes:
+    - prefix : IP address with prefix format `(ww.xx.yy.zz/aa)`
+    - fallbackPref : is `Administrative Distance` incase the AD in each nexthop is unspecified it will fallback to use this AD. Default is 1
+    - nullNextHop : if it true `it will create a static route to Null0`
+    """
+
+    prefix: str
+    fallbackPref: int = 1
+    enableBFDTracking: bool = False
+    nullNextHop: bool = False
+    nextHops: List[L3OutStaticRouteNextHop]
+
+
+@dataclass(kw_only=True)
 class L3OutNodeConfig:
+    """
+    ### Parameter Notes:
+    nodeID : node id example "1101"
+    routerID : IP address format (ww.xx.yy.zz)
+    """
+
     nodeID: str
     routerID: str
     podID: str = "1"
     useRouteIDAsLoopback: bool = False
+    staticRoutes: List[L3OutStaticRouteConfig] = field(default_factory=list)
 
 
 @dataclass(kw_only=True)

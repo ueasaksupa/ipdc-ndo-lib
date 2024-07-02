@@ -8,25 +8,25 @@ This is the example how to call the method to create l2 service on NDO.
 """
 ENDPOINTS = [
     SiteStaticPorts(
-        name="TLS1",
+        sitename="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
-            Endpoint(nodeId="3101", port_type="port", port_name="1/12", port_mode="regular", vlan=2103),
-            Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2103),
+            StaticPortPhy(nodeId="3101", port_name="1/12", port_mode="regular", vlan=2103),
+            StaticPortPhy(nodeId="3101", port_name="1/13", port_mode="regular", vlan=2103),
         ],
     ),
     SiteStaticPorts(
-        name="SILA",
+        sitename="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
-            Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2103),
-            Endpoint(nodeId="3101", port_type="dpc", port_name="PC_SILA_CL_01", port_mode="regular", vlan=2103),
+            StaticPortPhy(nodeId="3101", port_name="1/13", port_mode="regular", vlan=2103),
+            StaticPortPC(port_name="PC_SILA_CL_01", port_mode="regular", vlan=2103),
         ],
     ),
 ]
 
 
-params = L2ServiceParameters(
+params = ServiceL2Parameters(
     connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
     tenant_name="TN_NUTTAWUT",
     schema_name="TN_NUTTAWUT_Schema01",

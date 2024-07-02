@@ -9,37 +9,37 @@ This is the example how to call the method to create l2 service on NDO.
 
 ENDPOINTS_EPG_1 = [
     SiteStaticPorts(
-        name="TLS1",
+        sitename="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
-            Endpoint(nodeId="3101", port_type="port", port_name="1/12", port_mode="regular", vlan=2104),
-            Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2104),
+            StaticPortPhy(nodeId="3101", port_name="1/12", port_mode="regular", vlan=2104),
+            StaticPortPhy(nodeId="3101", port_name="1/13", port_mode="regular", vlan=2104),
         ],
     ),
     SiteStaticPorts(
-        name="SILA",
+        sitename="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        staticPorts=[Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2104)],
+        staticPorts=[StaticPortPhy(nodeId="3101", port_name="1/13", port_mode="regular", vlan=2104)],
     ),
 ]
 
 ENDPOINTS_EPG_2 = [
     SiteStaticPorts(
-        name="TLS1",
+        sitename="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
-            Endpoint(nodeId="3101", port_type="port", port_name="1/14", port_mode="regular", vlan=2104),
-            Endpoint(nodeId="3101", port_type="port", port_name="1/15", port_mode="regular", vlan=2104),
+            StaticPortPhy(nodeId="3101", port_name="1/14", port_mode="regular", vlan=2104),
+            StaticPortPhy(nodeId="3101", port_name="1/15", port_mode="regular", vlan=2104),
         ],
     ),
     SiteStaticPorts(
-        name="SILA",
+        sitename="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        staticPorts=[Endpoint(nodeId="3101", port_type="port", port_name="1/14", port_mode="regular", vlan=2104)],
+        staticPorts=[StaticPortPhy(nodeId="3101", port_name="1/14", port_mode="regular", vlan=2104)],
     ),
 ]
 
-params = L3ServiceParameters(
+params = ServiceL3Parameters(
     connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
     tenant_name="TN_NUTTAWUT",
     schema_name="TN_NUTTAWUT_Schema01",

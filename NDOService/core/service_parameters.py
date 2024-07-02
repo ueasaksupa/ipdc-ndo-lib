@@ -13,9 +13,16 @@ class NDOConnection:
 
 @dataclass(kw_only=True)
 class SiteStaticPorts:
-    name: str
+    """
+    ### Parameter Notes:
+    - sitename : site name
+    - epg_phy_domain : Name of physical domain that defined in the fabric policy
+    - staticPorts : List of StaticPortPhy | StaticPortPC | StaticPortVPC
+    """
+
+    sitename: str
     epg_phy_domain: str
-    staticPorts: List[Endpoint]
+    staticPorts: List[StaticPortPhy | StaticPortPC | StaticPortVPC]
 
 
 @dataclass(kw_only=True)
@@ -84,7 +91,7 @@ class TenantPolicyTenplate:
 
 
 @dataclass(kw_only=True)
-class L2ServiceParameters:
+class ServiceL2Parameters:
     connection: NDOConnection
     tenant_name: str
     tenant_sites: List[str] | None = None
@@ -93,7 +100,7 @@ class L2ServiceParameters:
 
 
 @dataclass(kw_only=True)
-class L3ServiceParameters:
+class ServiceL3Parameters:
     connection: NDOConnection
     tenant_name: str
     tenant_sites: List[str] | None = None
@@ -102,7 +109,7 @@ class L3ServiceParameters:
 
 
 @dataclass(kw_only=True)
-class L3OutServiceParameters:
+class ServiceL3OutParameters:
     connection: NDOConnection
     tenant_name: str
     tenant_sites: List[str] | None = None

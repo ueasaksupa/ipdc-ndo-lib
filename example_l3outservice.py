@@ -9,33 +9,33 @@ This is the example how to call the method to create l2 service on NDO.
 
 ENDPOINTS_EPG_1 = [
     SiteStaticPorts(
-        name="TLS1",
+        sitename="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
-            Endpoint(nodeId="3102", port_type="port", port_name="1/14", port_mode="regular", vlan=2105),
-            Endpoint(nodeId="3102", port_type="port", port_name="1/15", port_mode="regular", vlan=2105),
+            StaticPortPhy(nodeId="3102", port_name="1/14", port_mode="regular", vlan=2105),
+            StaticPortPhy(nodeId="3102", port_name="1/15", port_mode="regular", vlan=2105),
         ],
     ),
     SiteStaticPorts(
-        name="SILA",
+        sitename="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        staticPorts=[Endpoint(nodeId="3102", port_type="port", port_name="1/14", port_mode="regular", vlan=2105)],
+        staticPorts=[StaticPortPhy(nodeId="3102", port_name="1/14", port_mode="regular", vlan=2105)],
     ),
 ]
 
 ENDPOINTS_EPG_2 = [
     SiteStaticPorts(
-        name="TLS1",
+        sitename="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
-            Endpoint(nodeId="3102", port_type="port", port_name="1/16", port_mode="regular", vlan=2105),
-            Endpoint(nodeId="3102", port_type="port", port_name="1/17", port_mode="regular", vlan=2105),
+            StaticPortPhy(nodeId="3102", port_name="1/16", port_mode="regular", vlan=2105),
+            StaticPortPhy(nodeId="3102", port_name="1/17", port_mode="regular", vlan=2105),
         ],
     ),
     SiteStaticPorts(
-        name="SILA",
+        sitename="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        staticPorts=[Endpoint(nodeId="3102", port_type="port", port_name="1/15", port_mode="regular", vlan=2105)],
+        staticPorts=[StaticPortPhy(nodeId="3102", port_name="1/15", port_mode="regular", vlan=2105)],
     ),
 ]
 
@@ -43,7 +43,15 @@ L3OUT_SILA_CONFIG = L3OutConfig(
     name="L3OUT_SILA_TN_NUTTAWUT",
     vrf="VRF_CUST_L3OUT",
     l3domain="L3_DOMAIN_BL_DOM01",
-    nodes=[L3OutNodeConfig(nodeID="1101", routerID="10.1.1.1")],
+    nodes=[
+        L3OutNodeConfig(
+            nodeID="1101",
+            routerID="10.1.1.1",
+            staticRoutes=[
+                L3OutStaticRouteConfig(prefix="10.100.0.0/24", nextHops=[L3OutStaticRouteNextHop(nextHopIP="1.1.1.1")])
+            ],
+        )
+    ],
     routingProtocol="bgp",
     exportRouteMap="RM_SILA_TN_NUTTAWUT",
     interfaces=[
@@ -117,7 +125,7 @@ ROUTE_MAP_CONFIG_T = RouteMapConfig(
     ],
 )
 
-params = L3OutServiceParameters(
+params = ServiceL3OutParameters(
     connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
     tenant_name="TN_NUTTAWUT",
     tenant_sites=["SILA", "TLS1"],
