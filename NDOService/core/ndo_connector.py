@@ -32,15 +32,22 @@ class NDOTemplate:
             vpc_resource = self.find_vpc_by_name(endpoint.port_name, site_name)
             if not vpc_resource:
                 raise Exception(
-                    f"VPC resource name {endpoint.port_name} does not exist in the Fabric Resource Policy, Please create it first."
+                    f"VPC resource name {endpoint.port_name} does not exist in the Fabric Resource Policy."
                 )
             path = vpc_resource["path"]
+        elif endpoint.port_type == "dpc":
+            pc_resource = self.find_pc_by_name(endpoint.port_name, site_name)
+            if not pc_resource:
+                raise Exception(f"PC resource name {endpoint.port_name} does not exist in the Fabric Resource Policy.")
+            path = pc_resource["path"]
         elif endpoint.port_type == "port":
             path = f"topology/{pod}/paths-{endpoint.nodeId}/pathep-[eth{endpoint.port_name.replace('eth','')}]"
+        else:
+            raise ValueError(f"port_type {endpoint.port_type} is not supported")
 
         return path
 
-    def __append_fabric_intf_object(
+    def __append_fabricRes_intf_object(
         self, key: str, template: dict, port_config: PhysicalIntfResource | PortChannelResource | VPCResource
     ):
         if not template[key]:
@@ -103,7 +110,8 @@ class NDOTemplate:
                     actionFields["setWeight"] = entry.attributes.setWeight
                 if entry.attributes.setMultiPath is not None:
                     actionFields["setMultiPath"] = entry.attributes.setMultiPath
-                    actionFields["setNextHopPropagate"] = entry.attributes.setNextHopPropagate
+                    if entry.attributes.setMultiPath:
+                        actionFields["setNextHopPropagate"] = True
                 if entry.attributes.setAsPath is not None:
                     actionFields["setAsPath"] = (
                         [
@@ -1081,21 +1089,21 @@ class NDOTemplate:
             if policy_id is None:
                 raise ValueError(f"policy {intf_policy_name} does not exist. Please create it before using.")
             port_config.policy = policy_id["uuid"]
-            self.__append_fabric_intf_object("interfaceProfiles", template, port_config)
+            self.__append_fabricRes_intf_object("interfaceProfiles", template, port_config)
         elif isinstance(port_config, PortChannelResource):
             # find policy ID
             policy_id = self.find_pc_intf_setting_id_by_name(intf_policy_name)
             if policy_id is None:
                 raise ValueError(f"policy {intf_policy_name} does not exist. Please create it before using.")
             port_config.policy = policy_id["uuid"]
-            self.__append_fabric_intf_object("portChannels", template, port_config)
+            self.__append_fabricRes_intf_object("portChannels", template, port_config)
         elif isinstance(port_config, VPCResource):
             # find policy ID
             policy_id = self.find_pc_intf_setting_id_by_name(intf_policy_name)
             if policy_id is None:
                 raise Exception(f"policy {intf_policy_name} does not exist. Please create it before using.")
             port_config.policy = policy_id["uuid"]
-            self.__append_fabric_intf_object("virtualPortChannels", template, port_config)
+            self.__append_fabricRes_intf_object("virtualPortChannels", template, port_config)
         else:
             raise ValueError(
                 "port_config is not valid, you must pass an object of types PhysicalIntfResource | PortChannelResource | VPCResource"

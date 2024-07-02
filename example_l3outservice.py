@@ -143,7 +143,7 @@ params = L3OutServiceParameters(
             associatedSites=["SILA", "TLS1"],
             bds=[
                 TemplateBridgeDomain(
-                    name="BD_L3_CUST_NET_1",
+                    name="BD_L3OUT_CUST_NET_1",
                     linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",
@@ -153,7 +153,7 @@ params = L3OutServiceParameters(
                     ),
                 ),
                 TemplateBridgeDomain(
-                    name="BD_L3_CUST_NET_2",
+                    name="BD_L3OUT_CUST_NET_2",
                     linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",

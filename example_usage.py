@@ -107,14 +107,9 @@ def Example_L3Out():
 
 def Example_create_Tenant_Policies():
     # create tenant policy template
-    ndo.create_tenant_policies_template(
-        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", ["SILA", "TLS1"], "TN_NUTTAWUT_TEST"
-    )
+    ndo.create_tenant_policies_template("TN_NUTTAWUT_Tenant_Policies_SILA", ["SILA"], "TN_NUTTAWUT")
     # prepare prefixes config for RouteMap
-    prefixes_1 = [
-        RouteMapPrefix(prefix="10.100.0.0/24"),
-        RouteMapPrefix(prefix="10.200.0.0/24"),
-    ]
+    prefixes_1 = [RouteMapPrefix(prefix="10.100.0.0/24"), RouteMapPrefix(prefix="10.200.0.0/24")]
     prefixes_default = [RouteMapPrefix(prefix="0.0.0.0/0", aggregate=True, fromPfxLen=0, toPfxLen=32)]
     rnconfig = RouteMapConfig(
         name="RM_TN_NUTTAWUT_TEST",
@@ -125,21 +120,19 @@ def Example_create_Tenant_Policies():
                 action="permit",
                 prefixes=prefixes_1,
                 attributes=RouteMapAttributes(
-                    setAsPath=RouteMapSetAsPath(criteria="prepend", pathASNs=[450001]), setMultiPath=True
+                    setAsPath=RouteMapSetAsPath(criteria="prepend", pathASNs=[450001]),
                 ),
             ),
             RouteMapEntry(order=9, name="9", action="permit", prefixes=prefixes_default),
         ],
     )
-    ndo.add_route_map_policy_under_template("TN_NUTTAWUT_TEST_Tenant_Policies_Template", rnconfig)
+    ndo.add_route_map_policy_under_template("TN_NUTTAWUT_Tenant_Policies_SILA", rnconfig)
     # BFD or OSPF interface settings
     bfdconfig = BFDPolicyConfig(minRxInterval=100, minTxInterval=100, echoRxInterval=100)
     ospfconfig = OSPFIntfConfig()
+    ndo.add_l3out_intf_routing_policy("TN_NUTTAWUT_Tenant_Policies_SILA", "IF_POLICY_BFD_100", bfdConfig=bfdconfig)
     ndo.add_l3out_intf_routing_policy(
-        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_BFD_100", bfdConfig=bfdconfig
-    )
-    ndo.add_l3out_intf_routing_policy(
-        "TN_NUTTAWUT_TEST_Tenant_Policies_Template", "IF_POLICY_OSPF_DEFAULT", ospfIntfConfig=ospfconfig
+        "TN_NUTTAWUT_Tenant_Policies_SILA", "IF_POLICY_OSPF_DEFAULT", ospfIntfConfig=ospfconfig
     )
 
 

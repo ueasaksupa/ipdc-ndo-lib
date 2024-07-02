@@ -18,7 +18,10 @@ ENDPOINTS = [
     SiteStaticPorts(
         name="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
-        staticPorts=[Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2103)],
+        staticPorts=[
+            Endpoint(nodeId="3101", port_type="port", port_name="1/13", port_mode="regular", vlan=2103),
+            Endpoint(nodeId="3101", port_type="dpc", port_name="PC_SILA_CL_01", port_mode="regular", vlan=2103),
+        ],
     ),
 ]
 
