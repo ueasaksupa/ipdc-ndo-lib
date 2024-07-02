@@ -36,7 +36,8 @@ def create(srvParams: ServiceL3OutParameters):
             # prepare empty VRF template
             ndo.create_template(schema, template.name, tenant["id"])
             # associate site to template
-            ndo.add_site_to_template(schema, template.name, template.associatedSites)
+            template_sites = allSiteList if template.associatedSites is None else template.associatedSites
+            ndo.add_site_to_template(schema, template.name, template_sites)
             # update schema
             schema = ndo.save_schema(schema)
 

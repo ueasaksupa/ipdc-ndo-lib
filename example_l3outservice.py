@@ -140,40 +140,33 @@ params = ServiceL3OutParameters(
     ],
     templates=[
         VRFTemplate(
-            name="VRF_Contract_Stretch_Template",
-            associatedSites=["SILA", "TLS1"],
             filter_name="FLT_IP",
             contract_name="CON_VRF_CUST_L3OUT",
             vrf_name="VRF_CUST_L3OUT",
         ),
         MultiEPGTemplate(
-            name="Policy_Stretch_AllSite_template",
-            associatedSites=["SILA", "TLS1"],
             bds=[
                 TemplateBridgeDomain(
                     name="BD_L3OUT_CUST_NET_1",
-                    linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",
                     epg=TemplateEPG(name="EPG_L3_SERVER_3_EXT", staticPortPerSite=ENDPOINTS_EPG_1),
                     bdConfig=BridgeDomainConfig(
-                        subnets=[BridgeDomainSubnet(ip="10.101.0.1/24", description="test from api")]
+                        arpFlood=False, subnets=[BridgeDomainSubnet(ip="10.101.0.1/24", description="test from api")]
                     ),
                 ),
                 TemplateBridgeDomain(
                     name="BD_L3OUT_CUST_NET_2",
-                    linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",
                     epg=TemplateEPG(name="EPG_L3_SERVER_4_EXT", staticPortPerSite=ENDPOINTS_EPG_2),
                     bdConfig=BridgeDomainConfig(
-                        subnets=[BridgeDomainSubnet(ip="10.201.0.1/24", description="test from api")]
+                        arpFlood=False, subnets=[BridgeDomainSubnet(ip="10.201.0.1/24", description="test from api")]
                     ),
                 ),
             ],
             externalEPG=TemplateExternalEPG(
                 name="EPG_L3OUT_CUST_NET_3",
-                linkedVrfTemplate="VRF_Contract_Stretch_Template",
                 linkedVrfName="VRF_CUST_L3OUT",
                 associatedL3Out=[
                     EEPGL3OutInfo(

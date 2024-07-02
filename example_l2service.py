@@ -32,18 +32,13 @@ params = ServiceL2Parameters(
     schema_name="TN_NUTTAWUT_Schema01",
     templates=[
         VRFTemplate(
-            name="VRF_Contract_Stretch_Template",
-            associatedSites=["SILA", "TLS1"],
             filter_name="FLT_IP",
             contract_name="CON_VRF_CUSTOMER",
             vrf_name="VRF_CUSTOMER",
         ),
         SingleEPGTemplate(
-            name="Policy_Stretch_AllSite_template",
-            associatedSites=["SILA", "TLS1"],
             bd=TemplateBridgeDomain(
                 name="BD_L2_CUST_NET_1",
-                linkedVrfTemplate="VRF_Contract_Stretch_Template",
                 linkedVrfName="VRF_CUSTOMER",
                 anp_name="AP_CUSTOMER",
                 epg=TemplateEPG(

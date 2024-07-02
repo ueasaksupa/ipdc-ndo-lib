@@ -28,7 +28,7 @@ class SiteStaticPorts:
 @dataclass(kw_only=True)
 class TemplateExternalEPG:
     name: str
-    linkedVrfTemplate: str
+    linkedVrfTemplate: str = "VRF_Contract_Stretch_Template"
     linkedVrfName: str
     associatedL3Out: List[EEPGL3OutInfo]
 
@@ -42,7 +42,7 @@ class TemplateEPG:
 @dataclass(kw_only=True)
 class TemplateBridgeDomain:
     name: str
-    linkedVrfTemplate: str
+    linkedVrfTemplate: str = "VRF_Contract_Stretch_Template"
     linkedVrfName: str
     anp_name: str
     epg: TemplateEPG
@@ -51,24 +51,24 @@ class TemplateBridgeDomain:
 
 @dataclass(kw_only=True)
 class SingleEPGTemplate:
-    name: str
-    associatedSites: List[str]
+    name: str = "Policy_Stretch_AllSite_template"
+    associatedSites: List[str] | None = None
     bd: TemplateBridgeDomain
     externalEPG: Optional[TemplateExternalEPG] = None
 
 
 @dataclass(kw_only=True)
 class MultiEPGTemplate:
-    name: str
-    associatedSites: List[str]
+    name: str = "Policy_Stretch_AllSite_template"
+    associatedSites: List[str] | None = None
     bds: List[TemplateBridgeDomain]
     externalEPG: Optional[TemplateExternalEPG] = None
 
 
 @dataclass(kw_only=True)
 class VRFTemplate:
-    name: str
-    associatedSites: List[str]
+    name: str = "VRF_Contract_Stretch_Template"
+    associatedSites: List[str] | None = None
     filter_name: str
     contract_name: str
     vrf_name: str

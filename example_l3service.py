@@ -45,40 +45,30 @@ params = ServiceL3Parameters(
     schema_name="TN_NUTTAWUT_Schema01",
     templates=[
         VRFTemplate(
-            name="VRF_Contract_Stretch_Template",
-            associatedSites=["SILA", "TLS1"],
             filter_name="FLT_IP",
             contract_name="CON_VRF_CUSTOMER",
             vrf_name="VRF_CUSTOMER",
         ),
         MultiEPGTemplate(
-            name="Policy_Stretch_AllSite_template",
-            associatedSites=["SILA", "TLS1"],
             bds=[
                 TemplateBridgeDomain(
                     name="BD_L3_CUST_NET_1",
-                    linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUSTOMER",
                     anp_name="AP_CUSTOMER",
                     epg=TemplateEPG(name="EPG_L3_SERVER_1", staticPortPerSite=ENDPOINTS_EPG_1),
                     bdConfig=BridgeDomainConfig(
                         arpFlood=False,
-                        subnets=[
-                            BridgeDomainSubnet(ip="10.100.0.1/24", description="test from api", scope="public"),
-                        ],
+                        subnets=[BridgeDomainSubnet(ip="10.100.0.1/24", description="test from api", scope="public")],
                     ),
                 ),
                 TemplateBridgeDomain(
                     name="BD_L3_CUST_NET_2",
-                    linkedVrfTemplate="VRF_Contract_Stretch_Template",
                     linkedVrfName="VRF_CUSTOMER",
                     anp_name="AP_CUSTOMER",
                     epg=TemplateEPG(name="EPG_L3_SERVER_2", staticPortPerSite=ENDPOINTS_EPG_2),
                     bdConfig=BridgeDomainConfig(
                         arpFlood=False,
-                        subnets=[
-                            BridgeDomainSubnet(ip="10.200.0.1/24", description="test from api", scope="public"),
-                        ],
+                        subnets=[BridgeDomainSubnet(ip="10.200.0.1/24", description="test from api", scope="public")],
                     ),
                 ),
             ],
