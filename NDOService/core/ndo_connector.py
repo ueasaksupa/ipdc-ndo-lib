@@ -7,6 +7,7 @@ from dataclasses import asdict
 from typing import Literal, Any
 import requests
 import urllib3
+import time
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -231,6 +232,21 @@ class NDOTemplate:
         self.__generate_l3out_interface_payload(template, payload, l3outConfig)
         # pprint(payload)
         return payload
+
+    def __send_deploy_task_request(self, url: str, payload: dict) -> None:
+        task_resp = self.session.post(url, json=payload)
+        if task_resp.status_code >= 400:
+            raise Exception(task_resp.json())
+        task_resp = task_resp.json()
+        # check deployment status
+        task_status_url = f"{self.base_path}{PATH_DEPLOYMENT}/{task_resp['id']}"
+        for i in range(20):
+            print(f"--- Checking deployment status ...({i})")
+            resp = self.session.get(task_status_url).json()
+            if resp["operDetails"]["taskStatus"] in ["Complete", "Error", "Timeout"]:
+                print(f"  |--- {resp['operDetails']['taskStatus']}")
+                break
+            time.sleep(2)
 
     # UTILS
     def login(self) -> None:
@@ -658,11 +674,13 @@ class NDOTemplate:
 
         # filter target epg from schema object
         target_site_id = self.sitename_id_map[site_name]
-        target_template = list(
+        schema_site_template = list(
             filter(lambda s: s["siteId"] == target_site_id and s["templateName"] == template_name, schema["sites"])
         )
+        if len(schema_site_template) == 0:
+            raise ValueError(f"Template {template_name} with site {site_name} does not exist.")
 
-        target_anp = list(filter(lambda a: f"/anps/{anp_name}" in a["anpRef"], target_template[0]["anps"]))
+        target_anp = list(filter(lambda a: f"/anps/{anp_name}" in a["anpRef"], schema_site_template[0]["anps"]))
         if len(target_anp) == 0:
             raise ValueError(f"ANP {anp_name} does not exist.")
 
@@ -1159,3 +1177,55 @@ class NDOTemplate:
             print(f"  |--- {resp.json()}")
             raise Exception(resp.json())
         print(f"  |--- Done")
+
+    # task deployment
+    def deploy_template(self, template_name: str):
+        print(f"--- Deploying template {template_name}")
+        url = f"{self.base_path}{PATH_TEMPLATES_SUMMARY}"
+        templates = self.session.get(url).json()
+        filtered = list(filter(lambda t: t["templateName"] == template_name, templates))
+        if len(filtered) == 0:
+            raise ValueError(f"template {template_name} does not exist.")
+
+        target_template = filtered[0]
+        url = f"{self.base_path}{PATH_TASK}"
+        payload = {
+            "schemaId": target_template["schemaId"],
+            "templateId": target_template["templateId"],
+            "timeoutSec": 600,
+            "isRedeploy": False,
+        }
+        self.__send_deploy_task_request(url, payload)
+
+    def deploy_schema_template(self, schema_name: str, template_name: str):
+        print(f"--- Deploying schema {schema_name} template {template_name}")
+
+        schema = self.find_schema_by_name(schema_name)
+        if schema is None:
+            raise ValueError(f"schema {schema_name} does not exist.")
+
+        url = f"{self.base_path}{PATH_TASK}"
+        payload = {"schemaId": schema["id"], "templateName": template_name, "isRedeploy": False}
+        self.__send_deploy_task_request(url, payload)
+
+    def undeploy_template_from_sites(self, schema_name: str, template_name: str, site_list: list[str]):
+        print(f"--- Undeploying template {template_name} from site {','.join(site_list)}")
+
+        siteId_list = []
+        schema = self.find_schema_by_name(schema_name)
+        if schema is None:
+            raise ValueError(f"schema {schema_name} does not exist.")
+
+        for site_name in site_list:
+            if site_name not in self.sitename_id_map:
+                raise ValueError(f"site {site_name} does not exist.")
+            siteId_list.append(self.sitename_id_map[site_name])
+
+        url = f"{self.base_path}{PATH_TASK}"
+        payload = {
+            "schemaId": schema["id"],
+            "templateName": template_name,
+            "siteGroupId": "default",
+            "undeploy": siteId_list,
+        }
+        self.__send_deploy_task_request(url, payload)

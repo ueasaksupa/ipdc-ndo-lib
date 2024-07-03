@@ -129,10 +129,14 @@ def Example_create_Tenant_Policies():
             RouteMapEntry(order=9, name="9", action="permit", prefixes=prefixes_default),
         ],
     )
+    # Add route map to to tenant policy
     ndo.add_route_map_policy_under_template("TN_NUTTAWUT_Tenant_Policies_SILA", rnconfig)
+
     # BFD or OSPF interface settings
     bfdconfig = BFDPolicyConfig(minRxInterval=100, minTxInterval=100, echoRxInterval=100)
     ospfconfig = OSPFIntfConfig()
+
+    # Add interface routing policy to tenant policy
     ndo.add_l3out_intf_routing_policy("TN_NUTTAWUT_Tenant_Policies_SILA", "IF_POLICY_BFD_100", bfdConfig=bfdconfig)
     ndo.add_l3out_intf_routing_policy(
         "TN_NUTTAWUT_Tenant_Policies_SILA", "IF_POLICY_OSPF_DEFAULT", ospfIntfConfig=ospfconfig
@@ -151,21 +155,25 @@ def Example_Fabric_Template():
     # example - To add vlan to pool
     ndo.add_vlans_to_pool("TLS1_nuttawut_test_by_script", "VLAN_SERVER_CL_TEST", [3013, 3014])
 
+    # example VPC resource config
     vpc_port_config = VPCResource(
         name="VPC_SILA_TEST",
         node1Details=VPCNodeDetails("3101", "1/14"),
         node2Details=VPCNodeDetails("3102", "1/14"),
     )
+    # example PC resource config
     pc_port_config = PortChannelResource(
         name="PC_SILA_TEST",
         node="3102",
         memberInterfaces="1/15,1/16",
     )
+    # example Physical resource config
     phy_port_config = PhysicalIntfResource(
         name="PHY_TEST",
         nodes=["3102"],
         interfaces="1/17",
     )
+    # Add port resource to fabric resource policy
     ndo.add_port_to_fabric_resource(
         "SILA_CL_DOM01_ResourcePolicy01", phy_port_config, "INT_SILA1_CL_DOM01_PHY_SERVER_1G"
     )
@@ -177,7 +185,24 @@ def Example_Fabric_Template():
     )
 
 
+def Example_Deploy_Schema_Template():
+    ndo.deploy_schema_template("TN_NUTTAWUT_Schema01", "VRF_Contract_Stretch_Template")
+    ndo.deploy_schema_template("TN_NUTTAWUT_Schema01", "Policy_Stretch_AllSite_template")
+
+
+def Example_Deploy_Template():
+    ndo.deploy_template("TN_NUTTAWUT_Tenant_Policies_TLS1")
+
+
+def Example_Undeploy_site():
+    ndo.undeploy_template_from_sites("TN_NUTTAWUT_Schema01", "Policy_Stretch_AllSite_template", ["SILA", "TLS1"])
+    ndo.undeploy_template_from_sites("TN_NUTTAWUT_Schema01", "VRF_Contract_Stretch_Template", ["SILA", "TLS1"])
+
+
 if __name__ == "__main__":
     # Example_Fabric_Template()
-    Example_create_Tenant_Policies()
+    # Example_create_Tenant_Policies()
     # Example_L3Out()
+    Example_Deploy_Schema_Template()
+    # Example_Deploy_Template()
+    # Example_Undeploy_site()
