@@ -62,7 +62,7 @@ ndo = NDOTemplate(
 def Example_Service_Create():
     # EXAMPLE HOW TO CREATE SERVICE
     #
-    l2_service.create(params)
+    l2_service.create(params, False)
 
 
 if __name__ == "__main__":

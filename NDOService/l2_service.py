@@ -3,7 +3,7 @@ from .core.ndo_connector import NDOTemplate
 from NDOService.core.service_parameters import *
 
 
-def create(srvParams: ServiceL2Parameters):
+def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True):
     """
     For create L2 service
     """
@@ -23,6 +23,10 @@ def create(srvParams: ServiceL2Parameters):
     tenant = ndo.create_tenant(srvParams.tenant_name, tenant_sites)
     # get schema by name if schema was not been created before, It will be created automatically
     schema = ndo.create_schema(srvParams.schema_name)
+    # check schema sync state from NDO
+    if not allowPushToUnSyncSchema and not ndo.isSchemaStateSync(schema=schema):
+        print(f"#### STOP, BECAUSE SCHEMA {schema['displayName']} is OUT OF SYNC ####")
+        return
 
     # ----- CREATE TEMPLATE ------
     for template in srvParams.templates:

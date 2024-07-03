@@ -329,6 +329,32 @@ class NDOTemplate:
 
         return filtered[0]
 
+    def isSchemaStateSync(self, schema_name: str | None = None, schema: Schema | None = None) -> bool:
+        """
+        This method is for checking schema state with NDO, whether it sync or out-of-sync.
+
+        you can provide parameter either `schema_name` or `schema` object return from `find_schema_by_name` method
+        """
+
+        if schema_name is None and schema is None:
+            raise ValueError("Either schema_name or schema object is required.")
+
+        schemaId = ""
+        if schema is not None:
+            schemaId = schema["id"]
+        elif schema_name is not None:
+            sch = self.find_schema_by_name(schema_name)
+            if sch is None:
+                raise ValueError(f"schema {schema_name} is not exist.")
+            schemaId = sch["id"]
+
+        url = f"{self.base_path}{PATH_SCHEMAS}/{schemaId}/policy-states"
+        resp: list[dict] = self.session.get(url).json()["policyStates"]
+        for state in resp:
+            if len(state.keys()) != 3:
+                return False
+        return True
+
     # Tenant Template
     def save_schema(self, schema: dict) -> Schema:
         print(f"--- Saving schema {schema['displayName']}")
