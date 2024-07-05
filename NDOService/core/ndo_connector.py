@@ -137,8 +137,11 @@ class NDOTemplate:
         completed_payload = {"name": rnConfig.name, "description": rnConfig.description, "rtMapEntryList": entryList}
         return completed_payload
 
-    def __generate_l3out_phyintf(self, site_name: str, intfConfig: L3OutInterfaceConfig) -> dict:
+    def __generate_l3out_phyintf(
+        self, site_name: str, intfConfig: L3OutInterfaceConfig, intfRoutingPol: str | None
+    ) -> dict:
         INTF_PAYLOAD = {
+            "group": "IF_GROUP_POLICY" if intfRoutingPol is not None else "",
             "pathType": intfConfig.portType,
             "addresses": {"primaryV4": intfConfig.primaryV4, "primaryV6": intfConfig.primaryV6},
             "mac": "00:22:BD:F8:19:FF",
@@ -157,13 +160,17 @@ class NDOTemplate:
 
         return INTF_PAYLOAD
 
-    def __generate_l3out_subintf(self, site_name: str, intfConfig: L3OutSubInterfaceConfig) -> dict:
-        INTF_PAYLOAD = self.__generate_l3out_phyintf(site_name, intfConfig)
+    def __generate_l3out_subintf(
+        self, site_name: str, intfConfig: L3OutSubInterfaceConfig, intfRoutingPol: str | None
+    ) -> dict:
+        INTF_PAYLOAD = self.__generate_l3out_phyintf(site_name, intfConfig, intfRoutingPol)
         INTF_PAYLOAD["encap"] = {"encapType": intfConfig.encapType, "value": intfConfig.encapVal}
         return INTF_PAYLOAD
 
-    def __generate_l3out_sviintf(self, site_name: str, intfConfig: L3OutSviInterfaceConfig) -> dict:
-        INTF_PAYLOAD = self.__generate_l3out_subintf(site_name, intfConfig)
+    def __generate_l3out_sviintf(
+        self, site_name: str, intfConfig: L3OutSviInterfaceConfig, intfRoutingPol: str | None
+    ) -> dict:
+        INTF_PAYLOAD = self.__generate_l3out_subintf(site_name, intfConfig, intfRoutingPol)
         INTF_PAYLOAD["svi"] = {"encapScope": "local", "autostate": "disabled", "mode": intfConfig.sviMode}
         return INTF_PAYLOAD
 
@@ -176,15 +183,27 @@ class NDOTemplate:
                 raise ValueError(f"portType {intf.portType} is not supported")
             if intf.type == "interfaces":
                 payload["interfaces"].append(
-                    self.__generate_l3out_phyintf(self.siteid_name_map[template["l3outTemplate"]["siteId"]], intf)
+                    self.__generate_l3out_phyintf(
+                        self.siteid_name_map[template["l3outTemplate"]["siteId"]],
+                        intf,
+                        l3outConfig.interfaceRoutingPolicy,
+                    )
                 )
             elif intf.type == "subInterfaces":
                 payload["subInterfaces"].append(
-                    self.__generate_l3out_subintf(self.siteid_name_map[template["l3outTemplate"]["siteId"]], intf)
+                    self.__generate_l3out_subintf(
+                        self.siteid_name_map[template["l3outTemplate"]["siteId"]],
+                        intf,
+                        l3outConfig.interfaceRoutingPolicy,
+                    )
                 )
             elif intf.type == "sviInterfaces":
                 payload["sviInterfaces"].append(
-                    self.__generate_l3out_sviintf(self.siteid_name_map[template["l3outTemplate"]["siteId"]], intf)
+                    self.__generate_l3out_sviintf(
+                        self.siteid_name_map[template["l3outTemplate"]["siteId"]],
+                        intf,
+                        l3outConfig.interfaceRoutingPolicy,
+                    )
                 )
             else:
                 raise ValueError(f"interface type {intf.type} is not supported")
@@ -229,6 +248,22 @@ class NDOTemplate:
             "nodes": list(map(lambda obj: asdict(obj), l3outConfig.nodes)),
             "pim": l3outConfig.pimEnabled,
         }
+        if l3outConfig.interfaceRoutingPolicy is not None:
+            intf_routing_pol = self.find_template_object_by_name(
+                l3outConfig.interfaceRoutingPolicy,
+                f"type=l3OutIntfPolGroup&tenant-id={template['l3outTemplate']['tenantId']}",
+            )
+            if intf_routing_pol is None:
+                raise ValueError(f"Interface routing policy {l3outConfig.interfaceRoutingPolicy} does not exist.")
+
+            payload["interfaceGroups"] = [
+                {
+                    "name": "IF_GROUP_POLICY",
+                    "interfaceRoutingPolicyRef": intf_routing_pol["uuid"],
+                    "qosPriority": "unspecified",
+                }
+            ]
+
         self.__generate_l3out_interface_payload(template, payload, l3outConfig)
         # pprint(payload)
         return payload
@@ -757,11 +792,11 @@ class NDOTemplate:
             raise ValueError(f"EPG {epg_name} does not exist.")
 
         for port in port_configs:
-            print(f"  |--- Adding port {port.port_name}")
+            print(f"  |--- Adding port {port.port_name} {f'on {port.nodeId}' if port.port_type =='port' else ''}")
             path = self.__get_port_resource_path(staticport=port, site_name=site_name, pod=pod)
             filter_port = list(filter(lambda p: p["path"] == path, target_epg[0]["staticPorts"]))
             if len(filter_port) != 0:
-                print(f"  |--- Port {port.port_name} is already exist.")
+                print(f"     |--- Port {port.port_name} is already exist.")
                 continue
 
             payload = {
@@ -771,7 +806,7 @@ class NDOTemplate:
                 "deploymentImmediacy": "immediate",
                 "mode": port.port_mode,
             }
-            print(f"  |--- Done")
+            print(f"     |--- Done")
             target_epg[0]["staticPorts"].append(payload)
 
     # Tenant policies template

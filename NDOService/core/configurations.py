@@ -338,12 +338,13 @@ class L3OutConfig:
     vrf: str
     l3domain: str
     nodes: List[L3OutNodeConfig]
-    routingProtocol: Literal["bgp", "static"]
+    routingProtocol: Literal["bgp"] | None = None
     interfaces: List[L3OutInterfaceConfig | L3OutSubInterfaceConfig | L3OutSviInterfaceConfig]
     exportRouteMap: str | None = None
     importRouteMap: str | None = None
     importRouteControl: bool = False
     pimEnabled: bool = False
+    interfaceRoutingPolicy: str | None = None
 
 
 @dataclass(kw_only=True)
