@@ -809,6 +809,12 @@ class NDOTemplate:
             print(f"     |--- Done")
             target_epg[0]["staticPorts"].append(payload)
 
+    def delete_egp_under_template(self, schema: dict, template_name: str, epg_name: str): ...
+
+    def delete_bridge_domain_under_template(self, schema: dict, template_name: str, bd_name: str): ...
+
+    def delete_vrf_under_template(self, schema: dict, template_name: str, vrf_name: str): ...
+
     # Tenant policies template
     def create_tenant_policies_template(
         self, template_name: str, sites: list[str], tenant_name: str

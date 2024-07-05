@@ -62,6 +62,7 @@ L3OUT_SILA_CONFIG = L3OutConfig(
             bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.2.2", peerAsn=65001)],
         ),
     ],
+    interfaceRoutingPolicy="IF_POLICY_SILA_BFD_100",
 )
 
 L3OUT_TLS1_CONFIG = L3OutConfig(
@@ -81,7 +82,7 @@ L3OUT_TLS1_CONFIG = L3OutConfig(
             bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.2.2", peerAsn=65001)],
         ),
     ],
-    interfaceRoutingPolicy="IF_POLICY_BFD_100",
+    interfaceRoutingPolicy="IF_POLICY_TLS1_BFD_100",
 )
 
 ROUTE_MAP_CONFIG_S = RouteMapConfig(
