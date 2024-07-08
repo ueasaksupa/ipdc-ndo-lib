@@ -8,6 +8,7 @@ from typing import Literal, Any
 import requests
 import urllib3
 import time
+import re
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -21,6 +22,7 @@ class NDOTemplate:
         self.base_path = f"https://{self.host}:{port}"
         self.sitename_id_map = {}
         self.siteid_name_map = {}
+        self.fabric_res_phyif_map = {}
         self.session = requests.Session()
         # LOGIN
         self.login()
@@ -28,7 +30,7 @@ class NDOTemplate:
     # ** INTERNAL ONLY ** UTIL METHODs
 
     def __get_port_resource_path(
-        self, staticport: StaticPortPhy | StaticPortPC | StaticPortVPC, site_name: str, pod: str
+        self, staticport: StaticPortPhy | StaticPortPC | StaticPortVPC, site_name: str, pod: str, strict_check: bool
     ):
         path = ""
         if staticport.port_type == "vpc":
@@ -46,7 +48,13 @@ class NDOTemplate:
                 )
             path = pc_resource["path"]
         elif staticport.port_type == "port":
-            path = f"topology/{pod}/paths-{staticport.nodeId}/pathep-[eth{staticport.port_name.replace('eth','')}]"
+            portId = staticport.port_name.replace("eth", "")
+            if strict_check and portId not in self.fabric_res_phyif_map[f"{site_name}__{staticport.nodeId}"]:
+                raise ValueError(
+                    f"You're adding port({staticport.nodeId}-{portId}) that hasn't been defined in the fabric resource yet. Please define port in fabric resource before create the service."
+                )
+
+            path = f"topology/{pod}/paths-{staticport.nodeId}/pathep-[eth{portId}]"
         else:
             raise ValueError(f"port_type {staticport.port_type} is not supported")
 
@@ -283,8 +291,52 @@ class NDOTemplate:
                 break
             time.sleep(2)
 
+    def __flattern_port_list(self, raw: str) -> list[str]:
+        result = []
+        matcher = re.compile(r"(\d+)/(\d+)-(\d+)")
+        interfaces = raw.split(",")
+        for intf in interfaces:
+            intf = intf.strip()
+            if res := matcher.match(intf):
+                result.extend([f"{res.group(1)}/{i}" for i in range(int(res.group(2)), int(res.group(3)) + 1)])
+            else:
+                result.append(intf)
+        return result
+
+    def __get_all_phyintf_resource(self) -> dict[str, list[str]]:
+        """
+        This is helper function for creating map of physical interface per node
+        dict structure:
+        {
+            [nodename]: ["eth1/1","eth1/2" ....]
+        }
+        """
+        portmap: dict[str, list[str]] = {}
+        url = f"{self.base_path}{PATH_FABRIC_RESOURCES_SUM}"
+        resp = self.session.get(url).json()
+        fr_template_ids = []
+        for fabric_template in resp:
+            for pol in fabric_template["policies"]:
+                if pol["objType"] == "interfaceProfile" and pol["count"] > 0:
+                    fr_template_ids.append(fabric_template["templateId"])
+                    break
+        for id in fr_template_ids:
+            url = f"{self.base_path}{PATH_TEMPLATES}/{id}"
+            template = self.session.get(url).json()
+            for site in template["fabricResourceTemplate"]["sites"]:
+                sitename = self.siteid_name_map[site["siteId"]]
+                for phyif_profile in template["fabricResourceTemplate"]["template"]["interfaceProfiles"]:
+                    for node in phyif_profile["nodes"]:
+                        nodeKey = f"{sitename}__{node}"
+                        if nodeKey not in portmap:
+                            portmap[nodeKey] = self.__flattern_port_list(phyif_profile["interfaces"])
+                        else:
+                            portmap[nodeKey].extend(self.__flattern_port_list(phyif_profile["interfaces"]))
+        return portmap
+
     # UTILS
     def login(self) -> None:
+        print("- TRYING TO LOGIN TO NDO")
         self.session = requests.session()
         self.session.verify = False
         self.session.trust_env = False
@@ -296,9 +348,14 @@ class NDOTemplate:
         url = f"{self.base_path}{PATH_LOGIN}"
         self.session.post(url, json=payload).json()
         # create site name to ID map
+        print("- INDEXING NODE IDS")
         for site in self.get_all_sites():
             self.sitename_id_map[site["name"]] = site["id"]
             self.siteid_name_map[site["id"]] = site["name"]
+        #
+        print("- INDEXING PHYSICAL PORTS AND NODES")
+        self.fabric_res_phyif_map = self.__get_all_phyintf_resource()
+        # pprint(self.fabric_res_phyif_map)
 
     def get_all_sites(self) -> Site:
         url = f"{self.base_path}{PATH_SITES}"
@@ -771,6 +828,7 @@ class NDOTemplate:
         epg_name: str,
         site_name: str,
         port_configs: list[StaticPortPhy | StaticPortPC | StaticPortVPC],
+        strict_check: bool = True,
         pod: str = "pod-1",
     ) -> None:
         print(f"--- Adding Static port to site {site_name}")
@@ -793,7 +851,7 @@ class NDOTemplate:
 
         for port in port_configs:
             print(f"  |--- Adding port {port.port_name} {f'on {port.nodeId}' if port.port_type =='port' else ''}")
-            path = self.__get_port_resource_path(staticport=port, site_name=site_name, pod=pod)
+            path = self.__get_port_resource_path(port, site_name, pod, strict_check)
             filter_port = list(filter(lambda p: p["path"] == path, target_epg[0]["staticPorts"]))
             if len(filter_port) != 0:
                 print(f"     |--- Port {port.port_name} is already exist.")
@@ -809,11 +867,11 @@ class NDOTemplate:
             print(f"     |--- Done")
             target_epg[0]["staticPorts"].append(payload)
 
-    def delete_egp_under_template(self, schema: dict, template_name: str, epg_name: str): ...
+    def delete_egp_under_template(self, schema: dict, template_name: str, epg_name: str) -> None: ...
 
-    def delete_bridge_domain_under_template(self, schema: dict, template_name: str, bd_name: str): ...
+    def delete_bridge_domain_under_template(self, schema: dict, template_name: str, bd_name: str) -> None: ...
 
-    def delete_vrf_under_template(self, schema: dict, template_name: str, vrf_name: str): ...
+    def delete_vrf_under_template(self, schema: dict, template_name: str, vrf_name: str) -> None: ...
 
     # Tenant policies template
     def create_tenant_policies_template(
@@ -876,6 +934,10 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
         print(f"  |--- Done")
+
+    def add_route_map_prefix_to_policy(
+        self, template_name: str, pol_name: str, entryOrder: int, prefix: RouteMapPrefix
+    ) -> None: ...
 
     def add_l3out_intf_routing_policy(
         self,

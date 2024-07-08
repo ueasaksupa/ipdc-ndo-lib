@@ -50,14 +50,6 @@ params = ServiceL2Parameters(
     ],
 )
 
-# INIT ndo object
-ndo = NDOTemplate(
-    params.connection.host,
-    params.connection.username,
-    params.connection.password,
-    params.connection.port,
-)
-
 
 def Example_Service_Create():
     # EXAMPLE HOW TO CREATE SERVICE
