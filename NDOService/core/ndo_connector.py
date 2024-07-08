@@ -657,32 +657,32 @@ class NDOTemplate:
     def create_bridge_domain_under_template(
         self,
         schema: dict,
-        template_name_vrf: str,
-        template_name_bd: str,
+        template_name: str,
+        linked_vrf_template: str,
         linked_vrf_name: str,
         bd_name: str,
         bd_config: BridgeDomainConfig | None = None,
     ) -> BD:
-        print(f"--- Creating BD under template {template_name_bd}")
+        print(f"--- Creating BD under template {template_name}")
         if bd_config is None:
             bd_config = BridgeDomainConfig()
         elif not isinstance(bd_config, BridgeDomainConfig):
             raise ValueError("bd_config must be object of BridgeDomainConfig")
 
-        filter_template = list(filter(lambda t: t["name"] == template_name_bd, schema["templates"]))
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(filter_template) == 0:
-            raise ValueError(f"Template {template_name_bd} does not exist.")
+            raise ValueError(f"Template {template_name} does not exist.")
 
         filter_bd = list(filter(lambda d: d["name"] == bd_name, filter_template[0]["bds"]))
         if len(filter_bd) != 0:
-            print(f"  |--- BD {bd_name} is already exist in template {template_name_bd}")
+            print(f"  |--- BD {bd_name} is already exist in template {template_name}")
             return filter_bd[0]
 
-        # "vrfRef": f"/schemas/{schema['id']}/templates/{template_name_vrf}/vrfs/{linked_vrf_name}",
+        # "vrfRef": f"/schemas/{schema['id']}/templates/{linked_vrf_template}/vrfs/{linked_vrf_name}",
         payload = {
             "name": bd_name,
             "displayName": bd_name,
-            "vrfRef": {"schemaID": schema["id"], "templateName": template_name_vrf, "vrfName": linked_vrf_name},
+            "vrfRef": {"schemaID": schema["id"], "templateName": linked_vrf_template, "vrfName": linked_vrf_name},
         }
         payload.update(asdict(bd_config))
 
@@ -867,11 +867,45 @@ class NDOTemplate:
             print(f"     |--- Done")
             target_epg[0]["staticPorts"].append(payload)
 
-    def delete_egp_under_template(self, schema: dict, template_name: str, epg_name: str) -> None: ...
+    def delete_egp_under_template(self, schema: dict, template_name: str, anp_name: str, epg_name: str) -> None:
+        print(f"--- Deleting EPG under template {template_name}")
 
-    def delete_bridge_domain_under_template(self, schema: dict, template_name: str, bd_name: str) -> None: ...
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
+        if len(filter_template) == 0:
+            raise ValueError(f"Template {template_name} does not exist.")
 
-    def delete_vrf_under_template(self, schema: dict, template_name: str, vrf_name: str) -> None: ...
+        filter_anp = list(filter(lambda anp: anp["name"] == anp_name, filter_template[0]["anps"]))
+        if len(filter_anp) == 0:
+            raise ValueError(f"ANP {anp_name} does not exist.")
+
+        for i in range(len(filter_anp[0]["epgs"])):
+            if filter_anp[0]["epgs"][i]["displayName"] == epg_name:
+                del filter_anp[0]["epgs"][i]
+                break
+
+    def delete_bridge_domain_under_template(self, schema: dict, template_name: str, bd_name: str) -> None:
+        print(f"--- Deleting BD under template {template_name}")
+
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
+        if len(filter_template) == 0:
+            raise ValueError(f"Template {template_name} does not exist.")
+
+        for i in range(len(filter_template[0]["bds"])):
+            if filter_template[0]["bds"][i]["displayName"] == bd_name:
+                del filter_template[0]["bds"][i]
+                break
+
+    def delete_vrf_under_template(self, schema: dict, template_name: str, vrf_name: str) -> None:
+        print(f"--- Deleting VRF under template {template_name}")
+
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
+        if len(filter_template) == 0:
+            raise ValueError(f"Template {template_name} does not exist.")
+
+        for i in range(len(filter_template[0]["vrfs"])):
+            if filter_template[0]["vrfs"][i]["displayName"] == vrf_name:
+                del filter_template[0]["vrfs"][i]
+                break
 
     # Tenant policies template
     def create_tenant_policies_template(

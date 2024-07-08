@@ -57,8 +57,8 @@ def create(srvParams: ServiceL3Parameters, allowPushToUnSyncSchema: bool = True)
                 bd_config.arpFlood = False
                 ndo.create_bridge_domain_under_template(
                     schema,
-                    bd.linkedVrfTemplate,
                     template.name,
+                    bd.linkedVrfTemplate,
                     bd.linkedVrfName,
                     bd.name,
                     bd_config,

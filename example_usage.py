@@ -199,10 +199,21 @@ def Example_Undeploy_site():
     ndo.undeploy_template_from_sites("TN_NUTTAWUT_Schema01", "VRF_Contract_Stretch_Template", ["SILA", "TLS1"])
 
 
+def Example_deletion():
+    schema = ndo.find_schema_by_name("TN_NUTTAWUT_Schema01")
+    if schema is None:
+        return
+    ndo.delete_vrf_under_template(schema, "VRF_Contract_Stretch_Template", "VRF_CUSTOMER")
+    ndo.delete_egp_under_template(schema, "Policy_Stretch_AllSite_template", "AP_CUSTOMER", "EPG_L2_DB_1")
+    ndo.delete_bridge_domain_under_template(schema, "Policy_Stretch_AllSite_template", "BD_L2_CUST_NET_1")
+    ndo.save_schema(schema)
+
+
 if __name__ == "__main__":
     # Example_Fabric_Template()
     # Example_create_Tenant_Policies()
     # Example_L3Out()
-    Example_Deploy_Schema_Template()
+    # Example_Deploy_Schema_Template()
     # Example_Deploy_Template()
     # Example_Undeploy_site()
+    Example_deletion()

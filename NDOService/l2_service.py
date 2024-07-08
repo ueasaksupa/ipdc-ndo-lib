@@ -58,8 +58,8 @@ def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True)
             )
             ndo.create_bridge_domain_under_template(
                 schema,
-                template.bd.linkedVrfTemplate,
                 template.name,
+                template.bd.linkedVrfTemplate,
                 template.bd.linkedVrfName,
                 template.bd.name,
                 bd_config,
