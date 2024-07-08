@@ -397,7 +397,7 @@ class NDOTemplate:
 
         return None
 
-    def find_tenant_policies_template_by_name(self, name: str) -> TenantPolTemplate | None:
+    def find_tenant_policies_template_by_name(self, name: str) -> Template | None:
         url = f"{self.base_path}{PATH_TENANT_POLICIES_TEMPLATE_SUM}"
         # Get all
         resp: list = self.session.get(url).json()
@@ -970,8 +970,26 @@ class NDOTemplate:
         print(f"  |--- Done")
 
     def add_route_map_prefix_to_policy(
-        self, template_name: str, pol_name: str, entryOrder: int, prefix: RouteMapPrefix
-    ) -> None: ...
+        self, template_name: str, rm_name: str, entryOrder: int, prefix: RouteMapPrefix
+    ) -> None:
+        print (f"--- Adding prefix to route map {rm_name}")
+        template = self.find_tenant_policies_template_by_name(template_name)
+        if template is None:
+            raise ValueError(f"Tenant policy {template_name} does not exist.")
+        rm_pol = list(
+            filter(lambda p: p["name"] == rm_name, template["tenantPolicyTemplate"]["template"]["routeMapPolicies"])
+        )
+        for entry in rm_pol[0]["rtMapEntryList"]:
+            if entry["rtMapContext"]["order"] != entryOrder:
+                continue
+            entry["matchRule"][0]["matchPrefixList"].append(asdict(prefix))
+            break
+        # put update to template
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template["templateId"]}"
+        resp = self.session.put(url,json=template)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+        print(f"  |--- Done")
 
     def add_l3out_intf_routing_policy(
         self,

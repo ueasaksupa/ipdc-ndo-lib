@@ -209,6 +209,12 @@ def Example_deletion():
     ndo.save_schema(schema)
 
 
+def Example_Add_prefix_to_existing_RM():
+    ndo.add_route_map_prefix_to_policy(
+        "TN_NUTTAWUT_Tenant_Policies_SILA", "RM_SILA_TN_NUTTAWUT", 1, RouteMapPrefix(prefix="99.0.0.0/24")
+    )
+
+
 if __name__ == "__main__":
     # Example_Fabric_Template()
     # Example_create_Tenant_Policies()
@@ -216,4 +222,5 @@ if __name__ == "__main__":
     # Example_Deploy_Schema_Template()
     # Example_Deploy_Template()
     # Example_Undeploy_site()
-    Example_deletion()
+    # Example_deletion()
+    Example_Add_prefix_to_existing_RM()
