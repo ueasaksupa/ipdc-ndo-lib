@@ -1,0 +1,38 @@
+{
+  "id": "string",
+  "name": "string",
+  "urls": ["string"],
+  "username": "string",
+  "password": "string",
+  "apicSiteId": "string",
+  "labels": ["string"],
+  "passwordEncryptionStatus": true,
+  "useProxy": true,
+  "platform": "string",
+  "cloudProviders": ["string"],
+  "apicVersion": "string",
+  "_updateVersion": 0,
+  "maintenanceMode": true,
+  "health": {
+    "score": 0
+  },
+  "faults": [
+    {
+      "code": "string",
+      "message": "string",
+      "type": "string",
+      "count": 0
+    }
+  ],
+  "clusterStatus": [
+    {
+      "controllerId": 0,
+      "controllerName": "string",
+      "dn": "string",
+      "ipAddress": "string",
+      "adminState": "string",
+      "operationalState": "string",
+      "health": "string"
+    }
+  ]
+}

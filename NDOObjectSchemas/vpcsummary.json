@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "id": "",
+    "schemaVersion": "",
+    "generation": 0,
+    "statusGeneration": 0,
+    "resourceVersion": 0,
+    "deletionTimestamp": "datetime",
+    "creationTimestamp": "datetime",
+    "modificationTimestamp": "datetime",
+    "account": "",
+    "org": "",
+    "kind": "mno.ndo.cisco.com/v1.VPCSummary"
+  },
+  "spec": {
+    "siteID": "string",
+    "vpcs": [
+      {
+        "uuid": "string",
+        "name": "string",
+        "path": "string",
+        "node1": "string",
+        "node2": "string",
+        "pod": "string",
+        "deployStatus": "string",
+        "templateID": "string",
+        "templateName": "string"
+      }
+    ]
+  }
+}

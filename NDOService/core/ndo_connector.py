@@ -357,7 +357,7 @@ class NDOTemplate:
         self.fabric_res_phyif_map = self.__get_all_phyintf_resource()
         # pprint(self.fabric_res_phyif_map)
 
-    def get_all_sites(self) -> Site:
+    def get_all_sites(self) -> list[Site]:
         url = f"{self.base_path}{PATH_SITES}"
         resp = self.session.get(url).json()
         return resp["sites"]
@@ -1064,7 +1064,7 @@ class NDOTemplate:
 
         return filtered[0]
 
-    def find_pc_by_name(self, pc_name: str, site_name: str) -> VPCResourcePolicy | None:
+    def find_pc_by_name(self, pc_name: str, site_name: str) -> PCResourcePolicy | None:
         if site_name not in self.sitename_id_map:
             raise ValueError(f"Site {site_name} does not exist.")
 
@@ -1089,7 +1089,7 @@ class NDOTemplate:
             url = f"{self.base_path}{PATH_TEMPLATES}/{filtered_resp[0]['templateId']}"
             return self.session.get(url).json()
 
-    def find_fabric_resource_by_name(self, name: str) -> FabricPolicy | None:
+    def find_fabric_resource_by_name(self, name: str) -> FabricResourcePolicy | None:
         url = f"{self.base_path}{PATH_FABRIC_RESOURCES_SUM}"
         resp = self.session.get(url).json()
         filtered_resp = list(filter(lambda p: p["templateName"] == name, resp))
@@ -1161,7 +1161,7 @@ class NDOTemplate:
         print(f"  |--- Done")
         return resp.json()
 
-    def create_fabric_resource(self, name: str, site: str) -> FabricPolicy:
+    def create_fabric_resource(self, name: str, site: str) -> FabricResourcePolicy:
         print(f"--- Creating resource policy {name} on site {site}")
 
         if site not in self.sitename_id_map:
@@ -1308,7 +1308,7 @@ class NDOTemplate:
         print(f"  |--- Done")
 
     # task deployment
-    def deploy_template(self, template_name: str):
+    def deploy_template(self, template_name: str) -> None:
         print(f"--- Deploying template {template_name}")
         url = f"{self.base_path}{PATH_TEMPLATES_SUMMARY}"
         templates = self.session.get(url).json()
@@ -1326,7 +1326,7 @@ class NDOTemplate:
         }
         self.__send_deploy_task_request(url, payload)
 
-    def deploy_schema_template(self, schema_name: str, template_name: str):
+    def deploy_schema_template(self, schema_name: str, template_name: str) -> None:
         print(f"--- Deploying schema {schema_name} template {template_name}")
 
         schema = self.find_schema_by_name(schema_name)
@@ -1337,7 +1337,7 @@ class NDOTemplate:
         payload = {"schemaId": schema["id"], "templateName": template_name, "isRedeploy": False}
         self.__send_deploy_task_request(url, payload)
 
-    def undeploy_template_from_sites(self, schema_name: str, template_name: str, site_list: list[str]):
+    def undeploy_template_from_sites(self, schema_name: str, template_name: str, site_list: list[str]) -> None:
         print(f"--- Undeploying template {template_name} from site {','.join(site_list)}")
 
         siteId_list = []

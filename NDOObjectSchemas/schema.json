@@ -1,0 +1,4303 @@
+{
+  "bsonIdent": "string",
+  "displayName": "string",
+  "templates": [
+    {
+      "name": "string",
+      "displayName": "string",
+      "tenantId": "string",
+      "templateID": "string",
+      "anps": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "anpRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "anpName": "string",
+            "anpID": "string"
+          },
+          "epgs": [
+            {
+              "uuid": "string",
+              "name": "string",
+              "displayName": "string",
+              "epgRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "anpName": "string",
+                "epgName": "string",
+                "epgID": "string"
+              },
+              "contractRelationships": [
+                {
+                  "relationshipType": "provider",
+                  "contractRef": {
+                    "schemaID": "string",
+                    "templateName": "string",
+                    "contractName": "string",
+                    "contractID": "string"
+                  }
+                }
+              ],
+              "subnets": [
+                {
+                  "ip": "string",
+                  "description": "string",
+                  "scope": "private",
+                  "shared": true,
+                  "querier": true,
+                  "noDefaultGateway": true,
+                  "virtual": true,
+                  "primary": true
+                }
+              ],
+              "uSegEpg": true,
+              "uSegAttrs": [
+                {
+                  "name": "string",
+                  "displayName": "string",
+                  "description": "string",
+                  "type": "unknown",
+                  "fvSubnet": true,
+                  "operator": "equals",
+                  "category": "string",
+                  "value": "string"
+                }
+              ],
+              "intraEpg": "enforced",
+              "prio": "unspecified",
+              "proxyArp": true,
+              "mCastSource": true,
+              "preferredGroup": true,
+              "bdRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "bdName": "string",
+                "bdID": "string"
+              },
+              "vrfRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "vrfName": "string"
+              },
+              "qosRef": "string",
+              "selectors": [
+                {
+                  "name": "string",
+                  "expressions": [
+                    {
+                      "key": "string",
+                      "operator": "equals",
+                      "value": "string"
+                    }
+                  ]
+                }
+              ],
+              "epgType": "application",
+              "cloudServiceEpgConfig": {
+                "serviceType": "Azure-ApiManagement",
+                "deploymentType": "CloudNative",
+                "accessType": "Public",
+                "customSvcType": "string"
+              },
+              "interSiteAllow": true,
+              "description": "string",
+              "schemaId": "string",
+              "templateId": "string",
+              "tenantId": "string",
+              "tenantDisplayName": "string",
+              "tenantName": "string",
+              "schemaName": "string",
+              "templateName": "string",
+              "policyTags": [
+                {
+                  "key": "string",
+                  "value": "string"
+                }
+              ],
+              "migratedFrom": "string",
+              "intraEpgContracts": [
+                {
+                  "contractRef": {
+                    "schemaID": "string",
+                    "templateName": "string",
+                    "contractName": "string",
+                    "contractID": "string"
+                  }
+                }
+              ],
+              "tagAnnotations": [
+                {
+                  "tagKey": "string",
+                  "tagValue": "string"
+                }
+              ],
+              "anpName": "string",
+              "epgName": "string"
+            }
+          ],
+          "description": "string",
+          "schemaId": "string",
+          "templateId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "templateName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "migratedFrom": "string"
+        }
+      ],
+      "bds": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "bdRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "bdName": "string",
+            "bdID": "string"
+          },
+          "l2UnknownUnicast": "flood",
+          "intersiteBumTrafficAllow": true,
+          "optimizeWanBandwidth": true,
+          "l2Stretch": true,
+          "l3MCast": true,
+          "subnets": [
+            {
+              "ip": "string",
+              "description": "string",
+              "scope": "private",
+              "shared": true,
+              "querier": true,
+              "noDefaultGateway": true,
+              "virtual": true,
+              "primary": true
+            }
+          ],
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "dhcpLabel": {
+            "name": "string",
+            "dhcpOptionLabel": {
+              "name": "string",
+              "ref": "string",
+              "version": 0
+            },
+            "version": 0,
+            "ref": "string"
+          },
+          "mcastRtMapFilter": {
+            "mcastRtMapSource": "string",
+            "mcastRtMapSourceRef": "string",
+            "mcastRtMapDest": "string",
+            "mcastRtMapDestRef": "string",
+            "version": 0,
+            "mcastRtMapDestVersion": 0
+          },
+          "unkMcastAct": "flood",
+          "v6unkMcastAct": "flood",
+          "arpFlood": true,
+          "vmac": "string",
+          "multiDstPktAct": "bd-flood",
+          "dhcpLabels": [
+            {
+              "name": "string",
+              "dhcpOptionLabel": {
+                "name": "string",
+                "ref": "string",
+                "version": 0
+              },
+              "version": 0,
+              "ref": "string"
+            }
+          ],
+          "unicastRouting": true,
+          "description": "string",
+          "igmpInterfaceRef": "string",
+          "igmpSnoopRef": "string",
+          "mldSnoopRef": "string",
+          "schemaId": "string",
+          "templateId": "string",
+          "templateName": "string",
+          "tenantId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "migratedFrom": "string",
+          "epMoveDetectMode": "none",
+          "tagAnnotations": [
+            {
+              "tagKey": "string",
+              "tagValue": "string"
+            }
+          ]
+        }
+      ],
+      "contracts": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "contractRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "contractName": "string",
+            "contractID": "string"
+          },
+          "filterRelationships": [
+            {
+              "filterRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "filterName": "string",
+                "filterID": "string"
+              },
+              "directives": ["none"],
+              "action": "deny",
+              "priorityOverride": "default"
+            }
+          ],
+          "prio": "unspecified",
+          "targetDscp": "af11",
+          "scope": "application-profile",
+          "subjectName": "string",
+          "filterType": "bothWay",
+          "filterRelationshipsProviderToConsumer": [
+            {
+              "filterRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "filterName": "string",
+                "filterID": "string"
+              },
+              "directives": ["none"],
+              "action": "deny",
+              "priorityOverride": "default"
+            }
+          ],
+          "filterRelationshipsConsumerToProvider": [
+            {
+              "filterRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "filterName": "string",
+                "filterID": "string"
+              },
+              "directives": ["none"],
+              "action": "deny",
+              "priorityOverride": "default"
+            }
+          ],
+          "serviceGraphRelationship": {
+            "serviceGraphRef": {
+              "schemaID": "string",
+              "templateName": "string",
+              "serviceGraphName": "string",
+              "serviceGraphID": "string"
+            },
+            "serviceGraphContractRelationRef": {
+              "schemaID": "string",
+              "templateName": "string",
+              "serviceGraphName": "string",
+              "contractName": "string"
+            },
+            "serviceGraphContractRelationIdRef": {
+              "serviceGraphRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "serviceGraphName": "string",
+                "serviceGraphID": "string"
+              },
+              "contractRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "contractName": "string",
+                "contractID": "string"
+              }
+            },
+            "serviceNodesRelationship": [
+              {
+                "serviceNodeRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "serviceGraphName": "string",
+                  "serviceNodeName": "string",
+                  "serviceNodeID": "string"
+                },
+                "providerConnector": {
+                  "connectorType": "general",
+                  "bdRef": {
+                    "schemaID": "string",
+                    "templateName": "string",
+                    "bdName": "string",
+                    "bdID": "string"
+                  },
+                  "externalEpgRef": {
+                    "schemaID": "string",
+                    "templateName": "string",
+                    "externalEpgName": "string",
+                    "externalEpgID": "string"
+                  }
+                },
+                "consumerConnector": {
+                  "connectorType": "general",
+                  "bdRef": {
+                    "schemaID": "string",
+                    "templateName": "string",
+                    "bdName": "string",
+                    "bdID": "string"
+                  },
+                  "externalEpgRef": {
+                    "schemaID": "string",
+                    "templateName": "string",
+                    "externalEpgName": "string",
+                    "externalEpgID": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "serviceChaining": {
+            "name": "string",
+            "serviceNodes": [
+              {
+                "uuid": "string",
+                "name": "string",
+                "serviceNodeRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "serviceGraphName": "string",
+                  "serviceNodeName": "string",
+                  "serviceNodeID": "string"
+                },
+                "serviceNodeTypeId": "string",
+                "index": 0,
+                "schemaId": "string",
+                "templateId": "string",
+                "templateName": "string",
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ],
+                "deviceRef": {
+                  "templateName": "string",
+                  "name": "string",
+                  "ref": "string"
+                },
+                "deviceType": "firewall",
+                "providerConnector": {
+                  "interfaceName": "string",
+                  "isRedirect": true
+                },
+                "consumerConnector": {
+                  "interfaceName": "string",
+                  "isRedirect": true
+                }
+              }
+            ],
+            "nodeFilter": "allow-all"
+          },
+          "description": "string",
+          "schemaId": "string",
+          "templateId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "templateName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "tagAnnotations": [
+            {
+              "tagKey": "string",
+              "tagValue": "string"
+            }
+          ]
+        }
+      ],
+      "externalEpgs": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "extEpgType": "on-premise",
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "subnets": [
+            {
+              "ip": "string",
+              "name": "string",
+              "description": "string",
+              "scope": ["export-rtctrl"],
+              "aggregate": ["export-rtctrl"]
+            }
+          ],
+          "selectors": [
+            {
+              "name": "string",
+              "expressions": [
+                {
+                  "key": "string",
+                  "operator": "equals",
+                  "value": "string"
+                }
+              ]
+            }
+          ],
+          "contractRelationships": [
+            {
+              "relationshipType": "provider",
+              "contractRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "contractName": "string",
+                "contractID": "string"
+              }
+            }
+          ],
+          "preferredGroup": true,
+          "isSrMpls": true,
+          "externalEpgRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "externalEpgName": "string",
+            "externalEpgID": "string"
+          },
+          "l3outRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "l3outName": "string",
+            "l3outID": "string"
+          },
+          "anpRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "anpName": "string",
+            "anpID": "string"
+          },
+          "description": "string",
+          "schemaId": "string",
+          "templateId": "string",
+          "tenantId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "templateName": "string",
+          "templateDisplayName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "qosPriority": "unspecified",
+          "tagAnnotations": [
+            {
+              "tagKey": "string",
+              "tagValue": "string"
+            }
+          ],
+          "externalEpgName": "string"
+        }
+      ],
+      "filters": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "description": "string",
+          "filterRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "filterName": "string",
+            "filterID": "string"
+          },
+          "entries": [
+            {
+              "name": "string",
+              "displayName": "string",
+              "description": "string",
+              "etherType": "unspecified",
+              "arpFlag": "unspecified",
+              "ipProtocol": "unspecified",
+              "ipProtocolNumber": "string",
+              "matchOnlyFragments": true,
+              "stateful": true,
+              "sourceFrom": "string",
+              "sourceTo": "string",
+              "destinationFrom": "string",
+              "destinationTo": "string",
+              "tcpSessionRules": ["unspecified"]
+            }
+          ],
+          "schemaId": "string",
+          "templateId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "templateName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "tagAnnotations": [
+            {
+              "tagKey": "string",
+              "tagValue": "string"
+            }
+          ]
+        }
+      ],
+      "intersiteL3outs": [
+        {
+          "l3outRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "l3outName": "string",
+            "l3outID": "string"
+          },
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "isSrMpls": true,
+          "externalEpgs": [
+            {
+              "schemaID": "string",
+              "templateName": "string",
+              "externalEpgName": "string",
+              "externalEpgID": "string"
+            }
+          ],
+          "description": "string",
+          "schemaId": "string",
+          "templateId": "string",
+          "templateName": "string",
+          "tenantId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "networks": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "nwRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "nwName": "string",
+            "nwID": "string"
+          },
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "nwId": 0,
+          "l2Only": true,
+          "nwProfileName": "string",
+          "nwExtnProfileName": "string",
+          "vlanId": 0,
+          "vlanName": "string",
+          "subnets": [
+            {
+              "ip": "string",
+              "primary": true
+            }
+          ],
+          "suppressArp": true,
+          "sviDescr": "string",
+          "mtu": 0,
+          "tag": 0,
+          "schemaId": "string",
+          "templateId": "string",
+          "templateName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "serviceGraphs": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "serviceGraphRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "serviceGraphName": "string",
+            "serviceGraphID": "string"
+          },
+          "description": "string",
+          "serviceNodes": [
+            {
+              "uuid": "string",
+              "name": "string",
+              "serviceNodeRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "serviceGraphName": "string",
+                "serviceNodeName": "string",
+                "serviceNodeID": "string"
+              },
+              "serviceNodeTypeId": "string",
+              "index": 0,
+              "schemaId": "string",
+              "templateId": "string",
+              "templateName": "string",
+              "policyTags": [
+                {
+                  "key": "string",
+                  "value": "string"
+                }
+              ],
+              "deviceRef": {
+                "templateName": "string",
+                "name": "string",
+                "ref": "string"
+              },
+              "deviceType": "firewall",
+              "providerConnector": {
+                "interfaceName": "string",
+                "isRedirect": true
+              },
+              "consumerConnector": {
+                "interfaceName": "string",
+                "isRedirect": true
+              }
+            }
+          ],
+          "nodeFilter": "allow-all",
+          "svcRuleType": "epg",
+          "schemaId": "string",
+          "templateId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "templateName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "vrfs": [
+        {
+          "uuid": "string",
+          "name": "string",
+          "displayName": "string",
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "l3MCast": true,
+          "preferredGroup": true,
+          "vzAnyEnabled": true,
+          "siteAwarePolicyEnforcementMode": true,
+          "vzAnyProviderContracts": [
+            {
+              "contractRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "contractName": "string",
+                "contractID": "string"
+              }
+            }
+          ],
+          "vzAnyConsumerContracts": [
+            {
+              "contractRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "contractName": "string",
+                "contractID": "string"
+              }
+            }
+          ],
+          "rpConfigs": [
+            {
+              "ipAddress": "string",
+              "rpType": "unknown",
+              "mcastRtMapPolicyName": "string",
+              "mcastRtMapPolicyRef": "string",
+              "version": 0
+            }
+          ],
+          "pcEnfPref": "enforced",
+          "ipDataPlaneLearning": "enabled",
+          "vrfId": 0,
+          "vrfProfileName": "string",
+          "vrfExtnProfileName": "string",
+          "vrfDescr": "string",
+          "tag": 0,
+          "redisDirRouteMap": "string",
+          "description": "string",
+          "routeLeakPolicy": "unknown",
+          "rtAutoDisabled": true,
+          "autoRouteTargetImport": [
+            {
+              "aci": "string",
+              "networking": "string"
+            }
+          ],
+          "autoRouteTargetExport": [
+            {
+              "aci": "string",
+              "networking": "string"
+            }
+          ],
+          "routeTargetImport": ["string"],
+          "routeTargetExport": ["string"],
+          "routeTargetImportEvpn": ["string"],
+          "routeTargetExportEvpn": ["string"],
+          "schemaId": "string",
+          "templateId": "string",
+          "templateName": "string",
+          "templateDisplayName": "string",
+          "tenantId": "string",
+          "tenantDisplayName": "string",
+          "tenantName": "string",
+          "schemaName": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ],
+          "routeLeak": [
+            {
+              "prefixsubnet": [
+                {
+                  "ip": "string"
+                }
+              ],
+              "tenantName": "string",
+              "vrfRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "vrfName": "string"
+              },
+              "siteIds": ["string"]
+            }
+          ],
+          "externalPrefixes": [
+            {
+              "subnet": "string"
+            }
+          ],
+          "bdEnfStatus": true,
+          "tagAnnotations": [
+            {
+              "tagKey": "string",
+              "tagValue": "string"
+            }
+          ]
+        }
+      ],
+      "templateSubType": ["networking"],
+      "templateType": "stretched-template",
+      "description": "string",
+      "version": 0,
+      "migratedFrom": "string",
+      "migratedTo": "string",
+      "policyTags": [
+        {
+          "key": "string",
+          "value": "string"
+        }
+      ],
+      "_updateVersion": 0,
+      "appTemplate": {
+        "template": "string",
+        "sites": [
+          {
+            "siteId": "string",
+            "templateName": "string",
+            "templateID": "string",
+            "anps": [
+              {
+                "anpRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "anpName": "string",
+                  "anpID": "string"
+                },
+                "epgs": [
+                  {
+                    "epgRef": {
+                      "schemaID": "string",
+                      "templateName": "string",
+                      "anpName": "string",
+                      "epgName": "string",
+                      "epgID": "string"
+                    },
+                    "domainAssociations": [
+                      {
+                        "dn": "string",
+                        "domainType": "vmmDomain",
+                        "deployImmediacy": "immediate",
+                        "resolutionImmediacy": "immediate",
+                        "microSegVlan": {
+                          "vlanType": "vlan",
+                          "vlan": 0
+                        },
+                        "portEncapVlan": {
+                          "vlanType": "vlan",
+                          "vlan": 0
+                        },
+                        "vlanEncapMode": "dynamic",
+                        "allowMicroSegmentation": true,
+                        "switchType": "CiscoAVS",
+                        "switchingMode": "native",
+                        "epgLagPol": {
+                          "enhancedLagPol": {
+                            "name": "string",
+                            "dn": "string"
+                          }
+                        },
+                        "delimiter": "string",
+                        "bindingType": "none",
+                        "numPorts": 0,
+                        "portAllocation": "elastic",
+                        "netflowPref": "enabled",
+                        "allowPromiscuous": "reject",
+                        "forgedTransmits": "reject",
+                        "macChanges": "reject",
+                        "customEpgName": "string"
+                      }
+                    ],
+                    "staticPorts": [
+                      {
+                        "type": "port",
+                        "path": "string",
+                        "portEncapVlan": 0,
+                        "microSegVlan": 0,
+                        "deploymentImmediacy": "immediate",
+                        "mode": "regular",
+                        "ptpConfig": {
+                          "mode": "multicast",
+                          "ptpProfileRef": "string",
+                          "srcIP": "string",
+                          "destIPs": ["string"]
+                        },
+                        "igmpSnoopStaticGroupPolicies": [
+                          {
+                            "groupAddress": "string",
+                            "sourceAddress": "string"
+                          }
+                        ],
+                        "mldSnoopStaticGroupPolicies": [
+                          {
+                            "groupAddress": "string",
+                            "sourceAddress": "string"
+                          }
+                        ]
+                      }
+                    ],
+                    "staticLeafs": [
+                      {
+                        "path": "string",
+                        "portEncapVlan": 0,
+                        "deploymentImmediacy": "immediate"
+                      }
+                    ],
+                    "uSegAttrs": [
+                      {
+                        "name": "string",
+                        "displayName": "string",
+                        "description": "string",
+                        "type": "unknown",
+                        "fvSubnet": true,
+                        "operator": "equals",
+                        "category": "string",
+                        "value": "string"
+                      }
+                    ],
+                    "subnets": [
+                      {
+                        "ip": "string",
+                        "description": "string",
+                        "scope": "private",
+                        "shared": true,
+                        "querier": true,
+                        "noDefaultGateway": true,
+                        "virtual": true,
+                        "primary": true
+                      }
+                    ],
+                    "selectors": [
+                      {
+                        "name": "string",
+                        "expressions": [
+                          {
+                            "key": "string",
+                            "operator": "equals",
+                            "value": "string"
+                          }
+                        ]
+                      }
+                    ],
+                    "azApplicationSecurityGroup": "string",
+                    "azNetworkSecurityGroup": "string",
+                    "privateLinkLabel": {
+                      "name": "string"
+                    },
+                    "policyTags": [
+                      {
+                        "key": "string",
+                        "value": "string"
+                      }
+                    ],
+                    "shutdown": true
+                  }
+                ],
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "vrfs": [
+              {
+                "vrfRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "vrfName": "string"
+                },
+                "regions": [
+                  {
+                    "name": "string",
+                    "vpcs": [
+                      {
+                        "name": "string",
+                        "cidrs": [
+                          {
+                            "ip": "string",
+                            "primary": true,
+                            "subnets": [
+                              {
+                                "ip": "string",
+                                "zone": "string",
+                                "usage": "string",
+                                "scope": "string",
+                                "azSubnet": "string",
+                                "name": "string",
+                                "vrfRef": {
+                                  "schemaID": "string",
+                                  "templateName": "string",
+                                  "vrfName": "string"
+                                },
+                                "privateLinkLabel": {
+                                  "name": "string"
+                                },
+                                "subnetGroup": "string",
+                                "isVirtual": true
+                              }
+                            ],
+                            "createdBy": "string",
+                            "allowSubnetRouting": true
+                          }
+                        ],
+                        "cloudRsCtxProfileToGatewayRouterP": {
+                          "name": "string",
+                          "tenantName": "string",
+                          "mode": "string"
+                        },
+                        "isVpnGatewayRouter": true,
+                        "isTGWAttachment": true,
+                        "hubnetworkPeering": true,
+                        "apicCloudCtxProfileName": "string",
+                        "apicCloudRouterPName": "string",
+                        "apicCloudIntNetworkPName": "string",
+                        "azVirtualNetwork": "string",
+                        "azResourceGroup": "string",
+                        "contextProfileType": "regular",
+                        "underlayCtxProfile": {
+                          "vrfRef": {
+                            "schemaID": "string",
+                            "templateName": "string",
+                            "vrfName": "string"
+                          },
+                          "regionName": "string",
+                          "apicCloudCtxProfileName": "string"
+                        },
+                        "vpcGroup": "string"
+                      }
+                    ],
+                    "cidrs": [
+                      {
+                        "ip": "string",
+                        "primary": true,
+                        "subnets": [
+                          {
+                            "ip": "string",
+                            "zone": "string",
+                            "usage": "string",
+                            "scope": "string",
+                            "azSubnet": "string",
+                            "name": "string",
+                            "vrfRef": {
+                              "schemaID": "string",
+                              "templateName": "string",
+                              "vrfName": "string"
+                            },
+                            "privateLinkLabel": {
+                              "name": "string"
+                            },
+                            "subnetGroup": "string",
+                            "isVirtual": true
+                          }
+                        ],
+                        "createdBy": "string",
+                        "allowSubnetRouting": true
+                      }
+                    ],
+                    "cloudRsCtxProfileToGatewayRouterP": {
+                      "name": "string",
+                      "tenantName": "string",
+                      "mode": "string"
+                    },
+                    "isVpnGatewayRouter": true,
+                    "isTGWAttachment": true,
+                    "hubnetworkPeering": true,
+                    "apicCloudCtxProfileName": "string",
+                    "apicCloudRouterPName": "string",
+                    "apicCloudIntNetworkPName": "string",
+                    "azVirtualNetwork": "string",
+                    "azResourceGroup": "string",
+                    "contextProfileType": "regular",
+                    "underlayCtxProfile": {
+                      "vrfRef": {
+                        "schemaID": "string",
+                        "templateName": "string",
+                        "vrfName": "string"
+                      },
+                      "regionName": "string",
+                      "apicCloudCtxProfileName": "string"
+                    },
+                    "vpcGroup": "string",
+                    "showMigrateToCloudZone": true,
+                    "doMigrateToCloudZone": true
+                  }
+                ],
+                "routeTargetAddresses": [
+                  {
+                    "addressFamily": "ipv4-ucast",
+                    "address": "string",
+                    "routeTargetType": "import"
+                  }
+                ],
+                "trmEnabled": true,
+                "isRPExternal": true,
+                "rpAddress": "string",
+                "multicastGroup": "string",
+                "dcnmStaticLeafs": [
+                  {
+                    "switchSN": "string",
+                    "encapVlan": 0
+                  }
+                ],
+                "routeLeak": [
+                  {
+                    "prefixsubnet": [
+                      {
+                        "ip": "string"
+                      }
+                    ],
+                    "tenantName": "string",
+                    "vrfRef": {
+                      "schemaID": "string",
+                      "templateName": "string",
+                      "vrfName": "string"
+                    },
+                    "siteIds": ["string"]
+                  }
+                ],
+                "routeTargetImportMvpn": ["string"],
+                "routeTargetExportMvpn": ["string"],
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "bds": [
+              {
+                "bdRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "bdName": "string",
+                  "bdID": "string"
+                },
+                "subnets": [
+                  {
+                    "ip": "string",
+                    "description": "string",
+                    "scope": "private",
+                    "shared": true,
+                    "querier": true,
+                    "noDefaultGateway": true,
+                    "virtual": true,
+                    "primary": true
+                  }
+                ],
+                "l3Outs": ["string"],
+                "hostBasedRouting": true,
+                "l3OutRefs": ["string"],
+                "l3OutIDRefs": ["string"],
+                "mac": "string",
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "contracts": [
+              {
+                "contractRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "contractName": "string",
+                  "contractID": "string"
+                },
+                "serviceGraphRelationship": {
+                  "serviceGraphRef": {
+                    "schemaID": "string",
+                    "templateName": "string",
+                    "serviceGraphName": "string",
+                    "serviceGraphID": "string"
+                  },
+                  "serviceNodesRelationship": [
+                    {
+                      "serviceNodeRef": {
+                        "schemaID": "string",
+                        "templateName": "string",
+                        "serviceGraphName": "string",
+                        "serviceNodeName": "string",
+                        "serviceNodeID": "string"
+                      },
+                      "providerConnector": {
+                        "clusterInterface": {
+                          "dn": "string"
+                        },
+                        "redirectPolicy": {
+                          "name": "string",
+                          "dn": "string",
+                          "destinationType": "string"
+                        },
+                        "subnets": [
+                          {
+                            "ip": "string",
+                            "description": "string",
+                            "scope": "private",
+                            "shared": true,
+                            "querier": true,
+                            "noDefaultGateway": true,
+                            "virtual": true,
+                            "primary": true
+                          }
+                        ]
+                      },
+                      "consumerConnector": {
+                        "clusterInterface": {
+                          "dn": "string"
+                        },
+                        "redirectPolicy": {
+                          "name": "string",
+                          "dn": "string",
+                          "destinationType": "string"
+                        },
+                        "subnets": [
+                          {
+                            "ip": "string",
+                            "description": "string",
+                            "scope": "private",
+                            "shared": true,
+                            "querier": true,
+                            "noDefaultGateway": true,
+                            "virtual": true,
+                            "primary": true
+                          }
+                        ]
+                      },
+                      "deviceConfiguration": {
+                        "cloudLoadBalancer": {
+                          "listeners": [
+                            {
+                              "name": "string",
+                              "port": 0,
+                              "protocol": "http",
+                              "nlbDevIp": {
+                                "name": "string",
+                                "dn": "string"
+                              },
+                              "secPolicy": "default",
+                              "certificates": [
+                                {
+                                  "name": "string",
+                                  "tDn": "string",
+                                  "default": true,
+                                  "store": "default"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "name": "string",
+                                  "floatingIp": "string",
+                                  "index": 0,
+                                  "host": "string",
+                                  "path": "string",
+                                  "action": ["string"],
+                                  "condition": ["string"],
+                                  "actionType": "fixedResponse",
+                                  "contentType": "textPlain",
+                                  "port": 0,
+                                  "protocol": "http",
+                                  "providerEpgRef": {
+                                    "schemaID": "string",
+                                    "templateName": "string",
+                                    "anpName": "string",
+                                    "epgName": "string",
+                                    "epgID": "string"
+                                  },
+                                  "urlType": "original",
+                                  "customURL": "string",
+                                  "redirectHostName": "string",
+                                  "redirectPath": "string",
+                                  "redirectQuery": "string",
+                                  "responseCode": "string",
+                                  "responseBody": "string",
+                                  "redirectProtocol": "http",
+                                  "redirectPort": 0,
+                                  "redirectCode": "unknown",
+                                  "healthCheck": {
+                                    "status": "string"
+                                  },
+                                  "targetIpType": "unspecified"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "cloudLDevInst": {
+                          "index": 0
+                        }
+                      }
+                    }
+                  ]
+                },
+                "azNetworkSecurityGroupRule": "string",
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "externalEpgs": [
+              {
+                "externalEpgRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "externalEpgName": "string",
+                  "externalEpgID": "string"
+                },
+                "l3outDn": "string",
+                "subnets": [
+                  {
+                    "ip": "string",
+                    "name": "string",
+                    "description": "string",
+                    "scope": ["export-rtctrl"],
+                    "aggregate": ["export-rtctrl"]
+                  }
+                ],
+                "vrfRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "vrfName": "string"
+                },
+                "routeReachabilityInternetType": "internet",
+                "l3outRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "l3outName": "string",
+                  "l3outID": "string"
+                },
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "serviceGraphs": [
+              {
+                "serviceGraphRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "serviceGraphName": "string",
+                  "serviceGraphID": "string"
+                },
+                "serviceNodes": [
+                  {
+                    "serviceNodeRef": {
+                      "schemaID": "string",
+                      "templateName": "string",
+                      "serviceGraphName": "string",
+                      "serviceNodeName": "string",
+                      "serviceNodeID": "string"
+                    },
+                    "device": {
+                      "name": "string",
+                      "dn": "string",
+                      "deviceType": "string",
+                      "funcType": "string",
+                      "deviceVendorType": "string",
+                      "devType": "string",
+                      "scheme": "string",
+                      "cLIfNames": ["string"],
+                      "tenantName": "string",
+                      "virtualIps": [
+                        {
+                          "vipName": "string",
+                          "dn": "string"
+                        }
+                      ]
+                    },
+                    "consumerConnectorType": "string",
+                    "providerConnectorType": "string",
+                    "consumerInterface": "string",
+                    "providerInterface": "string",
+                    "policyTags": [
+                      {
+                        "key": "string",
+                        "value": "string"
+                      }
+                    ]
+                  }
+                ],
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "intersiteL3outs": [
+              {
+                "l3outRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "l3outName": "string",
+                  "l3outID": "string"
+                },
+                "vrfRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "vrfName": "string"
+                },
+                "srLocationProfiles": [
+                  {
+                    "mplsLocationName": "string",
+                    "routeMapPolicyProfiles": [
+                      {
+                        "routeMapPolicyName": "string",
+                        "routeMapPolicyRef": "string",
+                        "routeMapType": "export",
+                        "version": 0
+                      }
+                    ]
+                  }
+                ],
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "networks": [
+              {
+                "nwRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "nwName": "string",
+                  "nwID": "string"
+                },
+                "tnRoutedMCast": true,
+                "enableL3OnBorder": true,
+                "loopbackId": 0,
+                "addrVrf": [
+                  {
+                    "dhcpServerAddr": "string",
+                    "dhcpVrf": "string"
+                  }
+                ],
+                "dcnmStaticPorts": [
+                  {
+                    "switchSN": "string",
+                    "encapVlan": 0,
+                    "ports": ["string"]
+                  }
+                ],
+                "policyTags": [
+                  {
+                    "key": "string",
+                    "value": "string"
+                  }
+                ]
+              }
+            ],
+            "status": {
+              "siteStatus": "string",
+              "timestamp": 0,
+              "timestampLocalDateTime": "string",
+              "msg": "string",
+              "siteDeployDuration": "string",
+              "deployedVersion": 0
+            },
+            "policyTags": [
+              {
+                "key": "string",
+                "value": "string"
+              }
+            ]
+          }
+        ]
+      },
+      "fabricPolicyTemplate": {
+        "vlanPools": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "allocMode": "dynamic",
+            "encapBlocks": [
+              {
+                "range": {
+                  "from": 0,
+                  "to": 0,
+                  "allocMode": "dynamic"
+                }
+              }
+            ]
+          }
+        ],
+        "domains": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "pool": "string"
+          }
+        ],
+        "l3Domains": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "pool": "string"
+          }
+        ],
+        "interfacePolicyGroups": [
+          {
+            "uuid": "string",
+            "type": "physical",
+            "name": "string",
+            "description": "string",
+            "cdp": {
+              "adminState": "enabled"
+            },
+            "lldp": {
+              "receiveState": "enabled",
+              "transmitState": "enabled"
+            },
+            "llfc": {
+              "receiveState": "enabled",
+              "transmitState": "enabled"
+            },
+            "pfc": {
+              "adminState": "off"
+            },
+            "l2Interface": {
+              "qinq": "corePort",
+              "reflectiveRelay": "enabled",
+              "vlanScope": "global"
+            },
+            "stp": {
+              "bpduFilterEnabled": "enabled",
+              "bpduGuardEnabled": "enabled"
+            },
+            "linkLevel": {
+              "speed": "100G",
+              "autoNegotiation": "off",
+              "bringUpDelay": 0,
+              "debounceInterval": 0,
+              "fec": "cl74-fc-fec"
+            },
+            "infraVlan": true,
+            "mcp": {
+              "adminState": "enabled",
+              "mcpMode": "off",
+              "initialDelayTime": 1800,
+              "txFreq": 300,
+              "txFreqMsec": 999,
+              "gracePeriod": 300,
+              "gracePeriodMsec": 999
+            },
+            "portChannelPolicy": {
+              "mode": "off",
+              "control": ["fast-sel-hot-stdby"],
+              "minLinks": 0,
+              "maxLinks": 0
+            },
+            "syncEthPolicy": "string",
+            "domains": ["string"],
+            "accessMACsecPolicy": "string"
+          }
+        ],
+        "podPolicyGroups": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "fabricMACsec": "string",
+            "ntp": "string"
+          }
+        ],
+        "nodePolicyGroups": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "ptp": {
+              "domain": 0,
+              "prio1": 0,
+              "prio2": 0
+            },
+            "synce": {
+              "adminState": "enabled",
+              "qlOption": "op1"
+            }
+          }
+        ],
+        "ptpPolicy": {
+          "uuid": "string",
+          "name": "string",
+          "description": "string",
+          "global": {
+            "uuid": "string",
+            "adminState": "enabled",
+            "prio1": 255,
+            "prio2": 255,
+            "globalDomain": 128,
+            "fabProfileTemplate": "aes67",
+            "fabAnnounceIntvl": 0,
+            "fabSyncIntvl": 0,
+            "fabDelayIntvl": 0,
+            "fabAnnounceTimeout": 0
+          },
+          "profiles": [
+            {
+              "embedPolicyBase": {
+                "uuid": "string",
+                "name": "string",
+                "templateID": "string",
+                "templateName": "string",
+                "schemaID": "string",
+                "schemaName": "string",
+                "tenantID": "string",
+                "tenantName": "string",
+                "tenantDisplayName": "string",
+                "nameRef": "string"
+              },
+              "description": "string",
+              "profileTemplate": "aes67",
+              "announceIntvl": 0,
+              "syncIntvl": 0,
+              "delayIntvl": 0,
+              "announceTimeout": 0,
+              "nodeProfileOverride": true,
+              "localPriority": 0,
+              "dstMacType": "forwardable",
+              "dstMacRxNoMatch": "drop"
+            }
+          ]
+        },
+        "qosClass": {
+          "uuid": "string",
+          "name": "string",
+          "description": "string",
+          "preserveCos": true,
+          "level1": {
+            "adminState": "enabled",
+            "minBuffer": 3,
+            "mtu": 9216,
+            "congestionAlgorithm": "tailDrop",
+            "wredConfig": {
+              "congestionNotification": "enabled",
+              "minThreshold": 100,
+              "maxThreshold": 100,
+              "probability": 100,
+              "weight": 7,
+              "forwardNonEcn": true
+            },
+            "schedulingAlgorithm": "strictPriority",
+            "bandwidthAllocated": 100,
+            "pfcAdminState": "enabled",
+            "noDropCoS": "cos0",
+            "pfcScope": "fabricWide"
+          },
+          "level2": {
+            "adminState": "enabled",
+            "minBuffer": 3,
+            "mtu": 9216,
+            "congestionAlgorithm": "tailDrop",
+            "wredConfig": {
+              "congestionNotification": "enabled",
+              "minThreshold": 100,
+              "maxThreshold": 100,
+              "probability": 100,
+              "weight": 7,
+              "forwardNonEcn": true
+            },
+            "schedulingAlgorithm": "strictPriority",
+            "bandwidthAllocated": 100,
+            "pfcAdminState": "enabled",
+            "noDropCoS": "cos0",
+            "pfcScope": "fabricWide"
+          },
+          "level3": {
+            "adminState": "enabled",
+            "minBuffer": 3,
+            "mtu": 9216,
+            "congestionAlgorithm": "tailDrop",
+            "wredConfig": {
+              "congestionNotification": "enabled",
+              "minThreshold": 100,
+              "maxThreshold": 100,
+              "probability": 100,
+              "weight": 7,
+              "forwardNonEcn": true
+            },
+            "schedulingAlgorithm": "strictPriority",
+            "bandwidthAllocated": 100,
+            "pfcAdminState": "enabled",
+            "noDropCoS": "cos0",
+            "pfcScope": "fabricWide"
+          },
+          "level4": {
+            "adminState": "enabled",
+            "minBuffer": 3,
+            "mtu": 9216,
+            "congestionAlgorithm": "tailDrop",
+            "wredConfig": {
+              "congestionNotification": "enabled",
+              "minThreshold": 100,
+              "maxThreshold": 100,
+              "probability": 100,
+              "weight": 7,
+              "forwardNonEcn": true
+            },
+            "schedulingAlgorithm": "strictPriority",
+            "bandwidthAllocated": 100,
+            "pfcAdminState": "enabled",
+            "noDropCoS": "cos0",
+            "pfcScope": "fabricWide"
+          },
+          "level5": {
+            "adminState": "enabled",
+            "minBuffer": 3,
+            "mtu": 9216,
+            "congestionAlgorithm": "tailDrop",
+            "wredConfig": {
+              "congestionNotification": "enabled",
+              "minThreshold": 100,
+              "maxThreshold": 100,
+              "probability": 100,
+              "weight": 7,
+              "forwardNonEcn": true
+            },
+            "schedulingAlgorithm": "strictPriority",
+            "bandwidthAllocated": 100,
+            "pfcAdminState": "enabled",
+            "noDropCoS": "cos0",
+            "pfcScope": "fabricWide"
+          },
+          "level6": {
+            "adminState": "enabled",
+            "minBuffer": 3,
+            "mtu": 9216,
+            "congestionAlgorithm": "tailDrop",
+            "wredConfig": {
+              "congestionNotification": "enabled",
+              "minThreshold": 100,
+              "maxThreshold": 100,
+              "probability": 100,
+              "weight": 7,
+              "forwardNonEcn": true
+            },
+            "schedulingAlgorithm": "strictPriority",
+            "bandwidthAllocated": 100,
+            "pfcAdminState": "enabled",
+            "noDropCoS": "cos0",
+            "pfcScope": "fabricWide"
+          }
+        },
+        "qosDscpTranslation": {
+          "uuid": "string",
+          "name": "string",
+          "description": "string",
+          "adminState": "enabled",
+          "level1": "af11",
+          "level2": "af11",
+          "level3": "af11",
+          "level4": "af11",
+          "level5": "af11",
+          "level6": "af11",
+          "controlPlaneTraffic": "af11",
+          "policyPlaneTraffic": "af11",
+          "spanTraffic": "af11",
+          "tracerouteTraffic": "af11"
+        },
+        "qosMpls": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "ingressRules": [
+              {
+                "expFrom": 7,
+                "expTo": 7,
+                "priority": "unspecified",
+                "targetDscp": "af11",
+                "targetCos": "cos0"
+              }
+            ],
+            "egressRules": [
+              {
+                "dscpFrom": "af11",
+                "dscpTo": "af11",
+                "mplsExp": 8,
+                "targetCos": "cos0"
+              }
+            ]
+          }
+        ],
+        "ntpPolicies": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "adminState": "enabled",
+            "serverState": "enabled",
+            "masterMode": "enabled",
+            "authState": "enabled",
+            "stratum": 14,
+            "ntpKeys": [
+              {
+                "id": 65535,
+                "key": "string",
+                "trusted": true,
+                "authType": "usePassword"
+              }
+            ],
+            "ntpProviders": [
+              {
+                "host": "string",
+                "preferred": true,
+                "minPollInterval": 16,
+                "maxPollInterval": 16,
+                "mgmtEpgName": "string",
+                "authKeyID": 0,
+                "mgmtEpgType": "inb"
+              }
+            ]
+          }
+        ],
+        "macsecPolicies": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "type": "fabric",
+            "adminState": "enabled",
+            "macsecParams": {
+              "cipherSuite": "128GcmAes",
+              "windowSize": 4294967295,
+              "securityPol": "shouldSecure",
+              "sakExpiryTime": 0,
+              "confOffSet": "offset0",
+              "keyServerPrio": 0
+            },
+            "macsecKeys": [
+              {
+                "keyname": "string",
+                "psk": "string",
+                "start": "string",
+                "end": "string",
+                "isPskEncrypted": true
+              }
+            ]
+          }
+        ],
+        "syncEthIntfPolicies": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "adminState": "enabled",
+            "syncStateMsgEnabled": true,
+            "selectionInputEnabled": true,
+            "srcPriority": 254,
+            "waitToRestore": 12
+          }
+        ],
+        "mcpGlobalPolicy": {
+          "uuid": "string",
+          "name": "string",
+          "description": "string",
+          "adminState": "enabled",
+          "enablePduPerVlan": true,
+          "key": "string",
+          "loopDetectMultFactor": 255,
+          "protectPortDisable": true,
+          "initialDelayTime": 1800,
+          "txFreq": 300,
+          "txFreqMsec": 999
+        },
+        "template": "string",
+        "sites": [
+          {
+            "siteId": "string"
+          }
+        ]
+      },
+      "fabricResourceTemplate": {
+        "interfaceProfiles": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "adminState": "up",
+            "nodes": ["string"],
+            "interfaces": "string",
+            "policy": "string",
+            "policyGroupType": "physical",
+            "breakoutMode": "string"
+          }
+        ],
+        "portChannels": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "adminState": "up",
+            "node": "string",
+            "memberInterfaces": "string",
+            "policy": "string"
+          }
+        ],
+        "virtualPortChannels": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "adminState": "up",
+            "node1Details": {
+              "node": "string",
+              "memberInterfaces": "string",
+              "role": "active"
+            },
+            "node2Details": {
+              "node": "string",
+              "memberInterfaces": "string",
+              "role": "active"
+            },
+            "policy": "string"
+          }
+        ],
+        "podProfiles": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "kind": "all",
+            "blocks": [0],
+            "policy": "string"
+          }
+        ],
+        "nodeProfiles": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "nodes": ["string"],
+            "policy": "string"
+          }
+        ],
+        "fexDevices": [
+          {
+            "uuid": "string",
+            "name": "string",
+            "description": "string",
+            "nodes": ["string"],
+            "interfaces": "string",
+            "fexId": 199
+          }
+        ],
+        "template": "string",
+        "sites": [
+          {
+            "siteId": "string",
+            "interfaceProfiles": [
+              {
+                "name": "string",
+                "nodes": ["string"]
+              }
+            ],
+            "portChannels": [
+              {
+                "name": "string",
+                "node": "string"
+              }
+            ],
+            "virtualPortChannels": [
+              {
+                "name": "string",
+                "node1Details": {
+                  "node": "string"
+                },
+                "node2Details": {
+                  "node": "string"
+                }
+              }
+            ],
+            "nodeProfiles": [
+              {
+                "name": "string",
+                "nodes": ["string"]
+              }
+            ],
+            "podProfiles": [
+              {
+                "name": "string",
+                "kind": "all",
+                "blocks": [0]
+              }
+            ],
+            "fexDevices": [
+              {
+                "name": "string",
+                "nodes": ["string"]
+              }
+            ]
+          }
+        ]
+      },
+      "monitoringTemplate": {
+        "mtType": "tenant",
+        "tenant": "string",
+        "spanSessions": [
+          {
+            "name": "string",
+            "description": "string",
+            "uuid": "string",
+            "sourceGroup": {
+              "enableAdminState": true,
+              "sources": [
+                {
+                  "name": "string",
+                  "direction": "incoming",
+                  "spanDropPackets": true,
+                  "accessPaths": [
+                    {
+                      "accessInterfaces": ["string"],
+                      "portChannels": ["string"],
+                      "virtualPortChannels": ["string"],
+                      "vpcComponentPc": [
+                        {
+                          "node": "string",
+                          "vpc": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "epg": "string",
+                  "filters": [
+                    {
+                      "name": "string",
+                      "srcIPPrefix": "string",
+                      "srcPortFrom": 0,
+                      "srcPortTo": 0,
+                      "destIPPrefix": "string",
+                      "destPortFrom": 0,
+                      "destPortTo": 0,
+                      "ipProtocol": "string"
+                    }
+                  ]
+                }
+              ]
+            },
+            "destination": {
+              "remote": {
+                "spanVersion": "v1",
+                "enforceSpanVersion": true,
+                "destIPAddress": "string",
+                "srcIPPrefix": "string",
+                "epgRef": "string",
+                "flowID": 0,
+                "ttl": 0,
+                "dscp": "af11"
+              },
+              "local": {
+                "accessInterface": "string",
+                "portChannel": "string"
+              },
+              "mtu": 0
+            }
+          }
+        ],
+        "template": "string",
+        "sites": [
+          {
+            "siteId": "string"
+          }
+        ]
+      },
+      "tenantPolicyTemplate": {
+        "tenantId": "string",
+        "dhcpRelayPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "providers": [
+              {
+                "ip": "string",
+                "epgRef": "string",
+                "externalEpgRef": "string",
+                "useServerVrf": true
+              }
+            ]
+          }
+        ],
+        "dhcpOptionPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "options": [
+              {
+                "name": "string",
+                "id": 0,
+                "data": "string"
+              }
+            ]
+          }
+        ],
+        "igmpSnoopPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "queryInterval": 18000,
+            "queryResponseInterval": 25,
+            "lastMemberQueryInterval": 25,
+            "startQueryCount": 10,
+            "startQueryInterval": 18000,
+            "enableAdminState": "enabled",
+            "enableFastLeaveControl": true,
+            "enableQuerierControl": true,
+            "igmpQuerierVersion": "v2"
+          }
+        ],
+        "igmpInterfacePolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "enableV3Asm": true,
+            "enableFastLeaveControl": true,
+            "enableReportLinkLocalGroups": true,
+            "groupTimeout": 65535,
+            "queryInterval": 18000,
+            "queryResponseInterval": 25,
+            "lastMemberCount": 5,
+            "lastMemberResponseInterval": 25,
+            "startQueryCount": 10,
+            "startQueryInterval": 18000,
+            "querierTimeout": 65535,
+            "robustnessFactor": 7,
+            "maximumMulticastEntries": 4294967295,
+            "reservedMulticastEntries": 4294967295,
+            "igmpQuerierVersion": "v2",
+            "stateLimitRouteMapRef": {
+              "templateName": "string",
+              "name": "string",
+              "ref": "string"
+            },
+            "reportPolicyRouteMapRef": {
+              "templateName": "string",
+              "name": "string",
+              "ref": "string"
+            },
+            "staticReportRouteMapRef": {
+              "templateName": "string",
+              "name": "string",
+              "ref": "string"
+            }
+          }
+        ],
+        "mldSnoopPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "queryInterval": 18000,
+            "queryResponseInterval": 25,
+            "lastMemberQueryInterval": 25,
+            "startQueryCount": 10,
+            "startQueryInterval": 18000,
+            "enableAdminState": "enabled",
+            "enableFastLeaveControl": true,
+            "enableQuerierControl": true,
+            "mldQuerierVersion": "v1"
+          }
+        ],
+        "qosPolicies": [
+          {
+            "mplsQosPolicy": {
+              "ingressRules": [
+                {
+                  "expFrom": 0,
+                  "expTo": 0,
+                  "priority": "string",
+                  "target": "string",
+                  "targetCos": "string"
+                }
+              ],
+              "egressRules": [
+                {
+                  "dscpFrom": "string",
+                  "dscpTo": "string",
+                  "mplsExp": 0,
+                  "targetCos": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "routeMapPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "rtMapEntryList": [
+              {
+                "rtMapContext": {
+                  "order": 9,
+                  "name": "string",
+                  "action": "permit"
+                },
+                "matchRule": [
+                  {
+                    "matchPrefixList": [
+                      {
+                        "prefix": "string",
+                        "aggregate": true,
+                        "fromPfxLen": 128,
+                        "toPfxLen": 128
+                      }
+                    ],
+                    "matchCommunityList": [
+                      {
+                        "community": "string",
+                        "scope": "transitive"
+                      }
+                    ]
+                  }
+                ],
+                "setAction": [
+                  {
+                    "setCommunity": {
+                      "community": "string",
+                      "criteria": "none"
+                    },
+                    "setAddCommunities": [
+                      {
+                        "community": "string",
+                        "criteria": "none"
+                      }
+                    ],
+                    "setDampening": {
+                      "halfLife": 0,
+                      "reuseLimit": 0,
+                      "suppressLimit": 0,
+                      "maxSuppressTime": 0
+                    },
+                    "setAsPath": [
+                      {
+                        "criteria": "prepend",
+                        "asnCount": 0,
+                        "pathASNs": [
+                          {
+                            "asn": 1,
+                            "order": 31
+                          }
+                        ]
+                      }
+                    ],
+                    "setRouteTag": 0,
+                    "setWeight": 0,
+                    "setNextHop": "string",
+                    "setPreference": 0,
+                    "setMetric": 0,
+                    "setMetricType": "none",
+                    "setNextHopPropagate": true,
+                    "setMultiPath": true
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mcastRouteMapPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "mcastRtMapEntryList": [
+              {
+                "source": "string",
+                "group": "string",
+                "order": 65535,
+                "rp": "string",
+                "action": "permit"
+              }
+            ]
+          }
+        ],
+        "ipslaTrackLists": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "type": "weight",
+            "weightUp": 255,
+            "weightDown": 255,
+            "percentageUp": 100,
+            "percentageDown": 100,
+            "trackListMembers": [
+              {
+                "weight": 0,
+                "trackMember": {
+                  "name": "string",
+                  "destIP": "string",
+                  "scope": "string",
+                  "scopeDn": "string",
+                  "scopeType": "bd",
+                  "ipslaMonitoringRef": {
+                    "templateName": "string",
+                    "name": "string",
+                    "ref": "string"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "ipslaMonitoringPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "slaType": "http",
+            "slaPort": 0,
+            "httpVersion": "HTTP10",
+            "httpUri": "string",
+            "slaFrequency": 300,
+            "slaDetectMultiplier": 100,
+            "reqDataSize": 17512,
+            "ipv4ToS": 255,
+            "timeout": 604800000,
+            "threshold": 604800000,
+            "ipv6TrfClass": 255
+          }
+        ],
+        "l3OutNodePolGroups": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "importMappings": ["string"],
+            "asPathPol": {
+              "description": "string",
+              "asPathMultipathRelax": true
+            },
+            "bfdMultiHopPol": {
+              "description": "string",
+              "adminState": "enabled",
+              "detectionMultiplier": 50,
+              "minRxInterval": 999,
+              "minTxInterval": 999
+            },
+            "bgpTimerPol": {
+              "description": "string",
+              "keepAliveInterval": 3600,
+              "holdInterval": 3600,
+              "staleInterval": 3600,
+              "maxAslimit": 2000,
+              "gracefulRestartHelper": true
+            }
+          }
+        ],
+        "l3OutIntfPolGroups": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "importMappings": ["string"],
+            "bfdPol": {
+              "description": "string",
+              "adminState": "enabled",
+              "detectionMultiplier": 50,
+              "minRxInterval": 999,
+              "minTxInterval": 999,
+              "echoAdminState": "enabled",
+              "echoRxInterval": 999,
+              "ifControl": true
+            },
+            "bfdMultiHopPol": {
+              "description": "string",
+              "adminState": "enabled",
+              "detectionMultiplier": 50,
+              "minRxInterval": 999,
+              "minTxInterval": 999
+            },
+            "ospfIntfPol": {
+              "description": "string",
+              "networkType": "broadcast",
+              "prio": 255,
+              "cost": 65535,
+              "ifControl": "advertise-subnet",
+              "helloInterval": 65535,
+              "deadInterval": 65535,
+              "retransmitInterval": 65535,
+              "transmitDelay": 450
+            }
+          }
+        ],
+        "bgpPeerPrefixPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "action": "log",
+            "maxPrefixes": 300000,
+            "restartTime": 65535,
+            "threshold": 100
+          }
+        ],
+        "backupPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "annotation": "string",
+            "redirectDestPolicy": [
+              {
+                "embedPolicyBase": {
+                  "uuid": "string",
+                  "name": "string",
+                  "templateID": "string",
+                  "templateName": "string",
+                  "schemaID": "string",
+                  "schemaName": "string",
+                  "tenantID": "string",
+                  "tenantName": "string",
+                  "tenantDisplayName": "string",
+                  "nameRef": "string"
+                },
+                "description": "string",
+                "annotation": "string",
+                "ctxSeg": "string",
+                "destType": "string",
+                "ip": "string",
+                "ip2": "string",
+                "mac": "string",
+                "destName": "string",
+                "weight": 0,
+                "podID": "string"
+              }
+            ]
+          }
+        ],
+        "redirectDestPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "annotation": "string",
+            "ctxSeg": "string",
+            "destType": "string",
+            "ip": "string",
+            "ip2": "string",
+            "mac": "string",
+            "destName": "string",
+            "weight": 0,
+            "podID": "string"
+          }
+        ],
+        "redirectHealthGroupPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "annotation": "string",
+            "childAction": "string"
+          }
+        ],
+        "redirectPolicies": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "anycastEnabled": true,
+            "destType": "string",
+            "hashingAlgorithm": "string",
+            "isL3OutPbr": true,
+            "maxThresholdPercent": "string",
+            "minThresholdPercent": "string",
+            "programLocalPodOnly": true,
+            "resilientHashEnabled": true,
+            "sortByName": true,
+            "srcMacRewriteEnabled": true,
+            "thresholdDownAction": "string",
+            "thresholdEnable": true,
+            "redirectDestPolicy": [
+              {
+                "embedPolicyBase": {
+                  "uuid": "string",
+                  "name": "string",
+                  "templateID": "string",
+                  "templateName": "string",
+                  "schemaID": "string",
+                  "schemaName": "string",
+                  "tenantID": "string",
+                  "tenantName": "string",
+                  "tenantDisplayName": "string",
+                  "nameRef": "string"
+                },
+                "description": "string",
+                "annotation": "string",
+                "ctxSeg": "string",
+                "destType": "string",
+                "ip": "string",
+                "ip2": "string",
+                "mac": "string",
+                "destName": "string",
+                "weight": 0,
+                "podID": "string"
+              }
+            ],
+            "rsBackupPolicy": [
+              {
+                "dn": "string",
+                "name": "string",
+                "status": "Unknown",
+                "uid": "string",
+                "redirectDestPolicy": [
+                  {
+                    "embedPolicyBase": {
+                      "uuid": "string",
+                      "name": "string",
+                      "templateID": "string",
+                      "templateName": "string",
+                      "schemaID": "string",
+                      "schemaName": "string",
+                      "tenantID": "string",
+                      "tenantName": "string",
+                      "tenantDisplayName": "string",
+                      "nameRef": "string"
+                    },
+                    "description": "string",
+                    "annotation": "string",
+                    "ctxSeg": "string",
+                    "destType": "string",
+                    "ip": "string",
+                    "ip2": "string",
+                    "mac": "string",
+                    "destName": "string",
+                    "weight": 0,
+                    "podID": "string"
+                  }
+                ]
+              }
+            ],
+            "vnsRsIPSLAMonitoringPol": [
+              {
+                "dn": "string",
+                "state": "string"
+              }
+            ]
+          }
+        ],
+        "template": "string",
+        "sites": [
+          {
+            "siteId": "string"
+          }
+        ]
+      },
+      "l3outTemplate": {
+        "tenantId": "string",
+        "siteId": "string",
+        "l3outs": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "vrfRef": "string",
+            "l3domain": "string",
+            "routingProtocol": "bgp",
+            "ospfAreaConfig": {
+              "id": "string",
+              "cost": 0,
+              "areaType": "regular",
+              "control": {
+                "redistribute": true,
+                "originate": true,
+                "suppressFA": true
+              }
+            },
+            "defaultRouteLeak": {
+              "originateDefaultRoute": "only",
+              "always": true
+            },
+            "importRouteMapRef": "string",
+            "exportRouteMapRef": "string",
+            "advancedRouteMapRefs": {
+              "interleakRef": "string",
+              "staticRouteRedistRef": "string",
+              "connectedRouteRedistRef": "string",
+              "attachedHostRouteRedistRef": "string",
+              "routeDampeningV4Ref": "string",
+              "routeDampeningV6Ref": "string"
+            },
+            "pim": true,
+            "importRouteControl": true,
+            "targetDscp": "af11",
+            "nodeGroups": [
+              {
+                "name": "string",
+                "description": "string",
+                "nodeRoutingPolicyRef": "string",
+                "bfdMultiHop": {
+                  "authEnabled": true,
+                  "keyID": 0,
+                  "key": {
+                    "value": "string",
+                    "ref": "string"
+                  }
+                },
+                "targetDscp": "af11",
+                "bgpPeers": [
+                  {
+                    "peerAddr": "string",
+                    "peerAsn": 0,
+                    "password": "string",
+                    "passwordEncrypted": true,
+                    "ttl": 0,
+                    "sendCommEnabled": true,
+                    "sendExtCommEnabled": true,
+                    "allowSelfASEnabled": true,
+                    "asOverrideEnabled": true,
+                    "nhSelfEnabled": true,
+                    "disablePeerASCheckEnabled": true,
+                    "disableSegmentRoutingEnabled": true,
+                    "afUnicastEnabled": true,
+                    "afLabelUnicastEnabled": true,
+                    "bfdEnabled": true,
+                    "sendDomainPathEnabled": true,
+                    "adminStateEnabled": true
+                  }
+                ]
+              }
+            ],
+            "interfaceGroups": [
+              {
+                "name": "string",
+                "description": "string",
+                "interfaceRoutingPolicyRef": "string",
+                "bfd": {
+                  "authEnabled": true,
+                  "keyID": 0,
+                  "key": {
+                    "value": "string",
+                    "ref": "string"
+                  }
+                },
+                "bfdMultiHop": {
+                  "authEnabled": true,
+                  "keyID": 0,
+                  "key": {
+                    "value": "string",
+                    "ref": "string"
+                  }
+                },
+                "ospf": {
+                  "authType": "none",
+                  "keyID": 0,
+                  "key": {
+                    "value": "string",
+                    "ref": "string"
+                  }
+                },
+                "qosPriority": "unspecified",
+                "qosRef": "string"
+              }
+            ],
+            "nodes": [
+              {
+                "group": "string",
+                "podID": "string",
+                "nodeID": "string",
+                "routerID": "string",
+                "useRouteIDAsLoopback": true,
+                "loopbackIPs": ["string"],
+                "staticRoutes": [
+                  {
+                    "prefix": "string",
+                    "description": "string",
+                    "fallbackPref": 0,
+                    "enableBFDTracking": true,
+                    "trackPolicyRef": "string",
+                    "nullNextHop": true,
+                    "nextHops": [
+                      {
+                        "nextHopIP": "string",
+                        "description": "string",
+                        "preference": 0,
+                        "monitoringPolicyRef": "string"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "interfaces": [
+              {
+                "group": "string",
+                "pathType": "port",
+                "podID": "string",
+                "nodeID": "string",
+                "path": "string",
+                "description": "string",
+                "encap": {
+                  "encapType": "vlan",
+                  "value": 0
+                },
+                "svi": {
+                  "encapScope": "vrf",
+                  "autostate": "enabled",
+                  "mode": "access",
+                  "floatingPathAttributes": [
+                    {
+                      "domainType": "vmmDomain",
+                      "domain": "string",
+                      "encap": {
+                        "encapType": "vlan",
+                        "value": 0
+                      },
+                      "primaryAddressV4": "string",
+                      "primaryAddressV6": "string",
+                      "secondaryAddresses": [
+                        {
+                          "address": "string",
+                          "dhcpRelay": true,
+                          "v6RAPrefix": true,
+                          "ipV6DAD": "enabled"
+                        }
+                      ],
+                      "forgedTransmit": "enabled",
+                      "macAddrChange": "enabled",
+                      "promiscuousMode": "enabled",
+                      "enhancedLagPolicy": "string"
+                    }
+                  ]
+                },
+                "addresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "sideBAddresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "mac": "string",
+                "mtu": "string",
+                "bgpPeers": [
+                  {
+                    "peerAddr": "string",
+                    "peerAsn": 0,
+                    "password": "string",
+                    "passwordEncrypted": true,
+                    "ttl": 0,
+                    "sendCommEnabled": true,
+                    "sendExtCommEnabled": true,
+                    "allowSelfASEnabled": true,
+                    "asOverrideEnabled": true,
+                    "nhSelfEnabled": true,
+                    "disablePeerASCheckEnabled": true,
+                    "disableSegmentRoutingEnabled": true,
+                    "afUnicastEnabled": true,
+                    "afLabelUnicastEnabled": true,
+                    "bfdEnabled": true,
+                    "sendDomainPathEnabled": true,
+                    "adminStateEnabled": true
+                  }
+                ],
+                "targetDscp": "af11",
+                "microBfd": {
+                  "address": "string",
+                  "startTimer": 0
+                },
+                "ptpConfig": {
+                  "mode": "multicast",
+                  "ptpProfileRef": "string",
+                  "srcIP": "string",
+                  "destIPs": ["string"]
+                }
+              }
+            ],
+            "subInterfaces": [
+              {
+                "group": "string",
+                "pathType": "port",
+                "podID": "string",
+                "nodeID": "string",
+                "path": "string",
+                "description": "string",
+                "encap": {
+                  "encapType": "vlan",
+                  "value": 0
+                },
+                "svi": {
+                  "encapScope": "vrf",
+                  "autostate": "enabled",
+                  "mode": "access",
+                  "floatingPathAttributes": [
+                    {
+                      "domainType": "vmmDomain",
+                      "domain": "string",
+                      "encap": {
+                        "encapType": "vlan",
+                        "value": 0
+                      },
+                      "primaryAddressV4": "string",
+                      "primaryAddressV6": "string",
+                      "secondaryAddresses": [
+                        {
+                          "address": "string",
+                          "dhcpRelay": true,
+                          "v6RAPrefix": true,
+                          "ipV6DAD": "enabled"
+                        }
+                      ],
+                      "forgedTransmit": "enabled",
+                      "macAddrChange": "enabled",
+                      "promiscuousMode": "enabled",
+                      "enhancedLagPolicy": "string"
+                    }
+                  ]
+                },
+                "addresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "sideBAddresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "mac": "string",
+                "mtu": "string",
+                "bgpPeers": [
+                  {
+                    "peerAddr": "string",
+                    "peerAsn": 0,
+                    "password": "string",
+                    "passwordEncrypted": true,
+                    "ttl": 0,
+                    "sendCommEnabled": true,
+                    "sendExtCommEnabled": true,
+                    "allowSelfASEnabled": true,
+                    "asOverrideEnabled": true,
+                    "nhSelfEnabled": true,
+                    "disablePeerASCheckEnabled": true,
+                    "disableSegmentRoutingEnabled": true,
+                    "afUnicastEnabled": true,
+                    "afLabelUnicastEnabled": true,
+                    "bfdEnabled": true,
+                    "sendDomainPathEnabled": true,
+                    "adminStateEnabled": true
+                  }
+                ],
+                "targetDscp": "af11",
+                "microBfd": {
+                  "address": "string",
+                  "startTimer": 0
+                },
+                "ptpConfig": {
+                  "mode": "multicast",
+                  "ptpProfileRef": "string",
+                  "srcIP": "string",
+                  "destIPs": ["string"]
+                }
+              }
+            ],
+            "sviInterfaces": [
+              {
+                "group": "string",
+                "pathType": "port",
+                "podID": "string",
+                "nodeID": "string",
+                "path": "string",
+                "description": "string",
+                "encap": {
+                  "encapType": "vlan",
+                  "value": 0
+                },
+                "svi": {
+                  "encapScope": "vrf",
+                  "autostate": "enabled",
+                  "mode": "access",
+                  "floatingPathAttributes": [
+                    {
+                      "domainType": "vmmDomain",
+                      "domain": "string",
+                      "encap": {
+                        "encapType": "vlan",
+                        "value": 0
+                      },
+                      "primaryAddressV4": "string",
+                      "primaryAddressV6": "string",
+                      "secondaryAddresses": [
+                        {
+                          "address": "string",
+                          "dhcpRelay": true,
+                          "v6RAPrefix": true,
+                          "ipV6DAD": "enabled"
+                        }
+                      ],
+                      "forgedTransmit": "enabled",
+                      "macAddrChange": "enabled",
+                      "promiscuousMode": "enabled",
+                      "enhancedLagPolicy": "string"
+                    }
+                  ]
+                },
+                "addresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "sideBAddresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "mac": "string",
+                "mtu": "string",
+                "bgpPeers": [
+                  {
+                    "peerAddr": "string",
+                    "peerAsn": 0,
+                    "password": "string",
+                    "passwordEncrypted": true,
+                    "ttl": 0,
+                    "sendCommEnabled": true,
+                    "sendExtCommEnabled": true,
+                    "allowSelfASEnabled": true,
+                    "asOverrideEnabled": true,
+                    "nhSelfEnabled": true,
+                    "disablePeerASCheckEnabled": true,
+                    "disableSegmentRoutingEnabled": true,
+                    "afUnicastEnabled": true,
+                    "afLabelUnicastEnabled": true,
+                    "bfdEnabled": true,
+                    "sendDomainPathEnabled": true,
+                    "adminStateEnabled": true
+                  }
+                ],
+                "targetDscp": "af11",
+                "microBfd": {
+                  "address": "string",
+                  "startTimer": 0
+                },
+                "ptpConfig": {
+                  "mode": "multicast",
+                  "ptpProfileRef": "string",
+                  "srcIP": "string",
+                  "destIPs": ["string"]
+                }
+              }
+            ],
+            "floatingSviInterfaces": [
+              {
+                "group": "string",
+                "pathType": "port",
+                "podID": "string",
+                "nodeID": "string",
+                "path": "string",
+                "description": "string",
+                "encap": {
+                  "encapType": "vlan",
+                  "value": 0
+                },
+                "svi": {
+                  "encapScope": "vrf",
+                  "autostate": "enabled",
+                  "mode": "access",
+                  "floatingPathAttributes": [
+                    {
+                      "domainType": "vmmDomain",
+                      "domain": "string",
+                      "encap": {
+                        "encapType": "vlan",
+                        "value": 0
+                      },
+                      "primaryAddressV4": "string",
+                      "primaryAddressV6": "string",
+                      "secondaryAddresses": [
+                        {
+                          "address": "string",
+                          "dhcpRelay": true,
+                          "v6RAPrefix": true,
+                          "ipV6DAD": "enabled"
+                        }
+                      ],
+                      "forgedTransmit": "enabled",
+                      "macAddrChange": "enabled",
+                      "promiscuousMode": "enabled",
+                      "enhancedLagPolicy": "string"
+                    }
+                  ]
+                },
+                "addresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "sideBAddresses": {
+                  "primaryV4": "string",
+                  "primaryV6": "string",
+                  "linkLocalV4": "string",
+                  "linkLocalV6": "string",
+                  "ipV6DAD": "enabled",
+                  "secondary": [
+                    {
+                      "address": "string",
+                      "dhcpRelay": true,
+                      "v6RAPrefix": true,
+                      "ipV6DAD": "enabled"
+                    }
+                  ]
+                },
+                "mac": "string",
+                "mtu": "string",
+                "bgpPeers": [
+                  {
+                    "peerAddr": "string",
+                    "peerAsn": 0,
+                    "password": "string",
+                    "passwordEncrypted": true,
+                    "ttl": 0,
+                    "sendCommEnabled": true,
+                    "sendExtCommEnabled": true,
+                    "allowSelfASEnabled": true,
+                    "asOverrideEnabled": true,
+                    "nhSelfEnabled": true,
+                    "disablePeerASCheckEnabled": true,
+                    "disableSegmentRoutingEnabled": true,
+                    "afUnicastEnabled": true,
+                    "afLabelUnicastEnabled": true,
+                    "bfdEnabled": true,
+                    "sendDomainPathEnabled": true,
+                    "adminStateEnabled": true
+                  }
+                ],
+                "targetDscp": "af11",
+                "microBfd": {
+                  "address": "string",
+                  "startTimer": 0
+                },
+                "ptpConfig": {
+                  "mode": "multicast",
+                  "ptpProfileRef": "string",
+                  "srcIP": "string",
+                  "destIPs": ["string"]
+                }
+              }
+            ],
+            "tagAnnotations": [
+              {
+                "tagKey": "string",
+                "tagValue": "string"
+              }
+            ]
+          }
+        ],
+        "srl3outs": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "vrfRef": "string",
+            "srLocationProfiles": [
+              {
+                "mplsLocationName": "string",
+                "routeMapPolicyProfiles": [
+                  {
+                    "routeMapPolicyName": "string",
+                    "routeMapPolicyRef": "string",
+                    "routeMapType": "export",
+                    "version": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "deviceTemplate": {
+        "tenantId": "string",
+        "devices": [
+          {
+            "embedPolicyBase": {
+              "uuid": "string",
+              "name": "string",
+              "templateID": "string",
+              "templateName": "string",
+              "schemaID": "string",
+              "schemaName": "string",
+              "tenantID": "string",
+              "tenantName": "string",
+              "tenantDisplayName": "string",
+              "nameRef": "string"
+            },
+            "description": "string",
+            "deviceLocation": "onPremise",
+            "deviceType": "firewall",
+            "deviceMode": "layer1",
+            "connectivityMode": "oneArm",
+            "contractRelationship": {
+              "relationshipType": "provider",
+              "contractRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "contractName": "string",
+                "contractID": "string"
+              }
+            },
+            "interfaces": [
+              {
+                "name": "string",
+                "redirect": true,
+                "deviceInterfaceType": "bd",
+                "bdRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "bdName": "string",
+                  "bdID": "string"
+                },
+                "externalEpgRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "externalEpgName": "string",
+                  "externalEpgID": "string"
+                },
+                "ipslaMonitoringRef": {
+                  "templateName": "string",
+                  "name": "string",
+                  "ref": "string"
+                },
+                "isAdvancedIntfConfig": true,
+                "advancedIntfConfig": {
+                  "embedPolicyBase": {
+                    "uuid": "string",
+                    "name": "string",
+                    "templateID": "string",
+                    "templateName": "string",
+                    "schemaID": "string",
+                    "schemaName": "string",
+                    "tenantID": "string",
+                    "tenantName": "string",
+                    "tenantDisplayName": "string",
+                    "nameRef": "string"
+                  },
+                  "description": "string",
+                  "qosPolicyRef": "string",
+                  "preferredGroup": true,
+                  "loadBalanceHashing": "sourceIP",
+                  "podAwareRedirection": true,
+                  "anycast": true,
+                  "rewriteSourceMac": true,
+                  "advancedTrackingOptions": true,
+                  "configStaticMac": true,
+                  "tag": true,
+                  "resilientHashing": true,
+                  "isBackupRedirectIP": true,
+                  "thresholdForRedirectDestination": true,
+                  "thresholdForRedirect": {
+                    "minThreshold": 100,
+                    "maxThreshold": 100,
+                    "thresholdDownAction": "bypass"
+                  },
+                  "actionType": "reHashAll"
+                }
+              }
+            ]
+          }
+        ],
+        "template": "string",
+        "sites": [
+          {
+            "siteId": "string",
+            "devices": [
+              {
+                "name": "string",
+                "isPhysicalDomain": true,
+                "highAvailabilityMode": "activeActive",
+                "domainDn": "string",
+                "vlan": 0,
+                "promiscuousMode": true,
+                "trunkingPort": true,
+                "interfaces": [
+                  {
+                    "name": "string",
+                    "domainDn": "string",
+                    "fabricToDeviceConnectivity": [
+                      {
+                        "interfaceDn": "string",
+                        "vlan": 0,
+                        "podID": "string",
+                        "nodeID": "string",
+                        "path": "string",
+                        "tag": "string",
+                        "portType": "port"
+                      }
+                    ],
+                    "pbrDestinations": [
+                      {
+                        "ip": "string",
+                        "isAdvancedConfigSet": true,
+                        "mac": "string",
+                        "podID": "string",
+                        "additionalTrackingIP": "string",
+                        "weight": 0,
+                        "isBackUp": true,
+                        "tag": "string"
+                      }
+                    ],
+                    "vlan": 0,
+                    "vmmIntfInfo": [
+                      {
+                        "vmName": "string",
+                        "vNicName": "string",
+                        "podID": "string",
+                        "nodeID": "string",
+                        "path": "string",
+                        "portType": "port"
+                      }
+                    ],
+                    "enhancedLagPolicy": "string"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "schemaId": "string",
+      "templateId": "string"
+    }
+  ],
+  "sites": [
+    {
+      "siteId": "string",
+      "templateName": "string",
+      "templateID": "string",
+      "anps": [
+        {
+          "anpRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "anpName": "string",
+            "anpID": "string"
+          },
+          "epgs": [
+            {
+              "epgRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "anpName": "string",
+                "epgName": "string",
+                "epgID": "string"
+              },
+              "domainAssociations": [
+                {
+                  "dn": "string",
+                  "domainType": "vmmDomain",
+                  "deployImmediacy": "immediate",
+                  "resolutionImmediacy": "immediate",
+                  "microSegVlan": {
+                    "vlanType": "vlan",
+                    "vlan": 0
+                  },
+                  "portEncapVlan": {
+                    "vlanType": "vlan",
+                    "vlan": 0
+                  },
+                  "vlanEncapMode": "dynamic",
+                  "allowMicroSegmentation": true,
+                  "switchType": "CiscoAVS",
+                  "switchingMode": "native",
+                  "epgLagPol": {
+                    "enhancedLagPol": {
+                      "name": "string",
+                      "dn": "string"
+                    }
+                  },
+                  "delimiter": "string",
+                  "bindingType": "none",
+                  "numPorts": 0,
+                  "portAllocation": "elastic",
+                  "netflowPref": "enabled",
+                  "allowPromiscuous": "reject",
+                  "forgedTransmits": "reject",
+                  "macChanges": "reject",
+                  "customEpgName": "string"
+                }
+              ],
+              "staticPorts": [
+                {
+                  "type": "port",
+                  "path": "string",
+                  "portEncapVlan": 0,
+                  "microSegVlan": 0,
+                  "deploymentImmediacy": "immediate",
+                  "mode": "regular",
+                  "ptpConfig": {
+                    "mode": "multicast",
+                    "ptpProfileRef": "string",
+                    "srcIP": "string",
+                    "destIPs": ["string"]
+                  },
+                  "igmpSnoopStaticGroupPolicies": [
+                    {
+                      "groupAddress": "string",
+                      "sourceAddress": "string"
+                    }
+                  ],
+                  "mldSnoopStaticGroupPolicies": [
+                    {
+                      "groupAddress": "string",
+                      "sourceAddress": "string"
+                    }
+                  ]
+                }
+              ],
+              "staticLeafs": [
+                {
+                  "path": "string",
+                  "portEncapVlan": 0,
+                  "deploymentImmediacy": "immediate"
+                }
+              ],
+              "uSegAttrs": [
+                {
+                  "name": "string",
+                  "displayName": "string",
+                  "description": "string",
+                  "type": "unknown",
+                  "fvSubnet": true,
+                  "operator": "equals",
+                  "category": "string",
+                  "value": "string"
+                }
+              ],
+              "subnets": [
+                {
+                  "ip": "string",
+                  "description": "string",
+                  "scope": "private",
+                  "shared": true,
+                  "querier": true,
+                  "noDefaultGateway": true,
+                  "virtual": true,
+                  "primary": true
+                }
+              ],
+              "selectors": [
+                {
+                  "name": "string",
+                  "expressions": [
+                    {
+                      "key": "string",
+                      "operator": "equals",
+                      "value": "string"
+                    }
+                  ]
+                }
+              ],
+              "azApplicationSecurityGroup": "string",
+              "azNetworkSecurityGroup": "string",
+              "privateLinkLabel": {
+                "name": "string"
+              },
+              "policyTags": [
+                {
+                  "key": "string",
+                  "value": "string"
+                }
+              ],
+              "shutdown": true
+            }
+          ],
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "vrfs": [
+        {
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "regions": [
+            {
+              "name": "string",
+              "vpcs": [
+                {
+                  "name": "string",
+                  "cidrs": [
+                    {
+                      "ip": "string",
+                      "primary": true,
+                      "subnets": [
+                        {
+                          "ip": "string",
+                          "zone": "string",
+                          "usage": "string",
+                          "scope": "string",
+                          "azSubnet": "string",
+                          "name": "string",
+                          "vrfRef": {
+                            "schemaID": "string",
+                            "templateName": "string",
+                            "vrfName": "string"
+                          },
+                          "privateLinkLabel": {
+                            "name": "string"
+                          },
+                          "subnetGroup": "string",
+                          "isVirtual": true
+                        }
+                      ],
+                      "createdBy": "string",
+                      "allowSubnetRouting": true
+                    }
+                  ],
+                  "cloudRsCtxProfileToGatewayRouterP": {
+                    "name": "string",
+                    "tenantName": "string",
+                    "mode": "string"
+                  },
+                  "isVpnGatewayRouter": true,
+                  "isTGWAttachment": true,
+                  "hubnetworkPeering": true,
+                  "apicCloudCtxProfileName": "string",
+                  "apicCloudRouterPName": "string",
+                  "apicCloudIntNetworkPName": "string",
+                  "azVirtualNetwork": "string",
+                  "azResourceGroup": "string",
+                  "contextProfileType": "regular",
+                  "underlayCtxProfile": {
+                    "vrfRef": {
+                      "schemaID": "string",
+                      "templateName": "string",
+                      "vrfName": "string"
+                    },
+                    "regionName": "string",
+                    "apicCloudCtxProfileName": "string"
+                  },
+                  "vpcGroup": "string"
+                }
+              ],
+              "cidrs": [
+                {
+                  "ip": "string",
+                  "primary": true,
+                  "subnets": [
+                    {
+                      "ip": "string",
+                      "zone": "string",
+                      "usage": "string",
+                      "scope": "string",
+                      "azSubnet": "string",
+                      "name": "string",
+                      "vrfRef": {
+                        "schemaID": "string",
+                        "templateName": "string",
+                        "vrfName": "string"
+                      },
+                      "privateLinkLabel": {
+                        "name": "string"
+                      },
+                      "subnetGroup": "string",
+                      "isVirtual": true
+                    }
+                  ],
+                  "createdBy": "string",
+                  "allowSubnetRouting": true
+                }
+              ],
+              "cloudRsCtxProfileToGatewayRouterP": {
+                "name": "string",
+                "tenantName": "string",
+                "mode": "string"
+              },
+              "isVpnGatewayRouter": true,
+              "isTGWAttachment": true,
+              "hubnetworkPeering": true,
+              "apicCloudCtxProfileName": "string",
+              "apicCloudRouterPName": "string",
+              "apicCloudIntNetworkPName": "string",
+              "azVirtualNetwork": "string",
+              "azResourceGroup": "string",
+              "contextProfileType": "regular",
+              "underlayCtxProfile": {
+                "vrfRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "vrfName": "string"
+                },
+                "regionName": "string",
+                "apicCloudCtxProfileName": "string"
+              },
+              "vpcGroup": "string",
+              "showMigrateToCloudZone": true,
+              "doMigrateToCloudZone": true
+            }
+          ],
+          "routeTargetAddresses": [
+            {
+              "addressFamily": "ipv4-ucast",
+              "address": "string",
+              "routeTargetType": "import"
+            }
+          ],
+          "trmEnabled": true,
+          "isRPExternal": true,
+          "rpAddress": "string",
+          "multicastGroup": "string",
+          "dcnmStaticLeafs": [
+            {
+              "switchSN": "string",
+              "encapVlan": 0
+            }
+          ],
+          "routeLeak": [
+            {
+              "prefixsubnet": [
+                {
+                  "ip": "string"
+                }
+              ],
+              "tenantName": "string",
+              "vrfRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "vrfName": "string"
+              },
+              "siteIds": ["string"]
+            }
+          ],
+          "routeTargetImportMvpn": ["string"],
+          "routeTargetExportMvpn": ["string"],
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "bds": [
+        {
+          "bdRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "bdName": "string",
+            "bdID": "string"
+          },
+          "subnets": [
+            {
+              "ip": "string",
+              "description": "string",
+              "scope": "private",
+              "shared": true,
+              "querier": true,
+              "noDefaultGateway": true,
+              "virtual": true,
+              "primary": true
+            }
+          ],
+          "l3Outs": ["string"],
+          "hostBasedRouting": true,
+          "l3OutRefs": ["string"],
+          "l3OutIDRefs": ["string"],
+          "mac": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "contracts": [
+        {
+          "contractRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "contractName": "string",
+            "contractID": "string"
+          },
+          "serviceGraphRelationship": {
+            "serviceGraphRef": {
+              "schemaID": "string",
+              "templateName": "string",
+              "serviceGraphName": "string",
+              "serviceGraphID": "string"
+            },
+            "serviceNodesRelationship": [
+              {
+                "serviceNodeRef": {
+                  "schemaID": "string",
+                  "templateName": "string",
+                  "serviceGraphName": "string",
+                  "serviceNodeName": "string",
+                  "serviceNodeID": "string"
+                },
+                "providerConnector": {
+                  "clusterInterface": {
+                    "dn": "string"
+                  },
+                  "redirectPolicy": {
+                    "name": "string",
+                    "dn": "string",
+                    "destinationType": "string"
+                  },
+                  "subnets": [
+                    {
+                      "ip": "string",
+                      "description": "string",
+                      "scope": "private",
+                      "shared": true,
+                      "querier": true,
+                      "noDefaultGateway": true,
+                      "virtual": true,
+                      "primary": true
+                    }
+                  ]
+                },
+                "consumerConnector": {
+                  "clusterInterface": {
+                    "dn": "string"
+                  },
+                  "redirectPolicy": {
+                    "name": "string",
+                    "dn": "string",
+                    "destinationType": "string"
+                  },
+                  "subnets": [
+                    {
+                      "ip": "string",
+                      "description": "string",
+                      "scope": "private",
+                      "shared": true,
+                      "querier": true,
+                      "noDefaultGateway": true,
+                      "virtual": true,
+                      "primary": true
+                    }
+                  ]
+                },
+                "deviceConfiguration": {
+                  "cloudLoadBalancer": {
+                    "listeners": [
+                      {
+                        "name": "string",
+                        "port": 0,
+                        "protocol": "http",
+                        "nlbDevIp": {
+                          "name": "string",
+                          "dn": "string"
+                        },
+                        "secPolicy": "default",
+                        "certificates": [
+                          {
+                            "name": "string",
+                            "tDn": "string",
+                            "default": true,
+                            "store": "default"
+                          }
+                        ],
+                        "rules": [
+                          {
+                            "name": "string",
+                            "floatingIp": "string",
+                            "index": 0,
+                            "host": "string",
+                            "path": "string",
+                            "action": ["string"],
+                            "condition": ["string"],
+                            "actionType": "fixedResponse",
+                            "contentType": "textPlain",
+                            "port": 0,
+                            "protocol": "http",
+                            "providerEpgRef": {
+                              "schemaID": "string",
+                              "templateName": "string",
+                              "anpName": "string",
+                              "epgName": "string",
+                              "epgID": "string"
+                            },
+                            "urlType": "original",
+                            "customURL": "string",
+                            "redirectHostName": "string",
+                            "redirectPath": "string",
+                            "redirectQuery": "string",
+                            "responseCode": "string",
+                            "responseBody": "string",
+                            "redirectProtocol": "http",
+                            "redirectPort": 0,
+                            "redirectCode": "unknown",
+                            "healthCheck": {
+                              "status": "string"
+                            },
+                            "targetIpType": "unspecified"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "cloudLDevInst": {
+                    "index": 0
+                  }
+                }
+              }
+            ]
+          },
+          "azNetworkSecurityGroupRule": "string",
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "externalEpgs": [
+        {
+          "externalEpgRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "externalEpgName": "string",
+            "externalEpgID": "string"
+          },
+          "l3outDn": "string",
+          "subnets": [
+            {
+              "ip": "string",
+              "name": "string",
+              "description": "string",
+              "scope": ["export-rtctrl"],
+              "aggregate": ["export-rtctrl"]
+            }
+          ],
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "routeReachabilityInternetType": "internet",
+          "l3outRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "l3outName": "string",
+            "l3outID": "string"
+          },
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "serviceGraphs": [
+        {
+          "serviceGraphRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "serviceGraphName": "string",
+            "serviceGraphID": "string"
+          },
+          "serviceNodes": [
+            {
+              "serviceNodeRef": {
+                "schemaID": "string",
+                "templateName": "string",
+                "serviceGraphName": "string",
+                "serviceNodeName": "string",
+                "serviceNodeID": "string"
+              },
+              "device": {
+                "name": "string",
+                "dn": "string",
+                "deviceType": "string",
+                "funcType": "string",
+                "deviceVendorType": "string",
+                "devType": "string",
+                "scheme": "string",
+                "cLIfNames": ["string"],
+                "tenantName": "string",
+                "virtualIps": [
+                  {
+                    "vipName": "string",
+                    "dn": "string"
+                  }
+                ]
+              },
+              "consumerConnectorType": "string",
+              "providerConnectorType": "string",
+              "consumerInterface": "string",
+              "providerInterface": "string",
+              "policyTags": [
+                {
+                  "key": "string",
+                  "value": "string"
+                }
+              ]
+            }
+          ],
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "intersiteL3outs": [
+        {
+          "l3outRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "l3outName": "string",
+            "l3outID": "string"
+          },
+          "vrfRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "vrfName": "string"
+          },
+          "srLocationProfiles": [
+            {
+              "mplsLocationName": "string",
+              "routeMapPolicyProfiles": [
+                {
+                  "routeMapPolicyName": "string",
+                  "routeMapPolicyRef": "string",
+                  "routeMapType": "export",
+                  "version": 0
+                }
+              ]
+            }
+          ],
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "networks": [
+        {
+          "nwRef": {
+            "schemaID": "string",
+            "templateName": "string",
+            "nwName": "string",
+            "nwID": "string"
+          },
+          "tnRoutedMCast": true,
+          "enableL3OnBorder": true,
+          "loopbackId": 0,
+          "addrVrf": [
+            {
+              "dhcpServerAddr": "string",
+              "dhcpVrf": "string"
+            }
+          ],
+          "dcnmStaticPorts": [
+            {
+              "switchSN": "string",
+              "encapVlan": 0,
+              "ports": ["string"]
+            }
+          ],
+          "policyTags": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      ],
+      "status": {
+        "siteStatus": "string",
+        "timestamp": 0,
+        "timestampLocalDateTime": "string",
+        "msg": "string",
+        "siteDeployDuration": "string",
+        "deployedVersion": 0
+      },
+      "policyTags": [
+        {
+          "key": "string",
+          "value": "string"
+        }
+      ]
+    }
+  ],
+  "description": "string",
+  "_updateVersion": 0,
+  "id": "string",
+  "summary": {
+    "numOfPolicies": 0,
+    "inSync": {
+      "templateSyncInfo": "IN_SYNC",
+      "TimeStamp": 0
+    },
+    "templates": [
+      {
+        "templateID": "string",
+        "name": "string",
+        "numOfPolicies": 0,
+        "inSync": {
+          "templateSyncInfo": "IN_SYNC",
+          "TimeStamp": 0
+        },
+        "sites": [
+          {
+            "siteID": "string",
+            "inSync": {
+              "templateSyncInfo": "IN_SYNC",
+              "TimeStamp": 0
+            }
+          }
+        ],
+        "changeControlStatus": "EDIT_CONFIG",
+        "anps": {
+          "count": 0
+        },
+        "epgs": {
+          "count": 0
+        },
+        "vrfs": {
+          "count": 0
+        },
+        "bds": {
+          "count": 0
+        },
+        "contracts": {
+          "count": 0
+        },
+        "filters": {
+          "count": 0
+        },
+        "externalEpgs": {
+          "count": 0
+        },
+        "serviceGraphs": {
+          "count": 0
+        },
+        "intersiteL3outs": {
+          "count": 0
+        },
+        "networks": {
+          "count": 0
+        },
+        "templateId": "string",
+        "templateName": "string",
+        "tenantId": "string",
+        "tenantName": "string",
+        "schemaId": "string",
+        "templateType": "fabricResource",
+        "siteCount": 0,
+        "policyCount": 0,
+        "policies": [
+          {
+            "templateType": "string",
+            "numOfPolicies": 0,
+            "numOfTemplates": 0,
+            "objType": "string",
+            "count": 0
+          }
+        ],
+        "siteSummaries": [
+          {
+            "siteID": "string",
+            "inSync": {
+              "templateSyncInfo": "IN_SYNC",
+              "TimeStamp": 0
+            }
+          }
+        ],
+        "templateStatus": "EDIT_CONFIG"
+      }
+    ],
+    "changeControl": [
+      {
+        "status": "EDIT_CONFIG",
+        "count": 0
+      }
+    ]
+  }
+}

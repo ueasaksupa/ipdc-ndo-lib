@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "count": 0
+  },
+  "items": [
+    {
+      "metadata": {
+        "id": "mno.ndo.cisco.com::v1::PortChannelPolicyGroup::8190e6cc-72cf-403b-a61c-7b95bd437bbe",
+        "schemaVersion": "v1",
+        "generation": 2,
+        "statusGeneration": 0,
+        "resourceVersion": 2,
+        "deletionTimestamp": "datetime",
+        "creationTimestamp": "datetime",
+        "modificationTimestamp": "datetime",
+        "account": "NEXUS_DASHBOARD-SYSTEM-ADMIN",
+        "org": "",
+        "kind": "mno.ndo.cisco.com/v1.PortChannelPolicyGroup"
+      },
+      "spec": {
+        "name": "string",
+        "uuid": "string",
+        "description": "",
+        "templateID": "string",
+        "schemaID": "string",
+        "cdp": {
+          "adminState": "disabled"
+        },
+        "lldp": {
+          "receiveState": "enabled",
+          "transmitState": "enabled"
+        },
+        "stp": {
+          "bpduFilterEnabled": "disabled",
+          "bpduGuardEnabled": "disabled"
+        },
+        "l2Interface": {
+          "qinq": "disabled",
+          "reflectiveRelay": "disabled",
+          "vlanScope": "global"
+        },
+        "linkLevel": {
+          "speed": "inherit",
+          "autoNegotiation": "on",
+          "bringUpDelay": 0,
+          "debounceInterval": 100,
+          "fec": "inherit"
+        },
+        "mcp": {
+          "adminState": "enabled",
+          "mcpMode": "off",
+          "initialDelayTime": 180,
+          "txFreq": 2,
+          "txFreqMsec": 0,
+          "gracePeriod": 3,
+          "gracePeriodMsec": 0
+        },
+        "infraVlan": false,
+        "domains": ["string"],
+        "accessMACsecPolicy": "",
+        "syncEthPolicy": "",
+        "llfc": {
+          "receiveState": "disabled",
+          "transmitState": "disabled"
+        },
+        "pfc": {
+          "adminState": "auto"
+        },
+        "portChannelPolicy": {
+          "mode": "off",
+          "control": ["fast-sel-hot-stdby", "graceful-conv", "susp-individual"],
+          "minLinks": 1,
+          "maxLinks": 16,
+          "hashFields": "none"
+        }
+      },
+      "status": {
+        "fabrics": 0,
+        "interfaces": 0,
+        "config": {
+          "name": "",
+          "uuid": "",
+          "description": "",
+          "templateID": "",
+          "schemaID": "",
+          "cdp": {
+            "adminState": "disabled"
+          },
+          "lldp": {
+            "receiveState": "enabled",
+            "transmitState": "enabled"
+          },
+          "stp": {
+            "bpduFilterEnabled": "disabled",
+            "bpduGuardEnabled": "disabled"
+          },
+          "l2Interface": {
+            "qinq": "disabled",
+            "reflectiveRelay": "disabled",
+            "vlanScope": "global"
+          },
+          "linkLevel": {
+            "speed": "inherit",
+            "autoNegotiation": "on",
+            "bringUpDelay": 0,
+            "debounceInterval": 100,
+            "fec": "inherit"
+          },
+          "mcp": {
+            "adminState": "enabled",
+            "mcpMode": "off",
+            "initialDelayTime": 0,
+            "txFreq": 0,
+            "txFreqMsec": 500,
+            "gracePeriod": 3,
+            "gracePeriodMsec": 0
+          },
+          "infraVlan": false,
+          "accessMACsecPolicy": "",
+          "syncEthPolicy": "",
+          "llfc": {
+            "receiveState": "disabled",
+            "transmitState": "disabled"
+          },
+          "pfc": {
+            "adminState": "auto"
+          },
+          "portChannelPolicy": {
+            "mode": "off",
+            "minLinks": 1,
+            "maxLinks": 16,
+            "hashFields": "none"
+          }
+        }
+      }
+    }
+  ]
+}

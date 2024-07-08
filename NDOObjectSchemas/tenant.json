@@ -1,0 +1,63 @@
+{
+  "id": "string",
+  "name": "string",
+  "displayName": "string",
+  "siteAssociations": [
+    {
+      "siteId": "string",
+      "securityDomains": ["string"],
+      "cloudAccount": "string",
+      "azureAccount": [
+        {
+          "cloudSubscription": {
+            "cloudSubscriptionId": "string",
+            "cloudApplicationId": "string"
+          },
+          "cloudApplication": [
+            {
+              "cloudApplicationId": "string",
+              "cloudCredentialName": "string",
+              "secretKey": "string",
+              "cloudActiveDirectoryId": "string"
+            }
+          ],
+          "cloudActiveDirectory": [
+            {
+              "cloudActiveDire        ctoryId": "string",
+              "cloudActiveDirectoryName": "string"
+            }
+          ],
+          "securityDomains": ["string"],
+          "accessType": "string",
+          "vendor": "string"
+        }
+      ],
+      "awsAccount": [
+        {
+          "accountId": "string",
+          "isTrusted": true,
+          "accessKeyId": "string",
+          "secretKey": "string",
+          "isAccountInOrg": true
+        }
+      ],
+      "gatewayRouter": [
+        {
+          "name": "string",
+          "asn": "string",
+          "securityDomains": ["string"],
+          "tenantName": "string"
+        }
+      ]
+    }
+  ],
+  "userAssociations": [
+    {
+      "userId": "string"
+    }
+  ],
+  "description": "string",
+  "consistencyScheduleConfig": {
+    "frequency": 0
+  }
+}
