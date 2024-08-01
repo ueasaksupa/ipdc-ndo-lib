@@ -50,15 +50,7 @@ class TemplateBridgeDomain:
 
 
 @dataclass(kw_only=True)
-class SingleEPGTemplate:
-    name: str = "Policy_Stretch_AllSite_template"
-    associatedSites: List[str] | None = None
-    bd: TemplateBridgeDomain
-    externalEPG: Optional[TemplateExternalEPG] = None
-
-
-@dataclass(kw_only=True)
-class MultiEPGTemplate:
+class EPGsTemplate:
     name: str = "Policy_Stretch_AllSite_template"
     associatedSites: List[str] | None = None
     bds: List[TemplateBridgeDomain]
@@ -96,7 +88,7 @@ class ServiceL2Parameters:
     tenant_name: str
     tenant_sites: List[str] | None = None
     schema_name: str
-    templates: List[VRFTemplate | SingleEPGTemplate]
+    templates: List[VRFTemplate | EPGsTemplate]
 
 
 @dataclass(kw_only=True)
@@ -105,7 +97,7 @@ class ServiceL3Parameters:
     tenant_name: str
     tenant_sites: List[str] | None = None
     schema_name: str
-    templates: List[VRFTemplate | MultiEPGTemplate]
+    templates: List[VRFTemplate | EPGsTemplate]
 
 
 @dataclass(kw_only=True)
@@ -114,6 +106,6 @@ class ServiceL3OutParameters:
     tenant_name: str
     tenant_sites: List[str] | None = None
     schema_name: str
-    templates: List[VRFTemplate | MultiEPGTemplate]
+    templates: List[VRFTemplate | EPGsTemplate]
     l3outTemplatePerSite: List[L3OutTemplatePerSite]
     tenantPolTemplates: List[TenantPolicyTenplate]

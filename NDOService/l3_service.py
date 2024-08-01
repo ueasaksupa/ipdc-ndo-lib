@@ -50,7 +50,7 @@ def create(srvParams: ServiceL3Parameters, allowPushToUnSyncSchema: bool = True)
             ndo.create_vrf_under_template(schema, template.name, template.vrf_name, template.contract_name, vrf_config)
 
         # ----- CREATE BD, ANP, EPG UNDER TEMPLATE ------
-        if isinstance(template, MultiEPGTemplate):
+        if isinstance(template, EPGsTemplate):
             # create Bridge-Domain under template
             for bd in template.bds:
                 bd_config = BridgeDomainConfig() if bd.bdConfig is None else bd.bdConfig

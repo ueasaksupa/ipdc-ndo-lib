@@ -3,23 +3,24 @@ from NDOService.core.ndo_connector import NDOTemplate
 from NDOService.core.configurations import *
 from NDOService.core.service_parameters import *
 
-""" TODO
+"""
 This is the example how to call the method to create l2 service on NDO.
 """
+
 ENDPOINTS = [
     SiteStaticPorts(
         sitename="TLS1",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
+            StaticPortPhy(nodeId="3101", port_name="1/12", port_mode="regular", vlan=2102),
             StaticPortPhy(nodeId="3101", port_name="1/12", port_mode="regular", vlan=2103),
-            StaticPortPhy(nodeId="3101", port_name="1/13", port_mode="regular", vlan=2103),
         ],
     ),
     SiteStaticPorts(
         sitename="SILA",
         epg_phy_domain="PHY_DOMAIN_SERVER_CL_DOM01_01",
         staticPorts=[
-            StaticPortPhy(nodeId="3101", port_name="1/13", port_mode="regular", vlan=2103),
+            StaticPortPhy(nodeId="3101", port_name="1/12", port_mode="regular", vlan=2102),
             StaticPortPC(port_name="PC_SILA_CL_01", port_mode="regular", vlan=2103),
         ],
     ),
@@ -36,16 +37,18 @@ params = ServiceL2Parameters(
             contract_name="CON_VRF_CUSTOMER",
             vrf_name="VRF_CUSTOMER",
         ),
-        SingleEPGTemplate(
-            bd=TemplateBridgeDomain(
-                name="BD_L2_CUST_NET_1",
-                linkedVrfName="VRF_CUSTOMER",
-                anp_name="AP_CUSTOMER",
-                epg=TemplateEPG(
-                    name="EPG_L2_DB_1",
-                    staticPortPerSite=ENDPOINTS,
+        EPGsTemplate(
+            bds=[
+                TemplateBridgeDomain(
+                    name="BD_L2_CUST_NET_1",
+                    linkedVrfName="VRF_CUSTOMER",
+                    anp_name="AP_CUSTOMER",
+                    epg=TemplateEPG(
+                        name="EPG_L2_DB_1",
+                        staticPortPerSite=ENDPOINTS,
+                    ),
                 ),
-            ),
+            ]
         ),
     ],
 )

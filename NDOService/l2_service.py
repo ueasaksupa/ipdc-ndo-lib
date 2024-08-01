@@ -49,58 +49,59 @@ def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True)
             # create VRF under template
             ndo.create_vrf_under_template(schema, template.name, template.vrf_name, template.contract_name, vrf_config)
 
-        if isinstance(template, SingleEPGTemplate):
+        if isinstance(template, EPGsTemplate):
             # create Bridge-Domain under template
-            bd_config = (
-                BridgeDomainConfig(unicastRouting=False, l2UnknownUnicast="flood")
-                if template.bd.bdConfig is None
-                else template.bd.bdConfig
-            )
-            ndo.create_bridge_domain_under_template(
-                schema,
-                template.name,
-                template.bd.linkedVrfTemplate,
-                template.bd.linkedVrfName,
-                template.bd.name,
-                bd_config,
-            )
-            # create Application Profile under template
-            anp = ndo.create_anp_under_template(schema, template.name, template.bd.anp_name)
-            # create EPG under ANP
-            ndo.create_epg_under_template(
-                schema,
-                anp,
-                template.bd.epg.name,
-                EPGConfig(
-                    linked_template=template.name,
-                    linked_bd=template.bd.name,
-                ),
-            )
-            # update schema
-            schema = ndo.save_schema(schema)
-
-            # ----- ADD PHYSICAL PORT FOR EACH ENDPOINT PER SITE ------
-            # add physical domain and device port to EPG per site
-            for siteInfo in template.bd.epg.staticPortPerSite:
-                ndo.add_phy_domain_to_epg(
+            for bd in template.bds:
+                bd_config = (
+                    BridgeDomainConfig(unicastRouting=False, l2UnknownUnicast="flood")
+                    if bd.bdConfig is None
+                    else bd.bdConfig
+                )
+                ndo.create_bridge_domain_under_template(
                     schema,
                     template.name,
-                    template.bd.anp_name,
-                    template.bd.epg.name,
-                    siteInfo.epg_phy_domain,
-                    siteInfo.sitename,
+                    bd.linkedVrfTemplate,
+                    bd.linkedVrfName,
+                    bd.name,
+                    bd_config,
                 )
-                ndo.add_static_port_to_epg(
+                # create Application Profile under template
+                anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)
+                # create EPG under ANP
+                ndo.create_epg_under_template(
                     schema,
-                    template.name,
-                    template.bd.anp_name,
-                    template.bd.epg.name,
-                    siteInfo.sitename,
-                    siteInfo.staticPorts,
+                    anp,
+                    bd.epg.name,
+                    EPGConfig(
+                        linked_template=template.name,
+                        linked_bd=bd.name,
+                    ),
                 )
+                # update schema
+                schema = ndo.save_schema(schema)
 
-            # update schema
-            schema = ndo.save_schema(schema)
+                # ----- ADD PHYSICAL PORT FOR EACH ENDPOINT PER SITE ------
+                # add physical domain and device port to EPG per site
+                for siteInfo in bd.epg.staticPortPerSite:
+                    ndo.add_phy_domain_to_epg(
+                        schema,
+                        template.name,
+                        bd.anp_name,
+                        bd.epg.name,
+                        siteInfo.epg_phy_domain,
+                        siteInfo.sitename,
+                    )
+                    ndo.add_static_port_to_epg(
+                        schema,
+                        template.name,
+                        bd.anp_name,
+                        bd.epg.name,
+                        siteInfo.sitename,
+                        siteInfo.staticPorts,
+                    )
+
+                # update schema
+                schema = ndo.save_schema(schema)
 
 
 if __name__ == "__main__":

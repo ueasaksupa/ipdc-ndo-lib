@@ -3,8 +3,8 @@ from NDOService.core.ndo_connector import NDOTemplate
 from NDOService.core.configurations import *
 from NDOService.core.service_parameters import *
 
-""" TODO
-This is the example how to call the method to create l2 service on NDO.
+"""
+This is the example how to call the method to create l3 service on NDO.
 """
 
 ENDPOINTS_EPG_1 = [
@@ -49,7 +49,7 @@ params = ServiceL3Parameters(
             contract_name="CON_VRF_CUSTOMER",
             vrf_name="VRF_CUSTOMER",
         ),
-        MultiEPGTemplate(
+        EPGsTemplate(
             bds=[
                 TemplateBridgeDomain(
                     name="BD_L3_CUST_NET_1",
