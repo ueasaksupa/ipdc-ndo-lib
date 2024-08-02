@@ -685,6 +685,21 @@ class NDOTemplate:
             "vrfRef": {"schemaID": schema["id"], "templateName": linked_vrf_template, "vrfName": linked_vrf_name},
         }
         payload.update(asdict(bd_config))
+        if bd_config.l2Stretch == False:
+            print ("  |--- *** BD is not stretched, so subnets are removed and intersiteBumTrafficAllow is set to False ***")
+            payload["subnets"] = []
+            payload["intersiteBumTrafficAllow"] = False
+            # deploy per site subnet if config is set
+            if bd_config.perSiteSubnet:
+                for site in schema["sites"]:
+                    # find subnet config for site
+                    site_subnet = list(filter(lambda s: s[0] == self.siteid_name_map[site["siteId"]], bd_config.perSiteSubnet))
+                    if len(site_subnet) == 0:
+                        continue
+                    # create subnet object
+                    site["bds"].append({"bdRef": {"templateName": template_name, "bdName": bd_name}, "subnets": [asdict(site_subnet[0][1])]})
+        else:
+            del payload["perSiteSubnet"]
 
         filter_template[0]["bds"].append(payload)
         print(f"  |--- Done")

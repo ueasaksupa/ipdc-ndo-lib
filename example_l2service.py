@@ -53,6 +53,40 @@ params = ServiceL2Parameters(
     ],
 )
 
+# EXAMPLE HOW TO NON STRETCH BD SERVICE
+params_for_non_strech_bd = ServiceL2Parameters(
+    connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
+    tenant_name="TN_NUTTAWUT",
+    schema_name="TN_NUTTAWUT_Schema01",
+    templates=[
+        VRFTemplate(
+            filter_name="FLT_IP",
+            contract_name="CON_VRF_CUSTOMER",
+            vrf_name="VRF_CUSTOMER",
+        ),
+        EPGsTemplate(
+            bds=[
+                TemplateBridgeDomain(
+                    name="NON_STRETCH_BD",
+                    linkedVrfName="VRF_CUSTOMER",
+                    anp_name="AP_CUSTOMER",
+                    epg=TemplateEPG(
+                        name="EPG_L2_DB_1",
+                        staticPortPerSite=ENDPOINTS,
+                    ),
+                    bdConfig=BridgeDomainConfig(
+                        l2Stretch=False,
+                        perSiteSubnet=[
+                            ("TLS1", BridgeDomainSubnet(ip="10.1.1.1/24")),
+                            ("SILA", BridgeDomainSubnet(ip="10.2.2.2/24")),
+                        ],
+                    ),
+                ),
+            ]
+        ),
+    ],
+)
+
 
 def Example_Service_Create():
     # EXAMPLE HOW TO CREATE SERVICE

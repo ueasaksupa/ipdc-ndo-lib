@@ -42,6 +42,7 @@ class EPGConfig:
 class BridgeDomainSubnet:
     """
     ### Note scope defination :
+    - ip : IP address with prefix format `(ww.xx.yy.zz/aa)`
     - scope private is equal to `Private to VRF`
     - scope public is equal to `Advertised Externally`
     """
@@ -59,6 +60,12 @@ class BridgeDomainSubnet:
 
 @dataclass(kw_only=True)
 class BridgeDomainConfig:
+    """
+    ### Note:
+    - l2Stretch : if True it will create L2 stretch BD, if False subnets and intersiteBumTrafficAllow properties are ignored
+    - perSiteSubnet : List of tuple with site name and BridgeDomainSubnet object. Its only used when l2Stretch is False
+    """
+
     description: str = ""
     l2UnknownUnicast: Literal["proxy", "flood"] = "proxy"
     intersiteBumTrafficAllow: bool = True
@@ -71,6 +78,7 @@ class BridgeDomainConfig:
     multiDstPktAct: Literal["bd-flood", "encap-flood", "drop"] = "bd-flood"
     unicastRouting: bool = True
     subnets: List[BridgeDomainSubnet] = field(default_factory=list)
+    perSiteSubnet: List[tuple[str, BridgeDomainSubnet]] = field(default_factory=list)
 
 
 @dataclass
