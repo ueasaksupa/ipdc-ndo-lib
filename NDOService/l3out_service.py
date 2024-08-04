@@ -62,7 +62,7 @@ def create(srvParams: ServiceL3OutParameters, allowPushToUnSyncSchema: bool = Tr
                 ndo.add_l3out_under_template(l3outTemplate.name, l3outTemplate.l3outConfig)
 
         # ----- CREATE BD, ANP, EPG, ExternalEPG UNDER TEMPLATE ------
-        if isinstance(template, MultiEPGTemplate):
+        if isinstance(template, EPGsTemplate):
             # create External EPG
             if template.externalEPG is not None:
                 eepg = template.externalEPG

@@ -75,7 +75,7 @@ class L3OutTemplatePerSite:
 
 
 @dataclass(kw_only=True)
-class TenantPolicyTenplate:
+class TenantPolicyTemplate:
     name: str
     site: str
     routemapConfig: RouteMapConfig
@@ -108,4 +108,4 @@ class ServiceL3OutParameters:
     schema_name: str
     templates: List[VRFTemplate | EPGsTemplate]
     l3outTemplatePerSite: List[L3OutTemplatePerSite]
-    tenantPolTemplates: List[TenantPolicyTenplate]
+    tenantPolTemplates: List[TenantPolicyTemplate]

@@ -448,7 +448,22 @@ class NDOTemplate:
         return True
 
     # Tenant Template
+    # All of the methods in this Tenant Template will return the updated schema object.
+    # Note that it won't change the schema object in the NDO until you call the `save_schema` method with the updated schema object.
+
     def save_schema(self, schema: dict) -> Schema:
+        """
+        Saves the given schema. This method is used to save the schema after making changes to it.
+
+        Args:
+            schema (dict): The schema to be saved.
+
+        Returns:
+            Schema: The saved schema.
+
+        Raises:
+            Exception: If the request to save the schema fails.
+        """
         print(f"--- Saving schema {schema['displayName']}")
         url = f"{self.base_path}{PATH_SCHEMAS}/{schema['id']}?enableVersionCheck=true"
         resp = self.session.put(url, json=schema)
@@ -458,6 +473,21 @@ class NDOTemplate:
         return resp.json()
 
     def create_tenant(self, tenant_name: str, sites: list[str], tenant_desc: str = "") -> Tenant:
+        """
+        Creates a new tenant with the given name, sites, and optional description.
+
+        Args:
+            tenant_name (str): The name of the tenant.
+            sites (list[str]): A list of site names associated with the tenant.
+            tenant_desc (str, optional): The description of the tenant. Defaults to "".
+
+        Returns:
+            Tenant: The created tenant object.
+
+        Raises:
+            Exception: If the site does not exist in the network.
+
+        """
         print(f"--- Creating tenant {tenant_name}")
 
         tenant = self.find_tenant_by_name(tenant_name)
@@ -495,6 +525,20 @@ class NDOTemplate:
         return resp.json()
 
     def create_schema(self, schema_name: str, schema_desc: str = "") -> Schema:
+        """
+        Creates a new schema with the given name and description.
+
+        Args:
+            schema_name (str): The name of the schema.
+            schema_desc (str, optional): The description of the schema. Defaults to "".
+
+        Returns:
+            Schema: The created schema object.
+
+        Raises:
+            Exception: If the schema creation fails.
+
+        """
         print(f"--- Creating schema {schema_name}")
 
         schema = self.find_schema_by_name(schema_name)
@@ -511,6 +555,18 @@ class NDOTemplate:
         return resp.json()
 
     def create_template(self, schema: dict, template_name: str, tenant_id: str) -> Template:
+        '''
+        Creates a template in the given schema.
+
+        Args:
+            schema (dict): The schema to add the template to.
+            template_name (str): The name of the template.
+            tenant_id (str): The ID of the tenant.
+
+        Returns:
+            Template: The created template object.
+        '''
+
         print(f"--- Creating template {template_name}")
 
         if "templates" not in schema or not schema["templates"]:
@@ -533,6 +589,21 @@ class NDOTemplate:
         return schema["templates"][-1]
 
     def add_site_to_template(self, schema: dict, template_name: str, sites: list[str]) -> None:
+        """
+        Adds a site to a template in the given schema.
+
+        Args:
+            schema (dict): The schema containing the template and sites.
+            template_name (str): The name of the template.
+            sites (list[str]): The list of site names to be added.
+
+        Raises:
+            Exception: If the site does not exist.
+
+        Returns:
+            None: This method does not return anything.
+        """
+        
         for site in sites:
             print(f"--- Adding site {site} to template {template_name}")
             try:
@@ -556,6 +627,21 @@ class NDOTemplate:
                 raise Exception(f"Site {site} does not exist")
 
     def create_filter_under_template(self, schema: dict, template_name: str, filter_name: str) -> Filter:
+        """
+        Creates a filter under a specified template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template to create the filter under.
+            filter_name (str): The name of the filter to be created.
+
+        Returns:
+            Filter: The created filter object.
+
+        Raises:
+            Exception: If the specified template does not exist.
+        """
+        
         print(f"--- Creating filter {filter_name}")
 
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
@@ -594,8 +680,21 @@ class NDOTemplate:
         return filter_template[0]["filters"][-1]
 
     def create_contract_under_template(
+        
         self, schema: dict, template_name: str, contract_name: str, filter_name: str
     ) -> Contract:
+        """
+        Creates a contract under a template.
+        Args:
+            schema (dict): The schema containing templates and contracts.
+            template_name (str): The name of the template.
+            contract_name (str): The name of the contract to be created.
+            filter_name (str): The name of the filter.
+        Returns:
+            Contract: The created contract.
+        Raises:
+            ValueError: If the specified template does not exist.
+        """
         print(f"--- Creating contract {contract_name}")
 
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
@@ -627,6 +726,24 @@ class NDOTemplate:
     def create_vrf_under_template(
         self, schema: dict, template_name: str, vrf_name: str, contract_name: str, vrf_config: VrfConfig | None = None
     ) -> Vrf:
+        """
+        Create a VRF under a template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            vrf_name (str): The name of the VRF to be created.
+            contract_name (str): The name of the contract.
+            vrf_config (VrfConfig | None, optional): The configuration for the VRF. Defaults to None.
+
+        Returns:
+            Vrf: The created VRF.
+
+        Raises:
+            ValueError: If the vrf_config is not an instance of VrfConfig.
+            ValueError: If the template does not exist.
+
+        """
         print(f"--- Creating VRF {vrf_name}")
         if vrf_config is None:
             vrf_config = VrfConfig()
@@ -663,6 +780,24 @@ class NDOTemplate:
         bd_name: str,
         bd_config: BridgeDomainConfig | None = None,
     ) -> BD:
+        """
+        Creates a bridge domain under a template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            linked_vrf_template (str): The name of the linked VRF template.
+            linked_vrf_name (str): The name of the linked VRF.
+            bd_name (str): The name of the bridge domain.
+            bd_config (BridgeDomainConfig | None, optional): The configuration for the bridge domain. Defaults to None.
+
+        Returns:
+            BD: The created bridge domain.
+
+        Raises:
+            ValueError: If bd_config is not an instance of BridgeDomainConfig.
+            ValueError: If the template does not exist.
+        """
         print(f"--- Creating BD under template {template_name}")
         if bd_config is None:
             bd_config = BridgeDomainConfig()
@@ -706,6 +841,22 @@ class NDOTemplate:
         return filter_template[0]["bds"][-1]
 
     def create_anp_under_template(self, schema: dict, template_name: str, anp_name: str, anp_desc: str = "") -> ANP:
+        """
+        Creates a new Application Network Profile (ANP) under a specified template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template to create the ANP under.
+            anp_name (str): The name of the ANP to create.
+            anp_desc (str, optional): The description of the ANP. Defaults to "".
+
+        Returns:
+            ANP: The created ANP.
+
+        Raises:
+            ValueError: If the specified template does not exist.
+
+        """
         print(f"--- Creating ANP under template {template_name}")
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(filter_template) == 0:
@@ -727,6 +878,22 @@ class NDOTemplate:
         return filter_template[0]["anps"][-1]
 
     def create_epg_under_template(self, schema: dict, anp_obj: dict, epg_name: str, epg_config: EPGConfig) -> EPG:
+        """
+        Creates an EPG (Endpoint Group) under a given ANP (Application Network Profile).
+
+        Args:
+            schema (dict): The schema containing the templates.
+            anp_obj (dict): The ANP (Application Network Profile) object. This object should be obtained from `create_anp_under_template` method.
+            epg_name (str): The name of the EPG (Endpoint Group) to be created.
+            epg_config (EPGConfig): The configuration object for the EPG.
+
+        Returns:
+            EPG: The created EPG (Endpoint Group) object.
+
+        Raises:
+            ValueError: If epg_config is not an instance of EPGConfig.
+
+        """
         if not isinstance(epg_config, EPGConfig):
             raise ValueError("epg_config must be instance of EPGConfig")
 
@@ -768,6 +935,24 @@ class NDOTemplate:
         l3outToSiteInfo: List[EEPGL3OutInfo],
         epg_desc: str = "",
     ) -> ExtEPG:
+        """
+        Creates an External EPG under a given template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            epg_name (str): The name of the External EPG.
+            vrf_name (str): The name of the VRF.
+            vrf_template (str): The name of the VRF template.
+            l3outToSiteInfo (List[EEPGL3OutInfo]): The list of L3Out to site information.
+            epg_desc (str, optional): The description of the External EPG. Defaults to "".
+
+        Returns:
+            ExtEPG: The created External EPG.
+
+        Raises:
+            ValueError: If the template does not exist.
+        """
         print(f"--- Creating External EPG under template {template_name}")
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
         if len(filter_template) == 0:
@@ -801,6 +986,23 @@ class NDOTemplate:
         domain: str,
         site_name: str,
     ) -> None:
+        """
+        Adds a physical domain to an EPG per site.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            anp_name (str): The name of the ANP (Application Network Profile).
+            epg_name (str): The name of the EPG (Endpoint Group).
+            domain (str): The name of the physical domain to be added.
+            site_name (str): The name of the target site.
+
+        Raises:
+            ValueError: If the site does not exist, the template with the site does not exist, the ANP does not exist, or the EPG does not exist.
+
+        Returns:
+            None: This method does not return anything.
+        """
         print(f"--- Adding domain {domain} to site {site_name}")
         if site_name not in self.sitename_id_map:
             raise ValueError(f"Site {site_name} does not exist.")
@@ -846,6 +1048,25 @@ class NDOTemplate:
         strict_check: bool = True,
         pod: str = "pod-1",
     ) -> None:
+        """
+        Adds a static port to the specified EPG.
+
+        Args:
+            schema (dict): The schema object containing the network configuration.
+            template_name (str): The name of the template.
+            anp_name (str): The name of the ANP (Application Network Profile).
+            epg_name (str): The name of the EPG (Endpoint Group).
+            site_name (str): The name of the site.
+            port_configs (list[StaticPortPhy | StaticPortPC | StaticPortVPC]): A list of port configurations.
+            strict_check (bool, optional): Whether to perform strict checking. Defaults to True.
+            pod (str, optional): The name of the pod. Defaults to "pod-1".
+
+        Raises:
+            ValueError: If the specified site or ANP does not exist.
+
+        Returns:
+            None
+        """
         print(f"--- Adding Static port to site {site_name}")
         if site_name not in self.sitename_id_map:
             raise ValueError(f"Site {site_name} does not exist.")
@@ -883,6 +1104,21 @@ class NDOTemplate:
             target_epg[0]["staticPorts"].append(payload)
 
     def delete_egp_under_template(self, schema: dict, template_name: str, anp_name: str, epg_name: str) -> None:
+        """
+        Deletes an EPG under a specific template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            anp_name (str): The name of the ANP (Application Network Profile).
+            epg_name (str): The name of the EPG (Endpoint Group).
+
+        Raises:
+            ValueError: If the template or ANP does not exist.
+
+        Returns:
+            None
+        """
         print(f"--- Deleting EPG under template {template_name}")
 
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
@@ -899,6 +1135,20 @@ class NDOTemplate:
                 break
 
     def delete_bridge_domain_under_template(self, schema: dict, template_name: str, bd_name: str) -> None:
+        """
+        Deletes a bridge domain under a given template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            bd_name (str): The name of the bridge domain to delete.
+
+        Raises:
+            ValueError: If the template does not exist.
+
+        Returns:
+            None
+        """
         print(f"--- Deleting BD under template {template_name}")
 
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
@@ -911,6 +1161,20 @@ class NDOTemplate:
                 break
 
     def delete_vrf_under_template(self, schema: dict, template_name: str, vrf_name: str) -> None:
+        """
+        Deletes a VRF under a specific template.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            vrf_name (str): The name of the VRF to be deleted.
+
+        Raises:
+            ValueError: If the template does not exist.
+
+        Returns:
+            None
+        """
         print(f"--- Deleting VRF under template {template_name}")
 
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
@@ -1059,6 +1323,21 @@ class NDOTemplate:
 
     # L3OUT template
     def create_l3out_template(self, template_name: str, site_name: str, tenant_name: str) -> L3OutTemplate:
+        """
+        Creates an L3OutTemplate with the given parameters.
+
+        Args:
+            template_name (str): The name of the L3OutTemplate.
+            site_name (str): The name of the site.
+            tenant_name (str): The name of the tenant.
+
+        Returns:
+            L3OutTemplate: The created L3OutTemplate.
+
+        Raises:
+            ValueError: If the site does not exist or the tenant does not exist.
+            Exception: If there is an error during the creation of the L3OutTemplate.
+        """
         print(f"--- Creating L3outTemplate {template_name}")
         if site_name not in self.sitename_id_map:
             raise ValueError(f"site {site_name} does not exist.")
@@ -1090,6 +1369,19 @@ class NDOTemplate:
         return resp.json()
 
     def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig) -> None:
+        """
+        Adds an L3out to the specified template.
+
+        Args:
+            template_name (str): The name of the template.
+            l3outConfig (L3OutConfig): An object of class L3OutConfig representing the L3out configuration.
+
+        Raises:
+            ValueError: If l3outConfig is not an object of class L3OutConfig or if the template does not exist.
+
+        Returns:
+            None: This method does not return anything.
+        """
         print(f"--- Adding L3out {l3outConfig.name} to template {template_name}")
         if not isinstance(l3outConfig, L3OutConfig):
             raise ValueError("l3outConfig must be an object of class L3OutConfig")
@@ -1117,6 +1409,19 @@ class NDOTemplate:
 
     # Fabric Template
     def find_vpc_by_name(self, vpc_name: str, site_name: str) -> VPCResourcePolicy | None:
+        """
+        Finds a VPC by its name within a specific site.
+
+        Args:
+            vpc_name (str): The name of the VPC to find.
+            site_name (str): The name of the site where the VPC is located.
+
+        Returns:
+            VPCResourcePolicy | None: The VPC resource policy if found, None otherwise.
+
+        Raises:
+            ValueError: If the specified site does not exist.
+        """
         if site_name not in self.sitename_id_map:
             raise ValueError(f"Site {site_name} does not exist.")
 
@@ -1132,6 +1437,19 @@ class NDOTemplate:
         return filtered[0]
 
     def find_pc_by_name(self, pc_name: str, site_name: str) -> PCResourcePolicy | None:
+        """
+        Finds a PC (Port Channel) by its name within a specific site.
+
+        Args:
+            pc_name (str): The name of the PC to search for.
+            site_name (str): The name of the site to search within.
+
+        Returns:
+            PCResourcePolicy | None: The PC resource policy if found, otherwise None.
+
+        Raises:
+            ValueError: If the specified site does not exist.
+        """
         if site_name not in self.sitename_id_map:
             raise ValueError(f"Site {site_name} does not exist.")
 
@@ -1147,6 +1465,15 @@ class NDOTemplate:
         return filtered[0]
 
     def find_fabric_policy_by_name(self, name: str) -> FabricPolicy | None:
+        """
+        Finds a fabric policy by its name.
+
+        Args:
+            name (str): The name of the fabric policy.
+
+        Returns:
+            FabricPolicy | None: The fabric policy object if found, None otherwise.
+        """
         url = f"{self.base_path}{PATH_FABRIC_POLICIES_SUM}"
         resp = self.session.get(url).json()
         filtered_resp = list(filter(lambda p: p["templateName"] == name, resp))
@@ -1157,6 +1484,15 @@ class NDOTemplate:
             return self.session.get(url).json()
 
     def find_fabric_resource_by_name(self, name: str) -> FabricResourcePolicy | None:
+        """
+        Finds a fabric resource by its name.
+
+        Args:
+            name (str): The name of the fabric resource.
+
+        Returns:
+            FabricResourcePolicy | None: The fabric resource policy if found, None otherwise.
+        """
         url = f"{self.base_path}{PATH_FABRIC_RESOURCES_SUM}"
         resp = self.session.get(url).json()
         filtered_resp = list(filter(lambda p: p["templateName"] == name, resp))
@@ -1166,7 +1502,16 @@ class NDOTemplate:
             url = f"{self.base_path}{PATH_TEMPLATES}/{filtered_resp[0]['templateId']}"
             return self.session.get(url).json()
 
-    def find_phyintf_setting_id_by_name(self, name: str) -> IntSettingPolicy | None:
+    def find_phyintf_setting_by_name(self, name: str) -> IntSettingPolicy | None:
+        """
+        Finds the physical interface setting by name.
+
+        Args:
+            name (str): The name of the physical interface setting.
+
+        Returns:
+            IntSettingPolicy | None: The physical interface setting if found, None otherwise.
+        """
         url = f"{self.base_path}{PATH_PHYINTF_POLICY_GROUP}"
         resp = self.session.get(url)
         if resp.status_code != 200:
@@ -1178,7 +1523,16 @@ class NDOTemplate:
                 return item["spec"]
         return None
 
-    def find_pc_intf_setting_id_by_name(self, name: str) -> IntSettingPolicy | None:
+    def find_pc_intf_setting_by_name(self, name: str) -> IntSettingPolicy | None:
+        """
+        Find the port channel interface setting by name.
+
+        Args:
+            name (str): The name of the port channel interface setting.
+
+        Returns:
+            IntSettingPolicy | None: The port channel interface setting if found, None otherwise.
+        """
         url = f"{self.base_path}{PATH_PORTCHANNEL_POLICY_GROUP}"
         resp = self.session.get(url)
         if resp.status_code != 200:
@@ -1193,6 +1547,21 @@ class NDOTemplate:
     def find_domain_by_name(
         self, domain_name: str, site_name: str | None = None, site_id: str | None = None, type: str = ""
     ) -> dict | None:
+        """
+        Find a domain object by its name.
+
+        Args:
+            domain_name (str): The name of the domain to find.
+            site_name (str | None, optional): The name of the site. Defaults to None.
+            site_id (str | None, optional): The ID of the site. Defaults to None.
+            type (str, optional): The type of the domain, support value ["l3", ""]. Defaults to "".
+
+        Returns:
+            dict | None: The domain dictionary if found, None otherwise.
+
+        Raises:
+            ValueError: If neither site_name nor site_id is provided.
+        """
         if not site_name and not site_id:
             raise ValueError("Either Sitename or SiteID is required.")
 
@@ -1205,6 +1574,21 @@ class NDOTemplate:
         return None
 
     def create_fabric_policy(self, name: str, site: str) -> FabricPolicy:
+        """
+        Creates a fabric policy with the given name and site.
+
+        Args:
+            name (str): The name of the fabric policy.
+            site (str): The name of the site.
+
+        Returns:
+            FabricPolicy: The created fabric policy.
+
+        Raises:
+            ValueError: If the site does not exist.
+            Exception: If there is an error in the API response.
+
+        """
         print(f"--- Creating policy {name} on site {site}")
 
         if site not in self.sitename_id_map:
@@ -1229,6 +1613,20 @@ class NDOTemplate:
         return resp.json()
 
     def create_fabric_resource(self, name: str, site: str) -> FabricResourcePolicy:
+        """
+        Creates a fabric resource policy with the given name and site.
+
+        Args:
+            name (str): The name of the fabric resource policy.
+            site (str): The name of the site where the fabric resource policy will be created.
+
+        Returns:
+            FabricResourcePolicy: The created fabric resource policy.
+
+        Raises:
+            ValueError: If the specified site does not exist.
+            Exception: If there is an error during the creation of the fabric resource policy.
+        """
         print(f"--- Creating resource policy {name} on site {site}")
 
         if site not in self.sitename_id_map:
@@ -1256,6 +1654,21 @@ class NDOTemplate:
         return resp.json()
 
     def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int] = []) -> None:
+        """
+        Adds a list of VLANs to a VLAN pool in a fabric policy.
+
+        Args:
+            policy_name (str): The name of the fabric policy.
+            pool_name (str): The name of the VLAN pool.
+            vlans (list[int], optional): A list of VLAN IDs to be added to the pool. Defaults to an empty list.
+
+        Raises:
+            ValueError: If the fabric policy does not exist.
+            Exception: If there is an error in the API response.
+
+        Returns:
+            None: This method does not return anything.
+        """
         print(f"--- Adding vlans {','.join([str(v) for v in vlans])} to pool {pool_name}")
         policy = self.find_fabric_policy_by_name(policy_name)
         if not policy:
@@ -1293,6 +1706,21 @@ class NDOTemplate:
         port_config: PhysicalIntfResource | PortChannelResource | VPCResource,
         intf_policy_name: str,
     ) -> None:
+        """
+        Adds a port to a fabric resource policy.
+
+        Args:
+            resource_name (str): The name of the fabric resource policy.
+            port_config (PhysicalIntfResource | PortChannelResource | VPCResource): The port configuration object.
+            intf_policy_name (str): The name of the interface policy.
+
+        Raises:
+            ValueError: If the fabric resource does not exist or the policy does not exist.
+            Exception: If the port_config is not a valid object.
+
+        Returns:
+            None: This method does not return anything.
+        """
         print(f"--- Adding fabric resource {port_config.name}")
         # find resource template
         resource = self.find_fabric_resource_by_name(resource_name)
@@ -1302,24 +1730,24 @@ class NDOTemplate:
         template = resource["fabricResourceTemplate"]["template"]
         if isinstance(port_config, PhysicalIntfResource):
             # find policy ID
-            policy_id = self.find_phyintf_setting_id_by_name(intf_policy_name)
-            if policy_id is None:
+            interface_setting = self.find_phyintf_setting_by_name(intf_policy_name)
+            if interface_setting is None:
                 raise ValueError(f"policy {intf_policy_name} does not exist. Please create it before using.")
-            port_config.policy = policy_id["uuid"]
+            port_config.policy = interface_setting["uuid"]
             self.__append_fabricRes_intf_object("interfaceProfiles", template, port_config)
         elif isinstance(port_config, PortChannelResource):
             # find policy ID
-            policy_id = self.find_pc_intf_setting_id_by_name(intf_policy_name)
-            if policy_id is None:
+            interface_setting = self.find_pc_intf_setting_by_name(intf_policy_name)
+            if interface_setting is None:
                 raise ValueError(f"policy {intf_policy_name} does not exist. Please create it before using.")
-            port_config.policy = policy_id["uuid"]
+            port_config.policy = interface_setting["uuid"]
             self.__append_fabricRes_intf_object("portChannels", template, port_config)
         elif isinstance(port_config, VPCResource):
             # find policy ID
-            policy_id = self.find_pc_intf_setting_id_by_name(intf_policy_name)
-            if policy_id is None:
+            interface_setting = self.find_pc_intf_setting_by_name(intf_policy_name)
+            if interface_setting is None:
                 raise Exception(f"policy {intf_policy_name} does not exist. Please create it before using.")
-            port_config.policy = policy_id["uuid"]
+            port_config.policy = interface_setting["uuid"]
             self.__append_fabricRes_intf_object("virtualPortChannels", template, port_config)
         else:
             raise ValueError(
@@ -1339,6 +1767,22 @@ class NDOTemplate:
         domain_name: str,
         pool_name: str | None = None,
     ) -> None:
+        """
+        Adds a domain to a fabric policy.
+
+        Args:
+            policy_name (str): The name of the fabric policy.
+            domain_type (Literal["l3Domains", "domains"]): The type of the domain. Must be either "l3Domains" or "domains".
+            domain_name (str): The name of the domain to be added.
+            pool_name (str | None, optional): The name of the VLAN pool. Defaults to None.
+
+        Raises:
+            ValueError: If the domain_type is not supported or if the policy does not exist.
+            ValueError: If the VLAN pool does not exist in the policy.
+
+        Returns:
+            None: This method does not return anything.
+        """
         print(f"--- Adding {domain_type} to fabric policy {policy_name}")
         if domain_type not in ["l3Domains", "domains"]:
             raise ValueError("only domain_type of l3Domain or domains is supported")

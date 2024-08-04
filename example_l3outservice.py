@@ -133,8 +133,8 @@ params = ServiceL3OutParameters(
     tenant_sites=["SILA", "TLS1"],
     schema_name="TN_NUTTAWUT_Schema01",
     tenantPolTemplates=[
-        TenantPolicyTenplate(name="TN_NUTTAWUT_Tenant_Policies_SILA", site="SILA", routemapConfig=ROUTE_MAP_CONFIG_S),
-        TenantPolicyTenplate(name="TN_NUTTAWUT_Tenant_Policies_TLS1", site="TLS1", routemapConfig=ROUTE_MAP_CONFIG_T),
+        TenantPolicyTemplate(name="TN_NUTTAWUT_Tenant_Policies_SILA", site="SILA", routemapConfig=ROUTE_MAP_CONFIG_S),
+        TenantPolicyTemplate(name="TN_NUTTAWUT_Tenant_Policies_TLS1", site="TLS1", routemapConfig=ROUTE_MAP_CONFIG_T),
     ],
     l3outTemplatePerSite=[
         L3OutTemplatePerSite(name="TN_NUTTAWUT_TEST_SILA_L3Out_Template", site="SILA", l3outConfig=L3OUT_SILA_CONFIG),

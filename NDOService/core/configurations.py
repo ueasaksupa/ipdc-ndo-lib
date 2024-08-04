@@ -151,6 +151,11 @@ class RouteMapAttributes:
 
 @dataclass(kw_only=True)
 class RouteMapPrefix:
+    """
+    ### Parameter Notes:
+    - prefix : IP address with prefix format `(ww.xx.yy.zz/aa)`
+    """
+
     prefix: str
     fromPfxLen: int = 0
     toPfxLen: int = 0
@@ -175,10 +180,10 @@ class RouteMapConfig:
 
 @dataclass
 class BFDPolicyConfig:
-    adminState: Literal["enabled", "disabled"] = "enabled"
     detectionMultiplier: int = 3
     minRxInterval: int = 50
     minTxInterval: int = 50
+    adminState: Literal["enabled", "disabled"] = "enabled"
     echoAdminState: Literal["enabled", "disabled"] = "enabled"
     echoRxInterval: int = 50
     ifControl: bool = False
@@ -268,6 +273,8 @@ class L3OutBGPPeerConfig:
     allowedSelfASCount: int = 3
     ebpgMultiHopTTL: int = 1
     localAsnConfig: str = "none"
+    importRouteMap: str | None = None
+    exportRouteMap: str | None = None
     bgpControls: L3OutBGPControl = field(default_factory=L3OutBGPControl)
     peerControls: L3OutBGPPeerControl = field(default_factory=L3OutBGPPeerControl)
 
@@ -335,11 +342,13 @@ class L3OutConfig:
     Parameter documentation:
     - name : the name of L3OUT template
     - vrf : the VRF name for this L3OUT
+    - l3domain : name of L3 domain
     - nodes : List of L3OutNodeConfig object
     - routingProtocol : either bgp or ospf
     - exportRouteMap : name of route map in Tenant policy
     - interfaces : List of L3OutInterfaceConfig object
     - pimEnabled : PIM setting default is disabled
+    - interfaceRoutingPolicy : name of L3Out Interface Routing Policy in Tenant policy
     """
 
     name: str
