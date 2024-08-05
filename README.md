@@ -58,6 +58,41 @@ pip install -f requirement.txt
 
 note: `<download_file_path>` is path that you download library into
 
+## Quick Start
+
+```python
+from NDOService.core.ndo_connector import NDOTemplate
+from NDOService.core.configurations import *
+
+
+params = {
+    "connection": {"host": "127.0.0.1", "port": 10443, "username": "admin", "password": "P@ssw0rd"},
+}
+
+# INIT
+ndo = NDOTemplate(
+    params["connection"]["host"],
+    params["connection"]["username"],
+    params["connection"]["password"],
+    params["connection"]["port"],
+)
+tenant = ndo.create_tenant("TEST_TENANT", ["SITE1","SITE2"])
+# get schema by name if schema was not been created before, It will be created automatically
+schema = ndo.create_schema("TEST_SCHEMA")
+# create template to schema
+ndo.create_template(schema, "TEST_TEMPLATE", tenant["id"])
+# associate site to template
+ndo.add_site_to_template(schema, "TEST_TEMPLATE", template_sites)
+# PUT update to NDO
+schema = ndo.save_schema(schema)
+# create filter under template
+ndo.create_filter_under_template(schema, "TEST_TEMPLATE", "TEST_FILTER")
+# create contract under template
+ndo.create_contract_under_template(schema, "TEST_TEMPLATE", "TEST_CON", "TEST_FILTER")
+# add VRF object to template
+ndo.create_vrf_under_template(schema, "TEST_TEMPLATE", "TEST_VRF", "TEST_CON")
+```
+
 ## Util methods
 
 #### create_tenant(\*\*kwargs):
