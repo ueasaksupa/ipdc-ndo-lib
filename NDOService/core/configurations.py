@@ -369,3 +369,21 @@ class EEPGL3OutInfo:
     site: str
     l3outTemplate: str
     l3outName: str
+
+
+@dataclass(kw_only=True)
+class StormCtlConfig:
+    """
+    ### Note:
+    - action : either drop or shutdown
+    - soakInstCount : The packets exceeding the threshold are dropped for <sec> seconds and the port is shutdown on the <sec>th second
+    """
+
+    broadcastPPS: int = 1000
+    broadcastMaxBurstPPS: int = 1000
+    multicastPPS: int = 1000
+    multicastMaxBurstPPS: int = 1000
+    unicastPPS: int = 500
+    unicastMaxBurstPPS: int = 500
+    action: Literal["drop", "shutdown"] = "drop"
+    soakInstCount: int = 3

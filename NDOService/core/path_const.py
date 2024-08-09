@@ -22,3 +22,10 @@ PATH_DOMAINSUM_SITE = "/mso/api/v1/domainsummary/site"
 
 PATH_TASK = "/mso/api/v1/task"
 PATH_DEPLOYMENT = "/mso/api/v1/deployments"
+
+# APIC
+PATH_APIC_LOGIN = "/api/aaaLogin.json"
+PATH_APIC_STORM_CONTROL = "/api/node/mo/uni/infra/stormctrlifp-{name}.json"
+PATH_APIC_INTF_POL = "/api/node/mo/uni/infra/funcprof/accportgrp-{name}/rsstormctrlIfPol.json"
+PATH_APIC_BUNDLE_POL = "/api/node/mo/uni/infra/funcprof/accbundle-{name}/rsstormctrlIfPol.json"
+PATH_APIC_PORT_STATUS = "/api/node/mo/uni/fabric/outofsvc.json"
