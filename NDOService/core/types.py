@@ -4,34 +4,34 @@ for more detail about each JSON object please refer to json schema in NDOObjectS
 """
 
 # NDOObjectSchema/site.json
-type Site = dict
+Site = dict
 
 # NDOObjectSchema/tenant.json
-type Tenant = dict
+Tenant = dict
 
 # NDOObjectSchema/schema.json
-type Schema = dict
+Schema = dict
 
-type Template = dict  # schema.templates
-type Filter = dict  # schema.templates.filters
-type Contract = dict  # schema.template.contracts
-type ExtEPG = dict  # schema.template.externalEpgs
-type EPG = dict  # schema.template.anps.epgs
-type Vrf = dict  # schema.template.vrfs
-type BD = dict  # schema.template.bds
-type ANP = dict  # schema.template.anps
+Template = dict  # schema.templates
+Filter = dict  # schema.templates.filters
+Contract = dict  # schema.template.contracts
+ExtEPG = dict  # schema.template.externalEpgs
+EPG = dict  # schema.template.anps.epgs
+Vrf = dict  # schema.template.vrfs
+BD = dict  # schema.template.bds
+ANP = dict  # schema.template.anps
 
 # NDOObjectSchema/template.json
-type FabricPolicy = dict  # template.fabricPolicyTemplate
-type FabricResourcePolicy = dict  # template.fabricResourceTemplate
-type TenantPolTemplate = dict  # template.tenantPolicyTemplate
-type L3OutTemplate = dict  # template.l3outTemplate
+FabricPolicy = dict  # template.fabricPolicyTemplate
+FabricResourcePolicy = dict  # template.fabricResourceTemplate
+TenantPolTemplate = dict  # template.tenantPolicyTemplate
+L3OutTemplate = dict  # template.l3outTemplate
 
 # NDOObjectSchema/interfaceSetting.json
-type IntSettingPolicy = dict
+IntSettingPolicy = dict
 
 # NDOObjectSchema/vpcsummary.json
-type VPCResourcePolicy = dict
+VPCResourcePolicy = dict
 
 # NDOObjectSchema/pcsummary.json
-type PCResourcePolicy = dict
+PCResourcePolicy = dict
