@@ -32,6 +32,7 @@ params = ServiceL2Parameters(
     tenant_name="TN_NUTTAWUT",
     schema_name="TN_NUTTAWUT_Schema01",
     templates=[
+        # This is the VRF template, default is VZAny type
         VRFTemplate(
             filter_name="FLT_IP",
             contract_name="CON_VRF_CUSTOMER",
@@ -53,12 +54,13 @@ params = ServiceL2Parameters(
     ],
 )
 
-# EXAMPLE HOW TO NON STRETCH BD SERVICE
+# EXAMPLE OF NON STRETCH BD SERVICE PARAMETER
 params_for_non_strech_bd = ServiceL2Parameters(
     connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
     tenant_name="TN_NUTTAWUT",
     schema_name="TN_NUTTAWUT_Schema01",
     templates=[
+        # This is the VRF template, default is VZAny type
         VRFTemplate(
             filter_name="FLT_IP",
             contract_name="CON_VRF_CUSTOMER",
@@ -75,10 +77,11 @@ params_for_non_strech_bd = ServiceL2Parameters(
                         staticPortPerSite=ENDPOINTS,
                     ),
                     bdConfig=BridgeDomainConfig(
-                        l2Stretch=False,
+                        l2Stretch=False,  # This is the key to make it non-stretch
+                        # PerSiteSubnet is optional, if you want to assign subnet to each site
                         perSiteSubnet=[
-                            ("TLS1", BridgeDomainSubnet(ip="10.1.1.1/24")),
-                            ("SILA", BridgeDomainSubnet(ip="10.2.2.2/24")),
+                            ("TLS1", BridgeDomainSubnet(ip="10.1.1.1/24")),  # This is the subnet for TLS1
+                            ("SILA", BridgeDomainSubnet(ip="10.2.2.2/24")),  # This is the subnet for SILA
                         ],
                     ),
                 ),

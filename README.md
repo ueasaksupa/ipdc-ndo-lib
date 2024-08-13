@@ -93,6 +93,23 @@ ndo.create_contract_under_template(schema, "TEST_TEMPLATE", "TEST_CON", "TEST_FI
 ndo.create_vrf_under_template(schema, "TEST_TEMPLATE", "TEST_VRF", "TEST_CON")
 ```
 
+## Example services
+
+### L2 Service
+
+_example_l2service.py_
+![d](./images/img-l2service.png)
+
+### L3 Service
+
+_example_l3service.py_
+![d](./images/img-l3service.png)
+
+### L3OUT Service
+
+_example_l3outservice.py_
+![d](./images/img-l3out.png)
+
 ## Util methods
 
 #### create_tenant(\*\*kwargs):
