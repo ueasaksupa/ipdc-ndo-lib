@@ -29,6 +29,12 @@ class StaticPortVPC:
 
 @dataclass(kw_only=True)
 class EPGConfig:
+    """
+    ### Note:
+    - linked_template : name of the template that BridgeDomain is linked to
+    - linked_bd : name of the BridgeDomain that EPG is linked to
+    """
+
     epg_desc: str = ""
     linked_template: str
     linked_bd: str
@@ -208,7 +214,8 @@ class OSPFIntfConfig:
 class L3OutStaticRouteNextHop:
     """
     ### Parameter Notes:
-    preference : is `Administrative Distance`
+    - nextHopIP : IP address format (ww.xx.yy.zz)
+    - preference : is `Administrative Distance`
     """
 
     nextHopIP: str

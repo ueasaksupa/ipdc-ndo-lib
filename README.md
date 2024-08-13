@@ -644,3 +644,119 @@ Raises:
 Returns:
     None: This method does not return anything.
 ```
+
+### Configuration Parameters
+
+##### BridgeDomainConfig
+
+- l2Stretch : if True it will create L2 stretch BD, if False subnets and intersiteBumTrafficAllow properties are ignored
+- perSiteSubnet : List of tuple with site name and BridgeDomainSubnet object. Its only used when l2Stretch is False
+
+```python
+class BridgeDomainConfig:
+    description: str = ""
+    l2UnknownUnicast: Literal["proxy", "flood"] = "proxy"
+    intersiteBumTrafficAllow: bool = True
+    optimizeWanBandwidth: bool = True
+    l2Stretch: bool = True
+    l3MCast: bool = False
+    unkMcastAct: Literal["opt-flood", "flood"] = "flood"
+    v6unkMcastAct: Literal["opt-flood", "flood"] = "flood"
+    arpFlood: bool = True
+    multiDstPktAct: Literal["bd-flood", "encap-flood", "drop"] = "bd-flood"
+    unicastRouting: bool = True
+    subnets: List[BridgeDomainSubnet] = field(default_factory=list)
+    perSiteSubnet: List[tuple[str, BridgeDomainSubnet]] = field(default_factory=list)
+```
+
+##### VrfConfig
+
+```python
+class VrfConfig:
+    description: str = ""
+    l3MCast: bool = False
+    preferredGroup: bool = False
+    vzAnyEnabled: bool = True
+    ipDataPlaneLearning: Literal["enabled", "disabled"] = "enabled"
+```
+
+##### EPGConfig
+
+- linked_template : name of the template that BridgeDomain is linked to
+- linked_bd : name of the BridgeDomain that EPG is linked to
+
+```python
+class EPGConfig:
+    epg_desc: str = ""
+    linked_template: str
+    linked_bd: str
+    proxyArp: bool = False
+    mCastSource: bool = False
+    preferredGroup: bool = False
+    intraEpg: Literal["unenforced", "enforced"] = "unenforced"
+```
+
+##### L3OutConfig
+
+- name : the name of L3OUT template
+- vrf : the VRF name for this L3OUT
+- l3domain : name of L3 domain
+- nodes : List of L3OutNodeConfig object
+- routingProtocol : either bgp or ospf
+- exportRouteMap : name of route map in Tenant policy
+- interfaces : List of L3OutInterfaceConfig object
+- pimEnabled : PIM setting default is disabled
+- interfaceRoutingPolicy : name of L3Out Interface Routing Policy in Tenant policy
+
+```python
+class L3OutConfig:
+    name: str
+    vrf: str
+    l3domain: str
+    nodes: List[L3OutNodeConfig]
+    routingProtocol: Literal["bgp"] | None = None
+    interfaces: List[L3OutInterfaceConfig | L3OutSubInterfaceConfig | L3OutSviInterfaceConfig]
+    exportRouteMap: str | None = None
+    importRouteMap: str | None = None
+    importRouteControl: bool = False
+    pimEnabled: bool = False
+    interfaceRoutingPolicy: str | None = None
+```
+
+##### L3OutNodeConfig
+
+- nodeID : node id example "1101"
+- routerID : IP address format (ww.xx.yy.zz)
+
+```python
+class L3OutNodeConfig:
+    nodeID: str
+    routerID: str
+    podID: str = "1"
+    useRouteIDAsLoopback: bool = False
+    staticRoutes: List[L3OutStaticRouteConfig] = field(default_factory=list)
+```
+
+##### L3OutStaticRouteConfig
+
+- prefix : IP address with prefix format `(ww.xx.yy.zz/aa)`
+- fallbackPref : is `Administrative Distance` incase the AD in each nexthop is unspecified it will fallback to use this AD. Default is 1
+- nullNextHop : if it true `it will create a static route to Null0`
+
+---
+
+- nextHopIP : IP address format (ww.xx.yy.zz)
+- preference : is `Administrative Distance`
+
+```python
+class L3OutStaticRouteConfig:
+    prefix: str
+    fallbackPref: int = 1
+    enableBFDTracking: bool = False
+    nullNextHop: bool = False
+    nextHops: List[L3OutStaticRouteNextHop]
+
+class L3OutStaticRouteNextHop:
+    nextHopIP: str
+    preference: int = 0
+```
