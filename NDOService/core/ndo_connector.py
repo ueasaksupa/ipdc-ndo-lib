@@ -555,7 +555,7 @@ class NDOTemplate:
         return resp.json()
 
     def create_template(self, schema: dict, template_name: str, tenant_id: str) -> Template:
-        '''
+        """
         Creates a template in the given schema.
 
         Args:
@@ -565,7 +565,7 @@ class NDOTemplate:
 
         Returns:
             Template: The created template object.
-        '''
+        """
 
         print(f"--- Creating template {template_name}")
 
@@ -609,7 +609,7 @@ class NDOTemplate:
         Returns:
             None: This method does not return anything.
         """
-        
+
         for site in sites:
             print(f"--- Adding site {site} to template {template_name}")
             try:
@@ -647,7 +647,7 @@ class NDOTemplate:
         Raises:
             Exception: If the specified template does not exist.
         """
-        
+
         print(f"--- Creating filter {filter_name}")
 
         filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
@@ -686,7 +686,6 @@ class NDOTemplate:
         return filter_template[0]["filters"][-1]
 
     def create_contract_under_template(
-        
         self, schema: dict, template_name: str, contract_name: str, filter_name: str
     ) -> Contract:
         """
@@ -827,18 +826,27 @@ class NDOTemplate:
         }
         payload.update(asdict(bd_config))
         if bd_config.l2Stretch == False:
-            print ("  |--- *** BD is not stretched, so subnets are removed and intersiteBumTrafficAllow is set to False ***")
+            print(
+                "  |--- *** BD is not stretched, so subnets are removed and intersiteBumTrafficAllow is set to False ***"
+            )
             payload["subnets"] = []
             payload["intersiteBumTrafficAllow"] = False
             # deploy per site subnet if config is set
             if bd_config.perSiteSubnet:
                 for site in schema["sites"]:
                     # find subnet config for site
-                    site_subnet = list(filter(lambda s: s[0] == self.siteid_name_map[site["siteId"]], bd_config.perSiteSubnet))
+                    site_subnet = list(
+                        filter(lambda s: s[0] == self.siteid_name_map[site["siteId"]], bd_config.perSiteSubnet)
+                    )
                     if len(site_subnet) == 0:
                         continue
                     # create subnet object
-                    site["bds"].append({"bdRef": {"templateName": template_name, "bdName": bd_name}, "subnets": [asdict(site_subnet[0][1])]})
+                    site["bds"].append(
+                        {
+                            "bdRef": {"templateName": template_name, "bdName": bd_name},
+                            "subnets": [asdict(site_subnet[0][1])],
+                        }
+                    )
         else:
             del payload["perSiteSubnet"]
 
@@ -1257,7 +1265,7 @@ class NDOTemplate:
     def add_route_map_prefix_to_policy(
         self, template_name: str, rm_name: str, entryOrder: int, prefix: RouteMapPrefix
     ) -> None:
-        print (f"--- Adding prefix to route map {rm_name}")
+        print(f"--- Adding prefix to route map {rm_name}")
         template = self.find_tenant_policies_template_by_name(template_name)
         if template is None:
             raise ValueError(f"Tenant policy {template_name} does not exist.")
@@ -1270,8 +1278,8 @@ class NDOTemplate:
             entry["matchRule"][0]["matchPrefixList"].append(asdict(prefix))
             break
         # put update to template
-        url = f"{self.base_path}{PATH_TEMPLATES}/{template["templateId"]}"
-        resp = self.session.put(url,json=template)
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
+        resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             raise Exception(resp.json())
         print(f"  |--- Done")
