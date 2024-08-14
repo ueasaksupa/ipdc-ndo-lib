@@ -338,9 +338,9 @@ class L3OutSVIPortChannel(L3OutSubIntPortChannel):
     sviMode: Literal["trunk", "access", "access8021p"] = "trunk"
 
 
-type L3OutInterfaceConfig = L3OutIntPortChannel | L3OutIntPhysicalPort
-type L3OutSubInterfaceConfig = L3OutSubIntPhysicalPort | L3OutSubIntPortChannel
-type L3OutSviInterfaceConfig = L3OutSVIPhysicalPort | L3OutSVIPortChannel
+L3OutInterfaceConfig = L3OutIntPortChannel | L3OutIntPhysicalPort
+L3OutSubInterfaceConfig = L3OutSubIntPhysicalPort | L3OutSubIntPortChannel
+L3OutSviInterfaceConfig = L3OutSVIPhysicalPort | L3OutSVIPortChannel
 
 
 @dataclass(kw_only=True)
