@@ -582,6 +582,12 @@ class NDOTemplate:
             "tenantId": tenant_id,
             "displayName": template_name,
             "templateType": "stretched-template",
+            "vrfs": [],
+            "contracts": [],
+            "filters": [],
+            "anps": [],
+            "bds":[],
+            "externalEpgs":[]
         }
 
         schema["templates"].append(payload)
@@ -724,7 +730,7 @@ class NDOTemplate:
         return filter_template[0]["contracts"][-1]
 
     def create_vrf_under_template(
-        self, schema: dict, template_name: str, vrf_name: str, contract_name: str, vrf_config: VrfConfig | None = None
+        self, schema: dict, template_name: str, vrf_name: str, contract_name: str | None = None, vrf_config: VrfConfig | None = None
     ) -> Vrf:
         """
         Create a VRF under a template.
@@ -733,7 +739,7 @@ class NDOTemplate:
             schema (dict): The schema containing the templates.
             template_name (str): The name of the template.
             vrf_name (str): The name of the VRF to be created.
-            contract_name (str): The name of the contract.
+            contract_name (str, optional): The name of the contract.
             vrf_config (VrfConfig | None, optional): The configuration for the VRF. Defaults to None.
 
         Returns:
@@ -762,8 +768,8 @@ class NDOTemplate:
         payload = {
             "displayName": vrf_name,
             "name": vrf_name,
-            "vzAnyConsumerContracts": [{"contractRef": {"contractName": contract_name}}],
-            "vzAnyProviderContracts": [{"contractRef": {"contractName": contract_name}}],
+            "vzAnyConsumerContracts": [{"contractRef": {"contractName": contract_name}}] if contract_name else [],
+            "vzAnyProviderContracts": [{"contractRef": {"contractName": contract_name}}] if contract_name else [],
         }
         payload.update(asdict(vrf_config))
 

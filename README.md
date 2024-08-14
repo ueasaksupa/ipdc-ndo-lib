@@ -335,7 +335,7 @@ Args:
     schema (dict): The schema containing the templates.
     template_name (str): The name of the template.
     vrf_name (str): The name of the VRF to be created.
-    contract_name (str): The name of the contract.
+    contract_name (str, optional): The name of the contract.
     vrf_config (VrfConfig | None, optional): The configuration for the VRF. Defaults to None.
 
 Returns:
