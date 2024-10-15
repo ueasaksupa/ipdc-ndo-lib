@@ -586,8 +586,8 @@ class NDOTemplate:
             "contracts": [],
             "filters": [],
             "anps": [],
-            "bds":[],
-            "externalEpgs":[]
+            "bds": [],
+            "externalEpgs": [],
         }
 
         schema["templates"].append(payload)
@@ -729,7 +729,12 @@ class NDOTemplate:
         return filter_template[0]["contracts"][-1]
 
     def create_vrf_under_template(
-        self, schema: dict, template_name: str, vrf_name: str, contract_name: str | None = None, vrf_config: VrfConfig | None = None
+        self,
+        schema: dict,
+        template_name: str,
+        vrf_name: str,
+        contract_name: str | None = None,
+        vrf_config: VrfConfig | None = None,
     ) -> Vrf:
         """
         Create a VRF under a template.
@@ -1021,6 +1026,10 @@ class NDOTemplate:
         if site_name not in self.sitename_id_map:
             raise ValueError(f"Site {site_name} does not exist.")
 
+        domainObject = self.find_domain_by_name(domain, site_name=site_name, type="physical")
+        if domainObject is None:
+            raise ValueError(f"Domain {domain} does not exist.")
+
         # filter target epg from schema object
         target_site_id = self.sitename_id_map[site_name]
         schema_site_template = list(
@@ -1037,19 +1046,26 @@ class NDOTemplate:
         if len(target_epg) == 0:
             raise ValueError(f"EPG {epg_name} does not exist.")
 
+        filtered_domain = list(
+            filter(
+                lambda d: ("domainRef" in d and domainObject["uuid"] == d["domainRef"]) or domain in d["dn"],
+                target_epg[0]["domainAssociations"],
+            )
+        )
+        if len(filtered_domain) != 0:
+            print(f"  |--- Domain {domain} is already exist.")
+            return
+
         payload = {
-            "dn": f"uni/phys-{domain}",
+            "dn": "",
+            "domainRef": domainObject["uuid"],
             "domainType": "physicalDomain",
             "deployImmediacy": "lazy",
             "resolutionImmediacy": "immediate",
             "allowMicroSegmentation": False,
         }
-        filtered_domain = list(filter(lambda d: domain in d["dn"], target_epg[0]["domainAssociations"]))
-        if len(filtered_domain) != 0:
-            print(f"  |--- Domain {domain} is already exist.")
-            return
-        print(f"  |--- Done")
         target_epg[0]["domainAssociations"].append(payload)
+        print(f"  |--- Done")
 
     def add_static_port_to_epg(
         self,
