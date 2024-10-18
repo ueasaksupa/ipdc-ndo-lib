@@ -53,7 +53,7 @@ source ./venv/bin/activate
 5. Install dependencies
 
 ```bash
-pip install -f requirement.txt
+pip install -r requirement.txt
 ```
 
 note: `<download_file_path>` is path that you download library into
