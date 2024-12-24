@@ -4,7 +4,7 @@ from .configurations import *
 
 from pprint import pprint
 from dataclasses import asdict
-from typing import Literal, Any
+from typing import Literal, Any, Tuple
 import requests
 import urllib3
 import time
@@ -526,7 +526,7 @@ class NDOTemplate:
 
     def create_schema(self, schema_name: str, schema_desc: str = "") -> Schema:
         """
-        Creates a new schema with the given name and description.
+        Creates a new schema with the given name and description. If the schema already exists, it will return the existing schema.
 
         Args:
             schema_name (str): The name of the schema.
@@ -1683,14 +1683,15 @@ class NDOTemplate:
         print(f"  |--- Done")
         return resp.json()
 
-    def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int] = []) -> None:
+    def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int | Tuple[int, int]] = []) -> None:
         """
         Adds a list of VLANs to a VLAN pool in a fabric policy.
 
         Args:
             policy_name (str): The name of the fabric policy.
             pool_name (str): The name of the VLAN pool.
-            vlans (list[int], optional): A list of VLAN IDs to be added to the pool. Defaults to an empty list.
+            vlans (list[int], optional): A list of VLAN IDs to be added to the pool. Defaults to an empty list. If a tuple is provided, it will be treated as a range of VLANs.
+            example: [1, 2, 3, (10, 20)] will add VLANs 1, 2, 3, and VLANs 10 to 20 to the pool.
 
         Raises:
             ValueError: If the fabric policy does not exist.
@@ -1722,7 +1723,14 @@ class NDOTemplate:
             else:
                 # extent the target pool with new vlans
                 for vlan in vlans:
-                    target_pool[0]["encapBlocks"].append({"range": {"from": vlan, "to": vlan, "allocMode": "static"}})
+                    if isinstance(vlan, tuple):
+                        target_pool[0]["encapBlocks"].append(
+                            {"range": {"from": vlan[0], "to": vlan[1], "allocMode": "static"}}
+                        )
+                    elif isinstance(vlan, int):
+                        target_pool[0]["encapBlocks"].append(
+                            {"range": {"from": vlan, "to": vlan, "allocMode": "static"}}
+                        )
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
         resp = self.session.put(url, json=policy)

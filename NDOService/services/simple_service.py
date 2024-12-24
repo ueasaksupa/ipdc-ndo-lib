@@ -1,21 +1,22 @@
-from .core.configurations import *
-from .core.ndo_connector import NDOTemplate
-from NDOService.core.service_parameters import *
+from ..core.configurations import *
+from ..core.ndo_connector import NDOTemplate
+from ..core.service_parameters import *
 
 
-def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True):
+def create_service(
+    ndo: NDOTemplate,
+    srvParams: ServiceSimpleParameters,
+    allowPushToUnSyncSchema: bool = True,
+    strictPortCheck: bool = False,
+):
     """
-    For create L2 service
+    For create service in NDO
+    :param ndo: NDOTemplate instance
+    :param srvParams: ServiceSimpleParameters instance
     """
-    if not isinstance(srvParams, ServiceL2Parameters):
-        raise ValueError("srvParams must be instance of ServiceL2Parameters class.")
+    if not isinstance(srvParams, ServiceSimpleParameters):
+        raise ValueError("srvParams must be instance of ServiceSimpleParameters class.")
 
-    ndo = NDOTemplate(
-        srvParams.connection.host,
-        srvParams.connection.username,
-        srvParams.connection.password,
-        srvParams.connection.port,
-    )
     # prepare sites for tenant creation
     allSiteList: list[str] = list(map(lambda s: s["name"], ndo.get_all_sites()))
     tenant_sites = allSiteList if srvParams.tenant_sites is None else srvParams.tenant_sites
@@ -33,8 +34,8 @@ def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True)
         if template.name is not None:
             # prepare empty VRF template
             ndo.create_template(schema, template.name, tenant["id"])
-            # associate site to template
-            template_sites = allSiteList if template.associatedSites is None else template.associatedSites
+            # associate site to template if template.associatedSites is all use allSiteList
+            template_sites = allSiteList if template.associatedSites == "_all_" else template.associatedSites
             ndo.add_site_to_template(schema, template.name, template_sites)
             # update schema
             schema = ndo.save_schema(schema)
@@ -52,11 +53,7 @@ def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True)
         if isinstance(template, EPGsTemplate):
             # create Bridge-Domain under template
             for bd in template.bds:
-                bd_config = (
-                    BridgeDomainConfig(unicastRouting=False, l2UnknownUnicast="flood")
-                    if bd.bdConfig is None
-                    else bd.bdConfig
-                )
+                bd_config = bd.bdConfig
                 ndo.create_bridge_domain_under_template(
                     schema,
                     template.name,
@@ -68,15 +65,14 @@ def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True)
                 # create Application Profile under template
                 anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)
                 # create EPG under ANP
-                ndo.create_epg_under_template(
-                    schema,
-                    anp,
-                    bd.epg.name,
-                    EPGConfig(
-                        linked_template=template.name,
-                        linked_bd=bd.name,
-                    ),
+                epg_config = EPGConfig(
+                    epg_desc=bd.epg.epg_description,
+                    linked_template=template.name,
+                    linked_bd=bd.name,
+                    proxyArp=bd.epg.proxyArp,
+                    mCastSource=bd.epg.mCastSource,
                 )
+                ndo.create_epg_under_template(schema, anp, bd.epg.name, epg_config)
                 # update schema
                 schema = ndo.save_schema(schema)
 
@@ -98,13 +94,8 @@ def create(srvParams: ServiceL2Parameters, allowPushToUnSyncSchema: bool = True)
                         bd.epg.name,
                         siteInfo.sitename,
                         siteInfo.staticPorts,
+                        strict_check=strictPortCheck,
                     )
 
                 # update schema
                 schema = ndo.save_schema(schema)
-
-
-if __name__ == "__main__":
-    """
-    FOR TEST
-    """

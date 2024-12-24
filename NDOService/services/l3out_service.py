@@ -1,21 +1,20 @@
-from .core.configurations import *
-from .core.ndo_connector import NDOTemplate
-from NDOService.core.service_parameters import *
+from ..core.configurations import *
+from ..core.ndo_connector import NDOTemplate
+from ..core.service_parameters import *
 
 
-def create(srvParams: ServiceL3Parameters, allowPushToUnSyncSchema: bool = True):
+def create_service(
+    ndo: NDOTemplate,
+    srvParams: ServiceL3OutParameters,
+    allowPushToUnSyncSchema: bool = True,
+    strictPortCheck: bool = False,
+):
     """
-    For create L2 service
+    For create L3Out service
     """
-    if not isinstance(srvParams, ServiceL3Parameters):
-        raise ValueError("srvParams must be instance of ServiceL3Parameters class.")
+    if not isinstance(srvParams, ServiceL3OutParameters):
+        raise ValueError("srvParams must be instance of ServiceL3OutParameters class.")
 
-    ndo = NDOTemplate(
-        srvParams.connection.host,
-        srvParams.connection.username,
-        srvParams.connection.password,
-        srvParams.connection.port,
-    )
     # prepare sites for tenant creation
     allSiteList: list[str] = list(map(lambda s: s["name"], ndo.get_all_sites()))
     tenant_sites = allSiteList if srvParams.tenant_sites is None else srvParams.tenant_sites
@@ -28,13 +27,19 @@ def create(srvParams: ServiceL3Parameters, allowPushToUnSyncSchema: bool = True)
         print(f"#### STOP, BECAUSE SCHEMA {schema['displayName']} is OUT OF SYNC ####")
         return
 
+    # ----- CREATE TENANT POLICY TEMPLATE ------
+    tPolicy = srvParams.tenantPolTemplates
+    for pol in tPolicy:
+        ndo.create_tenant_policies_template(pol.name, [pol.site], srvParams.tenant_name)
+        ndo.add_route_map_policy_under_template(pol.name, pol.routemapConfig)
+
     # ----- CREATE TEMPLATE ------
     for template in srvParams.templates:
         if template.name is not None:
             # prepare empty VRF template
             ndo.create_template(schema, template.name, tenant["id"])
             # associate site to template
-            template_sites = allSiteList if template.associatedSites is None else template.associatedSites
+            template_sites = allSiteList if template.associatedSites == "_all_" else template.associatedSites
             ndo.add_site_to_template(schema, template.name, template_sites)
             # update schema
             schema = ndo.save_schema(schema)
@@ -48,9 +53,22 @@ def create(srvParams: ServiceL3Parameters, allowPushToUnSyncSchema: bool = True)
             ndo.create_contract_under_template(schema, template.name, template.contract_name, template.filter_name)
             # create VRF under template
             ndo.create_vrf_under_template(schema, template.name, template.vrf_name, template.contract_name, vrf_config)
+            # update schema
+            schema = ndo.save_schema(schema)
+            # ----- CREATE L3OUT TEMPLATE ------
+            for l3outTemplate in srvParams.l3outTemplatePerSite:
+                ndo.create_l3out_template(l3outTemplate.name, l3outTemplate.site, srvParams.tenant_name)
+                ndo.add_l3out_under_template(l3outTemplate.name, l3outTemplate.l3outConfig)
 
-        # ----- CREATE BD, ANP, EPG UNDER TEMPLATE ------
+        # ----- CREATE BD, ANP, EPG, ExternalEPG UNDER TEMPLATE ------
         if isinstance(template, EPGsTemplate):
+            # create External EPG
+            if template.externalEPG is not None:
+                eepg = template.externalEPG
+                ndo.create_ext_epg_under_template(
+                    schema, template.name, eepg.name, eepg.linkedVrfName, eepg.linkedVrfTemplate, eepg.associatedL3Out
+                )
+
             # create Bridge-Domain under template
             for bd in template.bds:
                 bd_config = BridgeDomainConfig() if bd.bdConfig is None else bd.bdConfig
@@ -66,9 +84,14 @@ def create(srvParams: ServiceL3Parameters, allowPushToUnSyncSchema: bool = True)
                 # create Application Profile under template
                 anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)
                 # create EPG under ANP
-                ndo.create_epg_under_template(
-                    schema, anp, bd.epg.name, EPGConfig(linked_template=template.name, linked_bd=bd.name)
+                epg_config = EPGConfig(
+                    epg_desc=bd.epg.epg_description,
+                    linked_template=template.name,
+                    linked_bd=bd.name,
+                    proxyArp=bd.epg.proxyArp,
+                    mCastSource=bd.epg.mCastSource,
                 )
+                ndo.create_epg_under_template(schema, anp, bd.epg.name, epg_config)
                 # update schema
                 schema = ndo.save_schema(schema)
 
@@ -90,6 +113,7 @@ def create(srvParams: ServiceL3Parameters, allowPushToUnSyncSchema: bool = True)
                         bd.epg.name,
                         siteInfo.sitename,
                         siteInfo.staticPorts,
+                        strict_check=strictPortCheck,
                     )
                 # update schema
                 schema = ndo.save_schema(schema)

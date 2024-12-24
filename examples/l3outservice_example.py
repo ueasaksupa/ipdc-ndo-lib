@@ -1,4 +1,4 @@
-from NDOService import l3out_service
+from NDOService.services.l3out_service import create_service
 from NDOService.core.ndo_connector import NDOTemplate
 from NDOService.core.configurations import *
 from NDOService.core.service_parameters import *
@@ -128,7 +128,6 @@ ROUTE_MAP_CONFIG_T = RouteMapConfig(
 )
 
 params = ServiceL3OutParameters(
-    connection=NDOConnection(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd"),
     tenant_name="TN_NUTTAWUT",
     tenant_sites=["SILA", "TLS1"],
     schema_name="TN_NUTTAWUT_Schema01",
@@ -142,14 +141,19 @@ params = ServiceL3OutParameters(
     ],
     templates=[
         VRFTemplate(
+            name="VRF_CONTRACT_STRETCHED_TEMPLATE",
+            associatedSites=["SiteA"],
+            vrf_name="VRF_CUSTOMER",
             filter_name="FLT_IP",
-            contract_name="CON_VRF_CUST_L3OUT",
-            vrf_name="VRF_CUST_L3OUT",
+            contract_name="CON_VRF_CUSTOMER",
         ),
         EPGsTemplate(
+            name="POLICY_SITEA",
+            associatedSites=["SiteA"],
             bds=[
                 TemplateBridgeDomain(
                     name="BD_L3OUT_CUST_NET_1",
+                    linkedVrfTemplate="VRF_CONTRACT_STRETCHED_TEMPLATE",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",
                     epg=TemplateEPG(name="EPG_L3_SERVER_3_EXT", staticPortPerSite=ENDPOINTS_EPG_1),
@@ -159,6 +163,7 @@ params = ServiceL3OutParameters(
                 ),
                 TemplateBridgeDomain(
                     name="BD_L3OUT_CUST_NET_2",
+                    linkedVrfTemplate="VRF_CONTRACT_STRETCHED_TEMPLATE",
                     linkedVrfName="VRF_CUST_L3OUT",
                     anp_name="AP_CUSTOMER",
                     epg=TemplateEPG(name="EPG_L3_SERVER_4_EXT", staticPortPerSite=ENDPOINTS_EPG_2),
@@ -169,6 +174,7 @@ params = ServiceL3OutParameters(
             ],
             externalEPG=TemplateExternalEPG(
                 name="EPG_L3OUT_CUST_NET_3",
+                linkedVrfTemplate="VRF_CONTRACT_STRETCHED_TEMPLATE",
                 linkedVrfName="VRF_CUST_L3OUT",
                 associatedL3Out=[
                     EEPGL3OutInfo(
@@ -187,20 +193,7 @@ params = ServiceL3OutParameters(
     ],
 )
 
-# INIT ndo object
-ndo = NDOTemplate(
-    params.connection.host,
-    params.connection.username,
-    params.connection.password,
-    params.connection.port,
-)
-
-
-def Example_Service_Create():
-    # EXAMPLE HOW TO CREATE SERVICE
-    #
-    l3out_service.create(params)
-
 
 if __name__ == "__main__":
-    Example_Service_Create()
+    ndo = NDOTemplate(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd")
+    create_service(ndo, params)

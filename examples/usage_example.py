@@ -216,10 +216,10 @@ def Example_Add_prefix_to_existing_RM():
 
 
 if __name__ == "__main__":
-    # Example_Fabric_Template()
+    Example_Fabric_Template()
     # Example_create_Tenant_Policies()
     # Example_L3Out()
-    Example_Deploy_Schema_Template()
+    # Example_Deploy_Schema_Template()
     # Example_Deploy_Template()
     # Example_Undeploy_site()
     # Example_deletion()

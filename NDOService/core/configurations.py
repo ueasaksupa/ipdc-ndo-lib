@@ -30,9 +30,14 @@ class StaticPortVPC:
 @dataclass(kw_only=True)
 class EPGConfig:
     """
-    ### Note:
+    Parameters:
+    - epg_desc : description of EPG
     - linked_template : name of the template that BridgeDomain is linked to
     - linked_bd : name of the BridgeDomain that EPG is linked to
+    - proxyArp : enable or disable proxy ARP
+    - mCastSource : enable or disable multicast source
+    - preferredGroup : enable or disable preferred group
+    - intraEpg : intra EPG enforcement [unenforced, enforced]
     """
 
     epg_desc: str = ""
@@ -67,7 +72,7 @@ class BridgeDomainSubnet:
 @dataclass(kw_only=True)
 class BridgeDomainConfig:
     """
-    ### Note:
+    Parameters:
     - l2Stretch : if True it will create L2 stretch BD, if False subnets and intersiteBumTrafficAllow properties are ignored
     - perSiteSubnet : List of tuple with site name and BridgeDomainSubnet object. Its only used when l2Stretch is False
     """

@@ -4,14 +4,6 @@ from .configurations import *
 
 
 @dataclass(kw_only=True)
-class NDOConnection:
-    host: str
-    port: int
-    username: str
-    password: str
-
-
-@dataclass(kw_only=True)
 class SiteStaticPorts:
     """
     ### Parameter Notes:
@@ -28,7 +20,7 @@ class SiteStaticPorts:
 @dataclass(kw_only=True)
 class TemplateExternalEPG:
     name: str
-    linkedVrfTemplate: str = "VRF_Contract_Stretch_Template"
+    linkedVrfTemplate: str
     linkedVrfName: str
     associatedL3Out: List[EEPGL3OutInfo]
 
@@ -37,30 +29,33 @@ class TemplateExternalEPG:
 class TemplateEPG:
     name: str
     staticPortPerSite: List[SiteStaticPorts]
+    epg_description: str = ""
+    mCastSource: bool = False
+    proxyArp: bool = False
 
 
 @dataclass(kw_only=True)
 class TemplateBridgeDomain:
     name: str
-    linkedVrfTemplate: str = "VRF_Contract_Stretch_Template"
+    linkedVrfTemplate: str
     linkedVrfName: str
     anp_name: str
     epg: TemplateEPG
-    bdConfig: Optional[BridgeDomainConfig] = None
+    bdConfig: BridgeDomainConfig
 
 
 @dataclass(kw_only=True)
 class EPGsTemplate:
-    name: str = "Policy_Stretch_AllSite_template"
-    associatedSites: List[str] | None = None
+    name: str
+    associatedSites: List[str] | Literal["_all_"]
     bds: List[TemplateBridgeDomain]
     externalEPG: Optional[TemplateExternalEPG] = None
 
 
 @dataclass(kw_only=True)
 class VRFTemplate:
-    name: str = "VRF_Contract_Stretch_Template"
-    associatedSites: List[str] | None = None
+    name: str
+    associatedSites: List[str] | Literal["_all_"]
     filter_name: str
     contract_name: str
     vrf_name: str
@@ -83,17 +78,7 @@ class TenantPolicyTemplate:
 
 
 @dataclass(kw_only=True)
-class ServiceL2Parameters:
-    connection: NDOConnection
-    tenant_name: str
-    tenant_sites: List[str] | None = None
-    schema_name: str
-    templates: List[VRFTemplate | EPGsTemplate]
-
-
-@dataclass(kw_only=True)
-class ServiceL3Parameters:
-    connection: NDOConnection
+class ServiceSimpleParameters:
     tenant_name: str
     tenant_sites: List[str] | None = None
     schema_name: str
@@ -102,7 +87,6 @@ class ServiceL3Parameters:
 
 @dataclass(kw_only=True)
 class ServiceL3OutParameters:
-    connection: NDOConnection
     tenant_name: str
     tenant_sites: List[str] | None = None
     schema_name: str
