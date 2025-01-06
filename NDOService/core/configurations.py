@@ -34,6 +34,7 @@ class EPGConfig:
     - epg_desc : description of EPG
     - linked_template : name of the template that BridgeDomain is linked to
     - linked_bd : name of the BridgeDomain that EPG is linked to
+    - linked_schema : (optional) name of the schema that EPG is linked to, default is the same schema as the linked_bd
     - proxyArp : enable or disable proxy ARP
     - mCastSource : enable or disable multicast source
     - preferredGroup : enable or disable preferred group
@@ -43,6 +44,7 @@ class EPGConfig:
     epg_desc: str = ""
     linked_template: str
     linked_bd: str
+    linked_schema: str | None = None
     proxyArp: bool = False
     mCastSource: bool = False
     preferredGroup: bool = False

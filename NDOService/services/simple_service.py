@@ -55,12 +55,13 @@ def create_service(
             for bd in template.bds:
                 bd_config = bd.bdConfig
                 ndo.create_bridge_domain_under_template(
-                    schema,
-                    template.name,
-                    bd.linkedVrfTemplate,
-                    bd.linkedVrfName,
-                    bd.name,
-                    bd_config,
+                    schema=schema,
+                    template_name=template.name,
+                    linked_vrf_schema=bd.linkedVrfSchema,
+                    linked_vrf_template=bd.linkedVrfTemplate,
+                    linked_vrf_name=bd.linkedVrfName,
+                    bd_name=bd.name,
+                    bd_config=bd_config,
                 )
                 # create Application Profile under template
                 anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)

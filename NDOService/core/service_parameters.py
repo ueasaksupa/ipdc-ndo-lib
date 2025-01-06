@@ -20,6 +20,7 @@ class SiteStaticPorts:
 @dataclass(kw_only=True)
 class TemplateExternalEPG:
     name: str
+    linkedVrfSchema: str | None = None
     linkedVrfTemplate: str
     linkedVrfName: str
     associatedL3Out: List[EEPGL3OutInfo]
@@ -37,6 +38,7 @@ class TemplateEPG:
 @dataclass(kw_only=True)
 class TemplateBridgeDomain:
     name: str
+    linkedVrfSchema: str | None = None
     linkedVrfTemplate: str
     linkedVrfName: str
     anp_name: str

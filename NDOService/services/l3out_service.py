@@ -66,20 +66,26 @@ def create_service(
             if template.externalEPG is not None:
                 eepg = template.externalEPG
                 ndo.create_ext_epg_under_template(
-                    schema, template.name, eepg.name, eepg.linkedVrfName, eepg.linkedVrfTemplate, eepg.associatedL3Out
+                    schema=schema,
+                    template_name=template.name,
+                    epg_name=eepg.name,
+                    linked_vrf_schema=eepg.linkedVrfSchema,
+                    linked_vrf_template=eepg.linkedVrfTemplate,
+                    linked_vrf_name=eepg.linkedVrfName,
+                    l3outToSiteInfo=eepg.associatedL3Out,
                 )
 
             # create Bridge-Domain under template
             for bd in template.bds:
-                bd_config = BridgeDomainConfig() if bd.bdConfig is None else bd.bdConfig
-                bd_config.arpFlood = False
+                bd_config = bd.bdConfig
                 ndo.create_bridge_domain_under_template(
-                    schema,
-                    template.name,
-                    bd.linkedVrfTemplate,
-                    bd.linkedVrfName,
-                    bd.name,
-                    bd_config,
+                    schema=schema,
+                    template_name=template.name,
+                    linked_vrf_schema=bd.linkedVrfSchema,
+                    linked_vrf_template=bd.linkedVrfTemplate,
+                    linked_vrf_name=bd.linkedVrfName,
+                    bd_name=bd.name,
+                    bd_config=bd_config,
                 )
                 # create Application Profile under template
                 anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)
@@ -117,9 +123,3 @@ def create_service(
                     )
                 # update schema
                 schema = ndo.save_schema(schema)
-
-
-if __name__ == "__main__":
-    """
-    FOR TEST
-    """

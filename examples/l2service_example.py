@@ -13,7 +13,7 @@ ENDPOINTS = [
         epg_phy_domain="PHY_DOM_01",
         staticPorts=[
             StaticPortPhy(nodeId="3101", port_name="1/10", port_mode="regular", vlan=2000),
-            StaticPortPhy(nodeId="3101", port_name="1/11", port_mode="regular", vlan=2100),
+            StaticPortPhy(nodeId="3101", port_name="1/11", port_mode="regular", vlan=2000),
             # StaticPortPC(port_name="PC_NAME", port_mode="regular", vlan=2200),  # example of port-channel, you have to make sure that the PC is already created in the fabric
             # StaticPortVPC(port_name="VPC_NAME", port_mode="regular", vlan=2300), # example of vPC, you have to make sure that the VPC is already created in the fabric
         ],
@@ -39,6 +39,7 @@ params = ServiceSimpleParameters(
             bds=[
                 TemplateBridgeDomain(
                     name="BD_L2_CUST_NET_1",
+                    # linkedVrfSchema="....", # if you want to link to another schema
                     linkedVrfTemplate="VRF_CONTRACT_STRETCHED_TEMPLATE",
                     linkedVrfName="VRF_CUSTOMER",
                     anp_name="AP_CUSTOMER",

@@ -789,6 +789,7 @@ class NDOTemplate:
         linked_vrf_name: str,
         bd_name: str,
         bd_config: BridgeDomainConfig | None = None,
+        linked_vrf_schema: str | None = None,
     ) -> BD:
         """
         Creates a bridge domain under a template.
@@ -798,6 +799,7 @@ class NDOTemplate:
             template_name (str): The name of the template.
             linked_vrf_template (str): The name of the linked VRF template.
             linked_vrf_name (str): The name of the linked VRF.
+            linked_vrf_schema (str | None, optional): The name of the linked VRF schema. Defaults to None meaning the same schema as the template.
             bd_name (str): The name of the bridge domain.
             bd_config (BridgeDomainConfig | None, optional): The configuration for the bridge domain. Defaults to None.
 
@@ -824,10 +826,17 @@ class NDOTemplate:
             return filter_bd[0]
 
         # "vrfRef": f"/schemas/{schema['id']}/templates/{linked_vrf_template}/vrfs/{linked_vrf_name}",
+        target_schema = schema if linked_vrf_schema is None else self.find_schema_by_name(linked_vrf_schema)
+        if target_schema is None:
+            raise ValueError(f"Linked VRF schema {linked_vrf_schema} does not exist.")
         payload = {
             "name": bd_name,
             "displayName": bd_name,
-            "vrfRef": {"schemaID": schema["id"], "templateName": linked_vrf_template, "vrfName": linked_vrf_name},
+            "vrfRef": {
+                "schemaID": target_schema["id"],
+                "templateName": linked_vrf_template,
+                "vrfName": linked_vrf_name,
+            },
         }
         payload.update(asdict(bd_config))
         if bd_config.l2Stretch == False:
@@ -925,13 +934,18 @@ class NDOTemplate:
 
         # TODO
         # Parameterized flags
+        target_schema = (
+            schema if epg_config.linked_schema is None else self.find_schema_by_name(epg_config.linked_schema)
+        )
+        if target_schema is None:
+            raise ValueError(f"Linked schema {epg_config.linked_schema} does not exist.")
         payload = {
             "epgType": "application",
             "name": epg_name,
             "displayName": epg_name,
             "description": epg_config.epg_desc,
             "bdRef": {
-                "schemaID": schema["id"],
+                "schemaID": target_schema["id"],
                 "templateName": epg_config.linked_template,
                 "bdName": epg_config.linked_bd,
             },
@@ -949,9 +963,10 @@ class NDOTemplate:
         schema: dict,
         template_name: str,
         epg_name: str,
-        vrf_name: str,
-        vrf_template: str,
+        linked_vrf_name: str,
+        linked_vrf_template: str,
         l3outToSiteInfo: List[EEPGL3OutInfo],
+        linked_vrf_schema: str | None = None,
         epg_desc: str = "",
     ) -> ExtEPG:
         """
@@ -961,8 +976,9 @@ class NDOTemplate:
             schema (dict): The schema containing the templates.
             template_name (str): The name of the template.
             epg_name (str): The name of the External EPG.
-            vrf_name (str): The name of the VRF.
-            vrf_template (str): The name of the VRF template.
+            linked_vrf_name (str): The name of the VRF.
+            linked_vrf_template (str): The name of the VRF template.
+            linked_vrf_schema (str, optional): The name of the linked VRF schema. Defaults to None meaning the same schema as the template.
             l3outToSiteInfo (List[EEPGL3OutInfo]): The list of L3Out to site information.
             epg_desc (str, optional): The description of the External EPG. Defaults to "".
 
@@ -982,11 +998,19 @@ class NDOTemplate:
             print(f"  |--- External EPG {epg_name} is already exist in template {template_name}")
             return filter_eepg[0]
 
+        target_schema = schema if linked_vrf_schema is None else self.find_schema_by_name(linked_vrf_schema)
+        if target_schema is None:
+            raise ValueError(f"Linked VRF schema {linked_vrf_schema} does not exist.")
+
         payload = {
             "name": epg_name,
             "displayName": epg_name,
             "extEpgType": "on-premise",
-            "vrfRef": {"vrfName": vrf_name, "templateName": vrf_template},
+            "vrfRef": {
+                "schemaID": target_schema["id"],
+                "vrfName": linked_vrf_name,
+                "templateName": linked_vrf_template,
+            },
             "description": epg_desc,
         }
         # Add External EPG to template
@@ -1857,8 +1881,8 @@ class NDOTemplate:
         print(f"  |--- Done")
 
     # task deployment
-    def deploy_template(self, template_name: str) -> None:
-        print(f"--- Deploying template {template_name}")
+    def deploy_policies_template(self, template_name: str) -> None:
+        print(f"--- Deploying policies template {template_name}")
         url = f"{self.base_path}{PATH_TEMPLATES_SUMMARY}"
         templates = self.session.get(url).json()
         filtered = list(filter(lambda t: t["templateName"] == template_name, templates))

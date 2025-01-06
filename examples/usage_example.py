@@ -191,7 +191,7 @@ def Example_Deploy_Schema_Template():
 
 
 def Example_Deploy_Template():
-    ndo.deploy_template("TN_NUTTAWUT_Tenant_Policies_TLS1")
+    ndo.deploy_policies_template("TN_NUTTAWUT_Tenant_Policies_TLS1")
 
 
 def Example_Undeploy_site():
