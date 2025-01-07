@@ -379,7 +379,7 @@ class L3OutConfig:
 
 
 @dataclass(kw_only=True)
-class EEPGL3OutInfo:
+class ExternalEpgToL3OutBinding:
     site: str
     l3outTemplate: str
     l3outName: str

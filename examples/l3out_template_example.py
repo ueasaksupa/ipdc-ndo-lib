@@ -85,12 +85,12 @@ def Example_L3Out():
         return
 
     EEPG_L3OUT_INFO = [
-        EEPGL3OutInfo(
+        ExternalEpgToL3OutBinding(
             site="SILA",
             l3outTemplate="TN_NUTTAWUT_TEST_SILA_L3Out_Template",
             l3outName="L3OUT_SILA_TEST",
         ),
-        EEPGL3OutInfo(
+        ExternalEpgToL3OutBinding(
             site="TLS1",
             l3outTemplate="TN_NUTTAWUT_TEST_TLS1_L3Out_Template",
             l3outName="L3OUT_TLS_TN_NUTTAWUT",

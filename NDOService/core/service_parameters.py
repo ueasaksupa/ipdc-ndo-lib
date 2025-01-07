@@ -23,7 +23,7 @@ class TemplateExternalEPG:
     linkedVrfSchema: str | None = None
     linkedVrfTemplate: str
     linkedVrfName: str
-    associatedL3Out: List[EEPGL3OutInfo]
+    associatedL3Out: List[ExternalEpgToL3OutBinding]
 
 
 @dataclass(kw_only=True)

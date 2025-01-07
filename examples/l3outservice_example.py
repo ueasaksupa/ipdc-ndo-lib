@@ -177,12 +177,12 @@ params = ServiceL3OutParameters(
                 linkedVrfTemplate="VRF_CONTRACT_STRETCHED_TEMPLATE",
                 linkedVrfName="VRF_CUST_L3OUT",
                 associatedL3Out=[
-                    EEPGL3OutInfo(
+                    ExternalEpgToL3OutBinding(
                         site="SILA",
                         l3outTemplate="TN_NUTTAWUT_TEST_SILA_L3Out_Template",
                         l3outName="L3OUT_SILA_TN_NUTTAWUT",
                     ),
-                    EEPGL3OutInfo(
+                    ExternalEpgToL3OutBinding(
                         site="TLS1",
                         l3outTemplate="TN_NUTTAWUT_TEST_TLS1_L3Out_Template",
                         l3outName="L3OUT_TLS1_TN_NUTTAWUT",

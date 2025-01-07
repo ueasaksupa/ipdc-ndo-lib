@@ -414,7 +414,7 @@ Args:
     epg_name (str): The name of the External EPG.
     vrf_name (str): The name of the VRF.
     vrf_template (str): The name of the VRF template.
-    l3outToSiteInfo (List[EEPGL3OutInfo]): The list of L3Out to site information.
+    l3outToSiteInfo (List[ExternalEpgToL3OutBinding]): The list of L3Out to site information.
     epg_desc (str, optional): The description of the External EPG. Defaults to "".
 
 Returns:

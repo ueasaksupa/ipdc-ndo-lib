@@ -74,7 +74,7 @@ class NDOTemplate:
         template[key].append(asdict(port_config))
 
     def __append_l3out_to_external_epg_site(
-        self, schema: dict, template_name: str, epg_name: str, l3outList: List[EEPGL3OutInfo]
+        self, schema: dict, template_name: str, epg_name: str, l3outList: List[ExternalEpgToL3OutBinding]
     ) -> None:
         for l3out in l3outList:
             for site in schema["sites"]:
@@ -965,7 +965,7 @@ class NDOTemplate:
         epg_name: str,
         linked_vrf_name: str,
         linked_vrf_template: str,
-        l3outToSiteInfo: List[EEPGL3OutInfo],
+        l3outToSiteInfo: List[ExternalEpgToL3OutBinding],
         linked_vrf_schema: str | None = None,
         epg_desc: str = "",
     ) -> ExtEPG:
@@ -979,7 +979,7 @@ class NDOTemplate:
             linked_vrf_name (str): The name of the VRF.
             linked_vrf_template (str): The name of the VRF template.
             linked_vrf_schema (str, optional): The name of the linked VRF schema. Defaults to None meaning the same schema as the template.
-            l3outToSiteInfo (List[EEPGL3OutInfo]): The list of L3Out to site information.
+            l3outToSiteInfo (List[ExternalEpgToL3OutBinding]): The list of L3Out to site information.
             epg_desc (str, optional): The description of the External EPG. Defaults to "".
 
         Returns:
