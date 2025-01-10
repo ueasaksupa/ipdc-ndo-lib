@@ -227,6 +227,30 @@ Raises:
     ValueError: If neither site_name nor site_id is provided.
 ```
 
+#### find_schema_by_name(...):
+
+Find a schema object by name.
+
+```
+Args:
+    schema_name(str)
+
+Returns:
+    dict | None: The schema object, None if not exist.
+```
+
+#### find_tenant_by_name(...):
+
+Find a Tenant object by name.
+
+```
+Args:
+    tenant_name(str)
+
+Returns:
+    dict | None: The tenant object, None if not exist.
+```
+
 ## Tenant Template methods
 
 All of the methods in this Tenant Template will return the updated schema object. Note that it won't change the schema object in the NDO until you call the `save_schema` method with the updated schema object.
@@ -759,4 +783,45 @@ class L3OutStaticRouteConfig:
 class L3OutStaticRouteNextHop:
     nextHopIP: str
     preference: int = 0
+```
+
+##### PhysicalIntfResource
+
+```python
+class PhysicalIntfResource:
+    name: str
+    interfaces: str
+    policy: str = ""
+    nodes: List[str] = field(default_factory=list)
+    interfaceDescriptions: List[IntfDescription] = field(default_factory=list)
+    description: str = ""
+```
+
+##### PortChannelResource
+
+```python
+class PortChannelResource:
+    name: str
+    node: str
+    memberInterfaces: str
+    policy: str = ""
+    interfaceDescriptions: List[IntfDescription] = field(default_factory=list)
+    description: str = ""
+```
+
+##### VPCResource
+
+```python
+class VPCResource:
+    name: str
+    node1Details: VPCNodeDetails
+    node2Details: VPCNodeDetails
+    policy: str = ""
+    interfaceDescriptions: List[IntfDescription] = field(default_factory=list)
+    description: str = ""
+
+
+class VPCNodeDetails:
+    node: str
+    memberInterfaces: str
 ```

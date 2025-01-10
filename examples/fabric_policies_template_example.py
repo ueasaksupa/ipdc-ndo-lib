@@ -27,6 +27,9 @@ def Example_Fabric_Template():
     # example - To add vlan to pool
     ndo.add_vlans_to_pool("TLS1_nuttawut_test_by_script", "VLAN_SERVER_CL_TEST", [3013, 3014, (3015, 3100)])
 
+    # example - To add domain to fabric policy
+    ndo.add_domain_to_fabric_policy("TLS1_nuttawut_test_by_script", "domains", "TLS1_CL_DOM01", "VLAN_SERVER_CL_TEST")
+
     # example VPC resource config
     vpc_port_config = VPCResource(
         name="VPC_SILA_TEST",
