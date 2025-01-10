@@ -1869,9 +1869,15 @@ class NDOTemplate:
         else:
             target = list(filter(lambda pol: pol["name"] == domain_name, template[domain_type]))
             if len(target) != 0:
-                print(f"  |--- {domain_type} name {domain_name} already exist.")
-                return
-            template[domain_type].append(payload)
+                if "pool" not in target[0] or target[0]["pool"] != poolname_map[pool_name]:
+                    print(f"  |--- {domain_type} name {domain_name} already exist.")
+                    print(f"     |--- changing pool to {pool_name}")
+                    target[0]["pool"] = poolname_map[pool_name]
+                else:
+                    print(f"  |--- {domain_type} name {domain_name} already exist.")
+                    return
+            else:
+                template[domain_type].append(payload)
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
         resp = self.session.put(url, json=policy)
