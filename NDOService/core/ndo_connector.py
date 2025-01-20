@@ -846,21 +846,23 @@ class NDOTemplate:
             payload["subnets"] = []
             payload["intersiteBumTrafficAllow"] = False
             # deploy per site subnet if config is set
-            if bd_config.perSiteSubnet:
+            for perSiteSubnet in bd_config.perSiteSubnet:
                 for site in schema["sites"]:
                     # find subnet config for site
-                    site_subnet = list(
-                        filter(lambda s: s[0] == self.siteid_name_map[site["siteId"]], bd_config.perSiteSubnet)
-                    )
-                    if len(site_subnet) == 0:
+                    if self.siteid_name_map[site["siteId"]] != perSiteSubnet[0]:
                         continue
-                    # create subnet object
-                    site["bds"].append(
-                        {
-                            "bdRef": {"templateName": template_name, "bdName": bd_name},
-                            "subnets": [asdict(site_subnet[0][1])],
-                        }
-                    )
+
+                    filter_bd = list(filter(lambda bd: bd_name in bd["bdRef"], site["bds"]))
+                    if len(filter_bd) == 0:
+                        # create subnet object
+                        site["bds"].append(
+                            {
+                                "bdRef": f"/schemas/{schema["id"]}/templates/{template_name}/bds/{bd_name}",
+                                "subnets": [asdict(perSiteSubnet[1])],
+                            }
+                        )
+                    else:
+                        filter_bd[0]["subnets"].append(asdict(perSiteSubnet[1]))
         else:
             del payload["perSiteSubnet"]
 
