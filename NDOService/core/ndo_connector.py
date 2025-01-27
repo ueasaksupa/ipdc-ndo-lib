@@ -1734,7 +1734,16 @@ class NDOTemplate:
         payload = {
             "name": pool_name,
             "allocMode": "static",
-            "encapBlocks": [{"range": {"from": vlan, "to": vlan, "allocMode": "static"}} for vlan in vlans],
+            "encapBlocks": [
+                {
+                    "range": {
+                        "from": vlan if isinstance(vlan, int) else vlan[0],
+                        "to": vlan if isinstance(vlan, int) else vlan[1],
+                        "allocMode": "static",
+                    }
+                }
+                for vlan in vlans
+            ],
         }
         # vlan pool never initialized before in this template
         if "vlanPools" not in policy["fabricPolicyTemplate"]["template"]:
