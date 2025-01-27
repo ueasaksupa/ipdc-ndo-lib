@@ -1863,12 +1863,12 @@ class NDOTemplate:
             raise ValueError(f"Vlan pool {pool_name} does not exist in the policy {policy_name}.")
 
         payload = {"name": domain_name}
-        if pool_name is not None:
-            payload["pool"] = poolname_map[pool_name]
 
         if domain_type not in template:
             template[domain_type] = [payload]
-        else:
+
+        if pool_name is not None:
+            payload["pool"] = poolname_map[pool_name]
             target = list(filter(lambda pol: pol["name"] == domain_name, template[domain_type]))
             if len(target) != 0:
                 if "pool" not in target[0] or target[0]["pool"] != poolname_map[pool_name]:
