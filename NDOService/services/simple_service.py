@@ -37,8 +37,6 @@ def create_service(
             # associate site to template if template.associatedSites is all use allSiteList
             template_sites = allSiteList if template.associatedSites == "_all_" else template.associatedSites
             ndo.add_site_to_template(schema, template.name, template_sites)
-            # update schema
-            schema = ndo.save_schema(schema)
 
         # ----- CREATE OBJECTS UNDER TEMPLATE ------
         if isinstance(template, VRFTemplate):
@@ -49,6 +47,8 @@ def create_service(
             ndo.create_contract_under_template(schema, template.name, template.contract_name, template.filter_name)
             # create VRF under template
             ndo.create_vrf_under_template(schema, template.name, template.vrf_name, template.contract_name, vrf_config)
+            # update schema
+            schema = ndo.save_schema(schema)
 
         if isinstance(template, EPGsTemplate):
             # create Bridge-Domain under template

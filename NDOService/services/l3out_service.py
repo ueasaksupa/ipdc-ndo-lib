@@ -41,8 +41,6 @@ def create_service(
             # associate site to template
             template_sites = allSiteList if template.associatedSites == "_all_" else template.associatedSites
             ndo.add_site_to_template(schema, template.name, template_sites)
-            # update schema
-            schema = ndo.save_schema(schema)
 
         # ----- CREATE VRF UNDER TEMPLATE ------
         if isinstance(template, VRFTemplate):

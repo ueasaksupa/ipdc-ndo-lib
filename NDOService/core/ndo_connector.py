@@ -667,6 +667,11 @@ class NDOTemplate:
                     "templateName": template_name,
                 }
                 schema["sites"].append(payload)
+                newSchema = self.save_schema(schema)
+
+                # update schema with new schema
+                schema["sites"] = newSchema["sites"]
+                schema["_updateVersion"] = newSchema["_updateVersion"]
                 print(f"  |--- Done")
             except Exception:
                 raise Exception(f"Site {site} does not exist")
