@@ -182,10 +182,42 @@ class NDOTemplate:
         INTF_PAYLOAD["encap"] = {"encapType": intfConfig.encapType, "value": intfConfig.encapVal}
         return INTF_PAYLOAD
 
+    def __generate_l3out_svivpcintf(self, site_name: str, intfConfig: L3OutSVIVPC, intfRoutingPol: str | None) -> dict:
+        sec_ip_payload = (
+            [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
+        )
+        INTF_PAYLOAD = {
+            "group": "IF_GROUP_POLICY" if intfRoutingPol is not None else "",
+            "pathType": "vpc",
+            "addresses": {
+                "primaryV4": intfConfig.a_primaryV4,
+                "primaryV6": intfConfig.a_primaryV6,
+                "secondary": sec_ip_payload,
+            },
+            "sideBAddresses": {
+                "primaryV4": intfConfig.b_primaryV4,
+                "primaryV6": intfConfig.b_primaryV6,
+                "secondary": sec_ip_payload,
+            },
+            "mac": "00:22:BD:F8:19:FF",
+            "mtu": "inherit",
+            "bgpPeers": list(map(lambda obj: asdict(obj), intfConfig.bgpPeers)),
+        }
+
+        vpcintf = self.find_vpc_by_name(intfConfig.vpcName, site_name)
+        if vpcintf is None:
+            raise Exception(f"PortChannel {intfConfig.vpcName} does not exist in the fabric resource.")
+        INTF_PAYLOAD["pathRef"] = vpcintf["uuid"]
+        INTF_PAYLOAD["encap"] = {"encapType": intfConfig.encapType, "value": intfConfig.encapVal}
+        return INTF_PAYLOAD
+
     def __generate_l3out_sviintf(
         self, site_name: str, intfConfig: L3OutSviInterfaceConfig, intfRoutingPol: str | None
     ) -> dict:
-        INTF_PAYLOAD = self.__generate_l3out_subintf(site_name, intfConfig, intfRoutingPol)
+        if isinstance(intfConfig, L3OutSVIVPC):
+            INTF_PAYLOAD = self.__generate_l3out_svivpcintf(site_name, intfConfig, intfRoutingPol)
+        else:
+            INTF_PAYLOAD = self.__generate_l3out_subintf(site_name, intfConfig, intfRoutingPol)
         INTF_PAYLOAD["svi"] = {"encapScope": "local", "autostate": intfConfig.autoState, "mode": intfConfig.sviMode}
         return INTF_PAYLOAD
 
@@ -194,7 +226,7 @@ class NDOTemplate:
         payload["subInterfaces"] = []
         payload["sviInterfaces"] = []
         for intf in l3outConfig.interfaces:
-            if intf.portType not in ["port", "pc"]:
+            if intf.portType not in ["port", "pc", "vpc"]:
                 raise ValueError(f"portType {intf.portType} is not supported")
             if intf.type == "interfaces":
                 payload["interfaces"].append(

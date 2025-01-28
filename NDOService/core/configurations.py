@@ -340,6 +340,24 @@ class L3OutIntPortChannel:
 
 
 @dataclass(kw_only=True)
+class L3OutIntVPC:
+    """
+    primaryV4 : IP address with prefix format `(ww.xx.yy.zz/aa)`
+    secondaryAddrs : List of IP address with prefix format `(ww.xx.yy.zz/aa)`
+    """
+
+    a_primaryV4: str
+    b_primaryV4: str
+    a_primaryV6: str | None = None
+    b_primaryV6: str | None = None
+    secondaryAddrs: List[str] | None = None
+    vpcName: str
+    bgpPeers: List[L3OutBGPPeerConfig] = field(default_factory=list)
+    type: Literal["interfaces"] = "interfaces"
+    portType: Literal["port", "pc", "vpc"] = "vpc"
+
+
+@dataclass(kw_only=True)
 class L3OutSubIntPhysicalPort(L3OutIntPhysicalPort):
     """
     primaryV4 : IP address with prefix format `(ww.xx.yy.zz/aa)`
@@ -391,9 +409,23 @@ class L3OutSVIPortChannel(L3OutSubIntPortChannel):
     autoState: Literal["enabled", "disabled"] = "enabled"
 
 
+@dataclass(kw_only=True)
+class L3OutSVIVPC(L3OutIntVPC):
+    """
+    primaryV4 : IP address with prefix format `(ww.xx.yy.zz/aa)`
+    secondaryAddrs : List of IP address with prefix format `(ww.xx.yy.zz/aa)`
+    """
+
+    encapVal: int
+    type: Literal["sviInterfaces"] = "sviInterfaces"
+    encapType: Literal["vlan", "vxlan"] = "vlan"
+    sviMode: Literal["trunk", "access", "access8021p"] = "trunk"
+    autoState: Literal["enabled", "disabled"] = "enabled"
+
+
 L3OutInterfaceConfig = L3OutIntPortChannel | L3OutIntPhysicalPort
 L3OutSubInterfaceConfig = L3OutSubIntPhysicalPort | L3OutSubIntPortChannel
-L3OutSviInterfaceConfig = L3OutSVIPhysicalPort | L3OutSVIPortChannel
+L3OutSviInterfaceConfig = L3OutSVIPhysicalPort | L3OutSVIPortChannel | L3OutSVIVPC
 
 
 @dataclass(kw_only=True)
