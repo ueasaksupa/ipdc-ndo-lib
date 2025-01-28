@@ -73,6 +73,7 @@ def create_service(
                     linked_vrf_template=eepg.linkedVrfTemplate,
                     linked_vrf_name=eepg.linkedVrfName,
                     l3outToSiteInfo=eepg.associatedL3Out,
+                    eepg_subnets=eepg.subnets,
                 )
 
             # create Bridge-Domain under template

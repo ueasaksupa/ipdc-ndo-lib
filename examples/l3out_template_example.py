@@ -47,6 +47,7 @@ def Example_L3Out():
             ),
             L3OutIntPhysicalPort(
                 primaryV4="10.0.1.1/30",
+                secondaryAddrs=["8.1.1.1/16"],
                 nodeID="1101",
                 portID="1/30",
                 bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.1.2", peerAsn=65001)],
@@ -97,12 +98,13 @@ def Example_L3Out():
         ),
     ]
     ndo.create_ext_epg_under_template(
-        schema,
-        "Policy_All_Site_template",
-        "EPG_L3OUT_CUSTOMER",
-        "VRF_CUSTOMER",
-        "VRF_Contract_Stretch_Template",
-        EEPG_L3OUT_INFO,
-        "external epg for test",
+        schema=schema,
+        template_name="POLICY_SITEA",
+        epg_name="EPG_L3OUT_CUSTOMER",
+        linked_vrf_name="VRF_CUST_L3OUT",
+        linked_vrf_template="VRF_CONTRACT_STRETCHED_TEMPLATE",
+        l3outToSiteInfo=EEPG_L3OUT_INFO,
+        epg_desc="external epg for test",
+        eepg_subnets=[ExternalEpgSubnet(ip="77.1.1.0/24")],
     )
     ndo.save_schema(schema)

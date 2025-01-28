@@ -148,10 +148,17 @@ class NDOTemplate:
     def __generate_l3out_phyintf(
         self, site_name: str, intfConfig: L3OutInterfaceConfig, intfRoutingPol: str | None
     ) -> dict:
+        sec_ip_payload = (
+            [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
+        )
         INTF_PAYLOAD = {
             "group": "IF_GROUP_POLICY" if intfRoutingPol is not None else "",
             "pathType": intfConfig.portType,
-            "addresses": {"primaryV4": intfConfig.primaryV4, "primaryV6": intfConfig.primaryV6},
+            "addresses": {
+                "primaryV4": intfConfig.primaryV4,
+                "primaryV6": intfConfig.primaryV6,
+                "secondary": sec_ip_payload,
+            },
             "mac": "00:22:BD:F8:19:FF",
             "mtu": "inherit",
             "bgpPeers": list(map(lambda obj: asdict(obj), intfConfig.bgpPeers)),
@@ -179,7 +186,7 @@ class NDOTemplate:
         self, site_name: str, intfConfig: L3OutSviInterfaceConfig, intfRoutingPol: str | None
     ) -> dict:
         INTF_PAYLOAD = self.__generate_l3out_subintf(site_name, intfConfig, intfRoutingPol)
-        INTF_PAYLOAD["svi"] = {"encapScope": "local", "autostate": "disabled", "mode": intfConfig.sviMode}
+        INTF_PAYLOAD["svi"] = {"encapScope": "local", "autostate": intfConfig.autoState, "mode": intfConfig.sviMode}
         return INTF_PAYLOAD
 
     def __generate_l3out_interface_payload(self, template: dict, payload: dict, l3outConfig: L3OutConfig) -> None:
@@ -857,7 +864,7 @@ class NDOTemplate:
                         # create subnet object
                         site["bds"].append(
                             {
-                                "bdRef": f"/schemas/{schema["id"]}/templates/{template_name}/bds/{bd_name}",
+                                "bdRef": f"/schemas/{schema['id']}/templates/{template_name}/bds/{bd_name}",
                                 "subnets": [asdict(perSiteSubnet[1])],
                             }
                         )
@@ -970,6 +977,7 @@ class NDOTemplate:
         l3outToSiteInfo: List[ExternalEpgToL3OutBinding],
         linked_vrf_schema: str | None = None,
         epg_desc: str = "",
+        eepg_subnets: List[ExternalEpgSubnet] = [],
     ) -> ExtEPG:
         """
         Creates an External EPG under a given template.
@@ -1004,6 +1012,16 @@ class NDOTemplate:
         if target_schema is None:
             raise ValueError(f"Linked VRF schema {linked_vrf_schema} does not exist.")
 
+        subnets = [
+            {
+                "ip": s.ip,
+                "name": s.name,
+                "scope": ["import-security"] if s.externalSubnet is True else [],
+                "aggregate": [],
+            }
+            for s in eepg_subnets
+        ]
+
         payload = {
             "name": epg_name,
             "displayName": epg_name,
@@ -1013,6 +1031,7 @@ class NDOTemplate:
                 "vrfName": linked_vrf_name,
                 "templateName": linked_vrf_template,
             },
+            "subnets": subnets,
             "description": epg_desc,
         }
         # Add External EPG to template

@@ -24,6 +24,7 @@ class TemplateExternalEPG:
     linkedVrfTemplate: str
     linkedVrfName: str
     associatedL3Out: List[ExternalEpgToL3OutBinding]
+    subnets: List[ExternalEpgSubnet] = field(default_factory=list)
 
 
 @dataclass(kw_only=True)
