@@ -1930,7 +1930,7 @@ class NDOTemplate:
         payload = {"name": domain_name}
 
         if domain_type not in template:
-            template[domain_type] = [payload]
+                template[domain_type] = []
 
         if pool_name is not None:
             payload["pool"] = poolname_map[pool_name]
@@ -1945,6 +1945,8 @@ class NDOTemplate:
                     return
             else:
                 template[domain_type].append(payload)
+        else:
+            template[domain_type].append(payload)
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
         resp = self.session.put(url, json=policy)
