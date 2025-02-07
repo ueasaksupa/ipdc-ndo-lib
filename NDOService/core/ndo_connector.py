@@ -75,7 +75,7 @@ class NDOTemplate:
         template[key].append(asdict(port_config))
 
     def __append_l3out_to_external_epg_site(
-        self, schema: dict, template_name: str, epg_name: str, l3outList: List[ExternalEpgToL3OutBinding]
+        self, schema: dict, template_name: str, eepg_name: str, l3outList: List[ExternalEpgToL3OutBinding]
     ) -> None:
         for l3out in l3outList:
             for site in schema["sites"]:
@@ -92,10 +92,15 @@ class NDOTemplate:
                     raise Exception(f"L3out {l3out.l3outName} does not exist in template {l3out.l3outTemplate}")
 
                 sitePayload = {
-                    "externalEpgRef": {"templateName": template_name, "externalEpgName": epg_name},
+                    "externalEpgRef": {"templateName": template_name, "externalEpgName": eepg_name},
                     "l3outRef": l3outObject[0]["uuid"],
                 }
-                site["externalEpgs"].append(sitePayload)
+                # check if l3out already exist in the site
+                eepg_site = list(filter(lambda s: eepg_name in s["externalEpgRef"], site["externalEpgs"]))
+                if len(eepg_site) > 0:
+                    eepg_site[0]["l3outRef"] = l3outObject[0]["uuid"]
+                else:
+                    site["externalEpgs"].append(sitePayload)
 
     def __generate_routeMap_payload(self, rnConfig: RouteMapConfig):
         entryList = []
@@ -835,6 +840,7 @@ class NDOTemplate:
         print(f"  |--- Done")
         return template[0]["vrfs"][-1]
 
+    # support replace mode
     def create_bridge_domain_under_template(
         self,
         schema: dict,
@@ -844,6 +850,7 @@ class NDOTemplate:
         bd_name: str,
         bd_config: BridgeDomainConfig | None = None,
         linked_vrf_schema: str | None = None,
+        replace: bool = False,
     ) -> BD:
         """
         Creates a bridge domain under a template.
@@ -864,6 +871,7 @@ class NDOTemplate:
             ValueError: If bd_config is not an instance of BridgeDomainConfig.
             ValueError: If the template does not exist.
         """
+
         print(f"--- Creating BD under template {template_name}")
         if bd_config is None:
             bd_config = BridgeDomainConfig()
@@ -877,7 +885,10 @@ class NDOTemplate:
         filter_bd = list(filter(lambda d: d["name"] == bd_name, filter_template[0]["bds"]))
         if len(filter_bd) != 0:
             print(f"  |--- BD {bd_name} is already exist in template {template_name}")
-            return filter_bd[0]
+            if replace:
+                print(f"  |--- replace TRUE : Replacing {bd_name} config in template {template_name}")
+            else:
+                return filter_bd[0]
 
         # "vrfRef": f"/schemas/{schema['id']}/templates/{linked_vrf_template}/vrfs/{linked_vrf_name}",
         target_schema = schema if linked_vrf_schema is None else self.find_schema_by_name(linked_vrf_schema)
@@ -900,14 +911,21 @@ class NDOTemplate:
             payload["subnets"] = []
             payload["intersiteBumTrafficAllow"] = False
             # deploy per site subnet if config is set
+            siteSubnetBySite: dict[str, List[dict]] = {}
             for perSiteSubnet in bd_config.perSiteSubnet:
+                if perSiteSubnet[0] not in siteSubnetBySite:
+                    siteSubnetBySite[perSiteSubnet[0]] = [asdict(perSiteSubnet[1])]
+                else:
+                    siteSubnetBySite[perSiteSubnet[0]].append(asdict(perSiteSubnet[1]))
+
+            if len(siteSubnetBySite) > 0:
                 for site in schema["sites"]:
                     # find subnet config for site
-                    if self.siteid_name_map[site["siteId"]] != perSiteSubnet[0]:
+                    if self.siteid_name_map[site["siteId"]] not in siteSubnetBySite:
                         continue
 
-                    filter_bd = list(filter(lambda bd: bd_name in bd["bdRef"], site["bds"]))
-                    if len(filter_bd) == 0:
+                    bd_site_config = list(filter(lambda bd: bd_name in bd["bdRef"], site["bds"]))
+                    if len(bd_site_config) == 0:
                         # create subnet object
                         site["bds"].append(
                             {
@@ -916,11 +934,17 @@ class NDOTemplate:
                             }
                         )
                     else:
-                        filter_bd[0]["subnets"].append(asdict(perSiteSubnet[1]))
+                        bd_site_config[0]["subnets"] = siteSubnetBySite[self.siteid_name_map[site["siteId"]]]
         else:
+            if len(bd_config.perSiteSubnet) != 0:
+                print("  |--- *** BD is stretched, perSiteSubnet is not supported ***")
             del payload["perSiteSubnet"]
 
-        filter_template[0]["bds"].append(payload)
+        if replace and len(filter_bd) != 0:
+            filter_bd[0] = filter_bd[0].update(payload)
+        else:
+            filter_template[0]["bds"].append(payload)
+
         print(f"  |--- Done")
         return filter_template[0]["bds"][-1]
 
@@ -1014,6 +1038,7 @@ class NDOTemplate:
         print(f"  |--- Done")
         return anp_obj["epgs"][-1]
 
+    # support replace mode
     def create_ext_epg_under_template(
         self,
         schema: dict,
@@ -1025,6 +1050,7 @@ class NDOTemplate:
         linked_vrf_schema: str | None = None,
         epg_desc: str = "",
         eepg_subnets: List[ExternalEpgSubnet] = [],
+        replace: bool = False,
     ) -> ExtEPG:
         """
         Creates an External EPG under a given template.
@@ -1053,7 +1079,10 @@ class NDOTemplate:
         filter_eepg = list(filter(lambda anp: anp["name"] == epg_name, filter_template[0]["externalEpgs"]))
         if len(filter_eepg) != 0:
             print(f"  |--- External EPG {epg_name} is already exist in template {template_name}")
-            return filter_eepg[0]
+            if replace:
+                print(f"  |--- replace TRUE : Replacing {epg_name} config in template {template_name}")
+            else:
+                return filter_eepg[0]
 
         target_schema = schema if linked_vrf_schema is None else self.find_schema_by_name(linked_vrf_schema)
         if target_schema is None:
@@ -1082,11 +1111,43 @@ class NDOTemplate:
             "description": epg_desc,
         }
         # Add External EPG to template
-        filter_template[0]["externalEpgs"].append(payload)
-        # Add L3Out to site
+        if replace and len(filter_eepg) != 0:
+            filter_eepg[0] = filter_eepg[0].update(payload)
+        else:
+            filter_template[0]["externalEpgs"].append(payload)
+
         self.__append_l3out_to_external_epg_site(schema, template_name, epg_name, l3outToSiteInfo)
+        # Add L3Out to site
         print(f"  |--- Done")
         return filter_template[0]["externalEpgs"][-1]
+
+    def change_ext_epg_l3out_binding(
+        self, schema: dict, template_name: str, epg_name: str, l3outToSiteInfo: List[ExternalEpgToL3OutBinding]
+    ) -> None:
+        """
+        Change the L3Out binding of an External EPG.
+
+        Args:
+            schema (dict): The schema containing the templates.
+            template_name (str): The name of the template.
+            epg_name (str): The name of the External EPG.
+            l3outToSiteInfo (List[ExternalEpgToL3OutBinding]): The list of L3Out to site information.
+
+        Returns: None
+
+        Raises:
+            ValueError: If the template or ExternalEPG does not exist.
+        """
+        print(f"--- Changing External EPG L3out blinding from template {template_name}")
+        filter_template = list(filter(lambda t: t["name"] == template_name, schema["templates"]))
+        if len(filter_template) == 0:
+            raise ValueError(f"Template {template_name} does not exist.")
+
+        filter_eepg = list(filter(lambda anp: anp["name"] == epg_name, filter_template[0]["externalEpgs"]))
+        if len(filter_eepg) == 0:
+            raise ValueError(f"External ExtermalEPG {epg_name} does not exist in template {template_name}")
+
+        self.__append_l3out_to_external_epg_site(schema, template_name, epg_name, l3outToSiteInfo)
 
     def add_phy_domain_to_epg(
         self,
@@ -1347,7 +1408,10 @@ class NDOTemplate:
 
         return resp.json()
 
-    def add_route_map_policy_under_template(self, template_name: str, rnConfig: RouteMapConfig) -> None:
+    # support replace mode
+    def add_route_map_policy_under_template(
+        self, template_name: str, rnConfig: RouteMapConfig, replace: bool = False
+    ) -> None:
         print("--- Adding RouteMap policy")
         if not isinstance(rnConfig, RouteMapConfig):
             raise ValueError("rnConfig must be an object of class RouteMapConfig")
@@ -1365,8 +1429,13 @@ class NDOTemplate:
             filtered_rm = list(filter(lambda rm: rm["name"] == rnConfig.name, rm_policies))
             if len(filtered_rm) > 0:
                 print(f"  |--- RouteMap {rnConfig.name} already exist.")
-                return
-            rm_policies.append(self.__generate_routeMap_payload(rnConfig))
+                if replace:
+                    print(f"  |--- replace TRUE : Replacing {rnConfig.name} config")
+                    filtered_rm[0] = filtered_rm[0].update(self.__generate_routeMap_payload(rnConfig))
+                else:
+                    return
+            else:
+                rm_policies.append(self.__generate_routeMap_payload(rnConfig))
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
         resp = self.session.put(url, json=template)
@@ -1387,11 +1456,15 @@ class NDOTemplate:
         rm_pol = list(
             filter(lambda p: p["name"] == rm_name, template["tenantPolicyTemplate"]["template"]["routeMapPolicies"])
         )
+        found = False
         for entry in rm_pol[0]["rtMapEntryList"]:
             if entry["rtMapContext"]["order"] != entryOrder:
                 continue
             entry["matchRule"][0]["matchPrefixList"].append(asdict(prefix))
+            found = True
             break
+        if not found:
+            raise ValueError(f"Route map entry with order {entryOrder} does not exist.")
         # put update to template
         url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
         resp = self.session.put(url, json=template)
@@ -1507,7 +1580,8 @@ class NDOTemplate:
 
         return resp.json()
 
-    def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig) -> None:
+    # support replace mode
+    def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig, replace: bool = False) -> None:
         """
         Adds an L3out to the specified template.
 
@@ -1536,10 +1610,15 @@ class NDOTemplate:
         filtered = list(filter(lambda l: l["name"] == l3outConfig.name, l3outs))
         if len(filtered) != 0:
             print(f"  |--- L3out {l3outConfig.name} already exist.")
-            return
+            if replace:
+                print(f"  |--- replace TRUE : Replacing {l3outConfig.name} config")
+                filtered[0] = filtered[0].update(self.__generate_l3out_payload(template, l3outConfig))
+            else:
+                return
+        else:
+            payload = self.__generate_l3out_payload(template, l3outConfig)
+            l3outs.append(payload)
 
-        payload = self.__generate_l3out_payload(template, l3outConfig)
-        l3outs.append(payload)
         url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
