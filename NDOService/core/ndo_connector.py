@@ -14,7 +14,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class NDOTemplate:
-    def __init__(self, host, username, password, port=443) -> None:
+    def __init__(self, host, username, password, port=443, delay: None | float = None) -> None:
         self.host = host
         self.username = username
         self.password = password
@@ -24,6 +24,7 @@ class NDOTemplate:
         self.siteid_name_map = {}
         self.fabric_res_phyif_map = {}
         self.session = requests.Session()
+        self.delay = delay
         # LOGIN
         self.login()
 
@@ -508,7 +509,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=schema)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
         return resp.json()
 
     def create_tenant(self, tenant_name: str, sites: list[str], tenant_desc: str = "") -> Tenant:
@@ -560,7 +564,10 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
         return resp.json()
 
     def create_schema(self, schema_name: str, schema_desc: str = "") -> Schema:
@@ -590,7 +597,10 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
         return resp.json()
 
     def create_template(self, schema: dict, template_name: str, tenant_id: str) -> Template:
@@ -1330,7 +1340,11 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
+
         return resp.json()
 
     def add_route_map_policy_under_template(self, template_name: str, rnConfig: RouteMapConfig) -> None:
@@ -1358,7 +1372,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     def add_route_map_prefix_to_policy(
         self, template_name: str, rm_name: str, entryOrder: int, prefix: RouteMapPrefix
@@ -1380,7 +1397,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     def add_l3out_intf_routing_policy(
         self,
@@ -1431,7 +1451,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     # L3OUT template
     def create_l3out_template(self, template_name: str, site_name: str, tenant_name: str) -> L3OutTemplate:
@@ -1477,7 +1500,11 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
+
         return resp.json()
 
     def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig) -> None:
@@ -1517,7 +1544,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             print(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     # Fabric Template
     def find_vpc_by_name(self, vpc_name: str, site_name: str) -> VPCResourcePolicy | None:
@@ -1721,7 +1751,11 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
+
         return resp.json()
 
     def create_fabric_resource(self, name: str, site: str) -> FabricResourcePolicy:
@@ -1762,7 +1796,11 @@ class NDOTemplate:
         resp = self.session.post(url, json=payload)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
+
         return resp.json()
 
     def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int | Tuple[int, int]] = []) -> None:
@@ -1827,7 +1865,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=policy)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     def add_port_to_fabric_resource(
         self,
@@ -1887,7 +1928,10 @@ class NDOTemplate:
         resp = self.session.put(url, json=resource)
         if resp.status_code >= 400:
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     def add_domain_to_fabric_policy(
         self,
@@ -1930,11 +1974,12 @@ class NDOTemplate:
         payload = {"name": domain_name}
 
         if domain_type not in template:
-                template[domain_type] = []
+            template[domain_type] = []
+
+        target = list(filter(lambda pol: pol["name"] == domain_name, template[domain_type]))
 
         if pool_name is not None:
             payload["pool"] = poolname_map[pool_name]
-            target = list(filter(lambda pol: pol["name"] == domain_name, template[domain_type]))
             if len(target) != 0:
                 if "pool" not in target[0] or target[0]["pool"] != poolname_map[pool_name]:
                     print(f"  |--- {domain_type} name {domain_name} already exist.")
@@ -1946,6 +1991,9 @@ class NDOTemplate:
             else:
                 template[domain_type].append(payload)
         else:
+            if len(target) != 0:
+                print(f"  |--- {domain_type} name {domain_name} already exist.")
+                return
             template[domain_type].append(payload)
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
@@ -1953,7 +2001,10 @@ class NDOTemplate:
         if resp.status_code >= 400:
             print(f"  |--- {resp.json()}")
             raise Exception(resp.json())
-        print(f"  |--- Done")
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     # task deployment
     def deploy_policies_template(self, template_name: str) -> None:

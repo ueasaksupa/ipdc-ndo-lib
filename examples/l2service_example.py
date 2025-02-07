@@ -56,5 +56,5 @@ params = ServiceSimpleParameters(
 
 
 if __name__ == "__main__":
-    ndo = NDOTemplate(host="172.31.1.24", port=443, username="admin", password="P@ssw0rd")
+    ndo = NDOTemplate(host="172.31.1.24", port=443, username="admin", password="P@ssw0rd", delay=1.5)
     create_service(ndo, params)

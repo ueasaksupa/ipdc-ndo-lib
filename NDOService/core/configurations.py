@@ -130,6 +130,10 @@ class VPCNodeDetails:
 
 @dataclass
 class PhysicalIntfResource:
+    """
+    policy is internal use only, to set policy use intf_policy_name in add_port_to_fabric_resource method
+    """
+
     name: str
     interfaces: str
     policy: str = ""
@@ -140,6 +144,10 @@ class PhysicalIntfResource:
 
 @dataclass
 class PortChannelResource:
+    """
+    policy is internal use only, to set policy use intf_policy_name in add_port_to_fabric_resource method
+    """
+
     name: str
     node: str
     memberInterfaces: str
@@ -150,6 +158,10 @@ class PortChannelResource:
 
 @dataclass
 class VPCResource:
+    """
+    policy is internal use only, to set policy use intf_policy_name in add_port_to_fabric_resource method
+    """
+
     name: str
     node1Details: VPCNodeDetails
     node2Details: VPCNodeDetails
@@ -295,10 +307,10 @@ class L3OutBGPPeerConfig:
     peerAsn: int
     peerAddressV6: str | None = None
     adminState: Literal["enabled", "disabled"] = "enabled"
-    authEnabled: bool = False
     allowedSelfASCount: int = 3
     ebpgMultiHopTTL: int = 1
-    localAsnConfig: str = "none"
+    localAsnConfig: Literal["none", "no-prepend", "dual-as", "replace-as"] = "none"
+    localAsn: int | None = None
     importRouteMap: str | None = None
     exportRouteMap: str | None = None
     bgpControls: L3OutBGPControl = field(default_factory=L3OutBGPControl)
