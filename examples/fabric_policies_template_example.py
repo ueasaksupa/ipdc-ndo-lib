@@ -35,18 +35,29 @@ def Example_Fabric_Template():
         name="VPC_SILA_TEST",
         node1Details=VPCNodeDetails("3101", "1/14"),
         node2Details=VPCNodeDetails("3102", "1/14"),
+        interfaceDescriptions=[
+            IntfDescription(nodeID="3101", interfaceID="1/14", description="VPC_SILA_TEST"),
+            IntfDescription(nodeID="3102", interfaceID="1/14", description="VPC_SILA_TEST"),
+        ],
     )
     # example PC resource config
     pc_port_config = PortChannelResource(
         name="PC_SILA_TEST",
         node="3102",
         memberInterfaces="1/15,1/16",
+        interfaceDescriptions=[
+            IntfDescription(nodeID="3102", interfaceID="1/15", description="PC_SILA_TEST"),
+            IntfDescription(nodeID="3102", interfaceID="1/16", description="PC_SILA_TEST"),
+        ],
     )
     # example Physical resource config
     phy_port_config = PhysicalIntfResource(
         name="PHY_TEST",
         nodes=["3102"],
         interfaces="1/17",
+        interfaceDescriptions=[
+            IntfDescription(interfaceID="1/15", description="PC_SILA_TEST"),
+        ],
     )
     # Add port resource to fabric resource policy
     ndo.add_port_to_fabric_resource(

@@ -1983,6 +1983,9 @@ class NDOTemplate:
             if interface_setting is None:
                 raise ValueError(f"policy {intf_policy_name} does not exist. Please create it before using.")
             port_config.policy = interface_setting["uuid"]
+            # clear nodeID for physical interface
+            for desc in port_config.interfaceDescriptions:
+                desc.nodeID = ""
             self.__append_fabricRes_intf_object("interfaceProfiles", template, port_config)
         elif isinstance(port_config, PortChannelResource):
             # find policy ID

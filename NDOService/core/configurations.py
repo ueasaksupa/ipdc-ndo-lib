@@ -115,9 +115,13 @@ class VrfConfig:
     ipDataPlaneLearning: Literal["enabled", "disabled"] = "enabled"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class IntfDescription:
-    nodeID: str
+    """
+    incase of PhysicalIntfResource nodeID is not required
+    """
+
+    nodeID: str = ""
     interfaceID: str
     description: str
 
