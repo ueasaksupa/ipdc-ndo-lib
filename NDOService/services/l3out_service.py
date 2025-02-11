@@ -8,6 +8,7 @@ def create_service(
     srvParams: ServiceL3OutParameters,
     allowPushToUnSyncSchema: bool = True,
     strictPortCheck: bool = False,
+    replace: bool = False,
 ):
     """
     For create L3Out service
@@ -31,7 +32,7 @@ def create_service(
     tPolicy = srvParams.tenantPolTemplates
     for pol in tPolicy:
         ndo.create_tenant_policies_template(pol.name, [pol.site], srvParams.tenant_name)
-        ndo.add_route_map_policy_under_template(pol.name, pol.routemapConfig)
+        ndo.add_route_map_policy_under_template(pol.name, pol.routemapConfig, replace)
 
     # ----- CREATE TEMPLATE ------
     for template in srvParams.templates:
@@ -56,7 +57,7 @@ def create_service(
             # ----- CREATE L3OUT TEMPLATE ------
             for l3outTemplate in srvParams.l3outTemplatePerSite:
                 ndo.create_l3out_template(l3outTemplate.name, l3outTemplate.site, srvParams.tenant_name)
-                ndo.add_l3out_under_template(l3outTemplate.name, l3outTemplate.l3outConfig)
+                ndo.add_l3out_under_template(l3outTemplate.name, l3outTemplate.l3outConfig, replace)
 
         # ----- CREATE BD, ANP, EPG, ExternalEPG UNDER TEMPLATE ------
         if isinstance(template, EPGsTemplate):
@@ -72,6 +73,7 @@ def create_service(
                     linked_vrf_name=eepg.linkedVrfName,
                     l3outToSiteInfo=eepg.associatedL3Out,
                     eepg_subnets=eepg.subnets,
+                    replace=replace,
                 )
 
             # create Bridge-Domain under template
@@ -85,6 +87,7 @@ def create_service(
                     linked_vrf_name=bd.linkedVrfName,
                     bd_name=bd.name,
                     bd_config=bd_config,
+                    replace=replace,
                 )
                 # create Application Profile under template
                 anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)

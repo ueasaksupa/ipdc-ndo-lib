@@ -8,6 +8,7 @@ def create_service(
     srvParams: ServiceSimpleParameters,
     allowPushToUnSyncSchema: bool = True,
     strictPortCheck: bool = False,
+    replace: bool = False,
 ):
     """
     For create service in NDO
@@ -62,6 +63,7 @@ def create_service(
                     linked_vrf_name=bd.linkedVrfName,
                     bd_name=bd.name,
                     bd_config=bd_config,
+                    replace=replace,
                 )
                 # create Application Profile under template
                 anp = ndo.create_anp_under_template(schema, template.name, bd.anp_name)

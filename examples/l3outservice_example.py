@@ -196,4 +196,4 @@ params = ServiceL3OutParameters(
 
 if __name__ == "__main__":
     ndo = NDOTemplate(host="127.0.0.1", port=10443, username="admin", password="P@ssw0rd", delay=0.5)
-    create_service(ndo, params)
+    create_service(ndo, params, replace=False)
