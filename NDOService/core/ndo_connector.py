@@ -1580,6 +1580,46 @@ class NDOTemplate:
 
         return resp.json()
 
+    def add_static_route_prefixes_to_l3out(
+        self, template_name: str, l3out_name: str, nodeID: str, prefixes: list[L3OutStaticRouteConfig]
+    ) -> None:
+        """
+        Adds static route prefixes to an L3Out.
+        parameters:
+            template_name: The name of the L3Out template.
+            l3out_name: The name of the L3Out.
+            nodeID: The node ID.
+            prefixes: A list of L3OutStaticRouteConfig objects representing the prefixes to add.
+        """
+        print(f"--- Adding static route prefixes to L3out {l3out_name}")
+        template = self.find_l3out_template_by_name(template_name)
+        if template is None:
+            raise ValueError(f"template {template_name} does not exist.")
+
+        l3out = list(filter(lambda l: l["name"] == l3out_name, template["l3outTemplate"]["l3outs"]))
+        if len(l3out) == 0:
+            raise ValueError(f"L3out {l3out_name} does not exist.")
+
+        target_node = list(filter(lambda n: n["nodeID"] == nodeID, l3out[0]["nodes"]))
+        if len(target_node) == 0:
+            raise ValueError(f"Node {nodeID} does not exist.")
+
+        for prefix in prefixes:
+            print(f"  |--- Adding prefix {prefix.prefix}")
+            payload = asdict(prefix)
+            if "staticRoutes" not in target_node[0]:
+                target_node[0]["staticRoutes"] = []
+            target_node[0]["staticRoutes"].append(payload)
+
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
+        resp = self.session.put(url, json=template)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
+
     # support replace mode
     def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig, replace: bool = False) -> None:
         """
