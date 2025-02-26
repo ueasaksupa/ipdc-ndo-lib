@@ -177,7 +177,7 @@ class NDOTemplate:
         elif isinstance(intfConfig, L3OutIntPhysicalPort):
             INTF_PAYLOAD["podID"] = intfConfig.podID
             INTF_PAYLOAD["nodeID"] = intfConfig.nodeID
-            INTF_PAYLOAD["path"] = f"eth{intfConfig.portID}"
+            INTF_PAYLOAD["path"] = f"eth{intfConfig.portID.removeprefix('eth')}"
 
         return INTF_PAYLOAD
 
@@ -872,7 +872,7 @@ class NDOTemplate:
             ValueError: If the template does not exist.
         """
 
-        print(f"--- Creating BD under template {template_name}")
+        print(f"--- Creating BD {bd_name} under template {template_name}")
         if bd_config is None:
             bd_config = BridgeDomainConfig()
         elif not isinstance(bd_config, BridgeDomainConfig):
