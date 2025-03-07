@@ -154,9 +154,11 @@ class NDOTemplate:
         entIndex = {}
         prefixIndex = {}
         for entry in currentRM["rtMapEntryList"]:
-            entIndex[entry["rtMapContext"]["name"]] = entry
+            entryName = entry["rtMapContext"]["name"]
+            entIndex[entryName] = entry
             for prefix in entry["matchRule"][0]["matchPrefixList"]:
-                prefixIndex[prefix["prefix"]] = prefix
+                prefixKey = entryName + "_" + prefix["prefix"]
+                prefixIndex[prefixKey] = prefix
 
         for rmEntry in rmConfig.entryList:
             if rmEntry.name not in entIndex:
@@ -168,21 +170,32 @@ class NDOTemplate:
                 entry["matchRule"] = [
                     {
                         "matchPrefixList": [
-                            {"prefix": p.prefix, "fromPfxLen": p.fromPfxLen, "toPfxLen": p.toPfxLen}
+                            {
+                                "prefix": p.prefix,
+                                "fromPfxLen": p.fromPfxLen,
+                                "toPfxLen": p.toPfxLen,
+                                "aggregate": p.aggregate,
+                            }
                             for p in rmEntry.prefixes
                         ]
                     }
                 ]
             else:
                 for p in rmEntry.prefixes:
-                    if p.prefix not in prefixIndex:
+                    key = rmEntry.name + "_" + p.prefix
+                    if key not in prefixIndex:
                         entry["matchRule"][0]["matchPrefixList"].append(
-                            {"prefix": p.prefix, "fromPfxLen": p.fromPfxLen, "toPfxLen": p.toPfxLen}
+                            {
+                                "prefix": p.prefix,
+                                "fromPfxLen": p.fromPfxLen,
+                                "toPfxLen": p.toPfxLen,
+                                "aggregate": p.aggregate,
+                            }
                         )
                     else:
-                        prefixIndex[p.prefix]["fromPfxLen"] = p.fromPfxLen
-                        prefixIndex[p.prefix]["toPfxLen"] = p.toPfxLen
-                        prefixIndex[p.prefix]["aggregate"] = p.aggregate
+                        prefixIndex[key]["fromPfxLen"] = p.fromPfxLen
+                        prefixIndex[key]["toPfxLen"] = p.toPfxLen
+                        prefixIndex[key]["aggregate"] = p.aggregate
 
             if rmEntry.attributes is not None:
                 actionFields = self.__generate_routeMap_attr_payload(rmEntry.attributes)
