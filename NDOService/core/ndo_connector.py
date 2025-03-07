@@ -102,52 +102,99 @@ class NDOTemplate:
                 else:
                     site["externalEpgs"].append(sitePayload)
 
+    def __generate_routeMap_attr_payload(self, attrs: RouteMapAttributes) -> dict:
+        actionFields = {}
+        if attrs.setNextHopPropagate is not None:
+            actionFields["setNextHopPropagate"] = attrs.setNextHopPropagate
+        if attrs.setPreference is not None:
+            actionFields["setPreference"] = attrs.setPreference
+        if attrs.setWeight is not None:
+            actionFields["setWeight"] = attrs.setWeight
+        if attrs.setMultiPath is not None:
+            actionFields["setMultiPath"] = attrs.setMultiPath
+            if attrs.setMultiPath:
+                actionFields["setNextHopPropagate"] = True
+        if attrs.setAsPath is not None:
+            actionFields["setAsPath"] = (
+                [
+                    {
+                        "criteria": attrs.setAsPath.criteria,
+                        "pathASNs": [
+                            {"asn": asn, "order": i} for i, asn in enumerate(attrs.setAsPath.pathASNs, start=1)
+                        ],
+                        "asnCount": attrs.setAsPath.asnCount,
+                    }
+                ]
+                if attrs.setAsPath
+                else None
+            )
+        return actionFields
+
+    def __generate_routeMap_entry_payload(self, entry: RouteMapEntry) -> dict:
+        prefixes = []
+        for prefix in entry.prefixes:
+            prefixes.append(
+                {
+                    "prefix": prefix.prefix,
+                    "fromPfxLen": prefix.fromPfxLen,
+                    "toPfxLen": prefix.toPfxLen,
+                    "aggregate": prefix.aggregate,
+                }
+            )
+        entryPayload = {
+            "rtMapContext": {"order": entry.order, "name": entry.name, "action": entry.action},
+            "matchRule": [{"matchPrefixList": prefixes}],
+        }
+        if entry.attributes is not None:
+            entryPayload["setAction"] = [self.__generate_routeMap_attr_payload(entry.attributes)]
+        return entryPayload
+
+    def __merge_routeMap_payload(self, currentRM: dict, rmConfig: RouteMapConfig) -> None:
+        # indexing current entry
+        entIndex = {}
+        prefixIndex = {}
+        for entry in currentRM["rtMapEntryList"]:
+            entIndex[entry["rtMapContext"]["name"]] = entry
+            for prefix in entry["matchRule"][0]["matchPrefixList"]:
+                prefixIndex[prefix["prefix"]] = prefix
+
+        for rmEntry in rmConfig.entryList:
+            if rmEntry.name not in entIndex:
+                currentRM["rtMapEntryList"].append(self.__generate_routeMap_entry_payload(rmEntry))
+                continue
+
+            entry = entIndex[rmEntry.name]
+            if "matchRule" not in entry:
+                entry["matchRule"] = [
+                    {
+                        "matchPrefixList": [
+                            {"prefix": p.prefix, "fromPfxLen": p.fromPfxLen, "toPfxLen": p.toPfxLen}
+                            for p in rmEntry.prefixes
+                        ]
+                    }
+                ]
+            else:
+                for p in rmEntry.prefixes:
+                    if p.prefix not in prefixIndex:
+                        entry["matchRule"][0]["matchPrefixList"].append(
+                            {"prefix": p.prefix, "fromPfxLen": p.fromPfxLen, "toPfxLen": p.toPfxLen}
+                        )
+                    else:
+                        prefixIndex[p.prefix]["fromPfxLen"] = p.fromPfxLen
+                        prefixIndex[p.prefix]["toPfxLen"] = p.toPfxLen
+                        prefixIndex[p.prefix]["aggregate"] = p.aggregate
+
+            if rmEntry.attributes is not None:
+                actionFields = self.__generate_routeMap_attr_payload(rmEntry.attributes)
+                if "setAction" not in entry:
+                    entry["setAction"] = [actionFields]
+                else:
+                    entry["setAction"][0].update(actionFields)
+
     def __generate_routeMap_payload(self, rnConfig: RouteMapConfig):
         entryList = []
         for entry in rnConfig.entryList:
-            prefixes = []
-            for prefix in entry.prefixes:
-                prefixes.append(
-                    {
-                        "prefix": prefix.prefix,
-                        "fromPfxLen": prefix.fromPfxLen,
-                        "toPfxLen": prefix.toPfxLen,
-                        "aggregate": prefix.aggregate,
-                    }
-                )
-            entryPayload = {
-                "rtMapContext": {"order": entry.order, "name": entry.name, "action": entry.action},
-                "matchRule": [{"matchPrefixList": prefixes}],
-            }
-            if entry.attributes is not None:
-                actionFields = {}
-                if entry.attributes.setNextHopPropagate is not None:
-                    actionFields["setNextHopPropagate"] = entry.attributes.setNextHopPropagate
-                if entry.attributes.setPreference is not None:
-                    actionFields["setPreference"] = entry.attributes.setPreference
-                if entry.attributes.setWeight is not None:
-                    actionFields["setWeight"] = entry.attributes.setWeight
-                if entry.attributes.setMultiPath is not None:
-                    actionFields["setMultiPath"] = entry.attributes.setMultiPath
-                    if entry.attributes.setMultiPath:
-                        actionFields["setNextHopPropagate"] = True
-                if entry.attributes.setAsPath is not None:
-                    actionFields["setAsPath"] = (
-                        [
-                            {
-                                "criteria": entry.attributes.setAsPath.criteria,
-                                "pathASNs": [
-                                    {"asn": asn, "order": i}
-                                    for i, asn in enumerate(entry.attributes.setAsPath.pathASNs, start=1)
-                                ],
-                                "asnCount": entry.attributes.setAsPath.asnCount,
-                            }
-                        ]
-                        if entry.attributes.setAsPath
-                        else None
-                    )
-                entryPayload["setAction"] = [actionFields]
-            entryList.append(entryPayload)
+            entryList.append(self.__generate_routeMap_entry_payload(entry))
         completed_payload = {"name": rnConfig.name, "description": rnConfig.description, "rtMapEntryList": entryList}
         return completed_payload
 
@@ -1260,6 +1307,9 @@ class NDOTemplate:
             filter(lambda s: s["siteId"] == target_site_id and s["templateName"] == template_name, schema["sites"])
         )
 
+        if len(target_template) == 0:
+            raise ValueError(f"Template {template_name} does not exist.")
+
         target_anp = list(filter(lambda a: f"/anps/{anp_name}" in a["anpRef"], target_template[0]["anps"]))
         if len(target_anp) == 0:
             raise ValueError(f"ANP {anp_name} does not exist.")
@@ -1410,7 +1460,7 @@ class NDOTemplate:
 
     # support replace mode
     def add_route_map_policy_under_template(
-        self, template_name: str, rnConfig: RouteMapConfig, replace: bool = False
+        self, template_name: str, rnConfig: RouteMapConfig, operation: Literal["add", "merge", "replace"] = "add"
     ) -> None:
         print("--- Adding RouteMap policy")
         if not isinstance(rnConfig, RouteMapConfig):
@@ -1429,9 +1479,12 @@ class NDOTemplate:
             filtered_rm = list(filter(lambda rm: rm["name"] == rnConfig.name, rm_policies))
             if len(filtered_rm) > 0:
                 print(f"  |--- RouteMap {rnConfig.name} already exist.")
-                if replace:
+                if operation == "replace":
                     print(f"  |--- replace TRUE : Replacing {rnConfig.name} config")
                     filtered_rm[0] = filtered_rm[0].update(self.__generate_routeMap_payload(rnConfig))
+                elif operation == "merge":
+                    print(f"  |--- merge TRUE : Merging {rnConfig.name} config")
+                    self.__merge_routeMap_payload(filtered_rm[0], rnConfig)
                 else:
                     return
             else:
