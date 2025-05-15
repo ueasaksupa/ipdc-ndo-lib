@@ -32,7 +32,9 @@ def create_service(
     tPolicy = srvParams.tenantPolTemplates
     for pol in tPolicy:
         ndo.create_tenant_policies_template(pol.name, [pol.site], srvParams.tenant_name)
-        ndo.add_route_map_policy_under_template(pol.name, pol.routemapConfig, replace)
+        ndo.add_route_map_policy_under_template(
+            pol.name, pol.routemapConfig, operation="replace" if replace else "add"
+        )
 
     # ----- CREATE TEMPLATE ------
     for template in srvParams.templates:
@@ -57,7 +59,9 @@ def create_service(
             # ----- CREATE L3OUT TEMPLATE ------
             for l3outTemplate in srvParams.l3outTemplatePerSite:
                 ndo.create_l3out_template(l3outTemplate.name, l3outTemplate.site, srvParams.tenant_name)
-                ndo.add_l3out_under_template(l3outTemplate.name, l3outTemplate.l3outConfig, replace)
+                ndo.add_l3out_under_template(
+                    l3outTemplate.name, l3outTemplate.l3outConfig, operation="replace" if replace else None
+                )
 
         # ----- CREATE BD, ANP, EPG, ExternalEPG UNDER TEMPLATE ------
         if isinstance(template, EPGsTemplate):

@@ -211,8 +211,36 @@ class NDOTemplate:
         completed_payload = {"name": rnConfig.name, "description": rnConfig.description, "rtMapEntryList": entryList}
         return completed_payload
 
+    def __generate_l3out_bgppeer_payload(self, tenant_id: str, bgpPeers: List[L3OutBGPPeerConfig]) -> List:
+        peer_payload = []
+        for peer in bgpPeers:
+            if peer.importRouteMap is None and peer.exportRouteMap is None:
+                peer_payload.append(asdict(peer))
+            else:
+                print(
+                    f"  |--- Apply routeMap in peer level for peer: {peer.peerAddressV4 if peer.peerAddressV4 else peer.peerAddressV6}"
+                )
+                tmp = asdict(peer)
+                if peer.importRouteMap is not None:
+                    im_routemap = self.find_template_object_by_name(
+                        peer.importRouteMap, f"type=routeMap&tenant-id={tenant_id}"
+                    )
+                    if im_routemap is None:
+                        raise Exception(f"RouteMap {peer.importRouteMap} does not exist.")
+                    tmp["importRouteMapRef"] = im_routemap["uuid"]
+                if peer.exportRouteMap is not None:
+                    ex_routemap = self.find_template_object_by_name(
+                        peer.exportRouteMap, f"type=routeMap&tenant-id={tenant_id}"
+                    )
+                    if ex_routemap is None:
+                        raise Exception(f"RouteMap {peer.exportRouteMap} does not exist.")
+                    tmp["exportRouteMapRef"] = ex_routemap["uuid"]
+
+                peer_payload.append(tmp)
+        return peer_payload
+
     def __generate_l3out_phyintf(
-        self, site_name: str, intfConfig: L3OutInterfaceConfig, intfRoutingPol: str | None
+        self, tenant_id: str, site_name: str, intfConfig: L3OutInterfaceConfig, intfRoutingPol: str | None
     ) -> dict:
         sec_ip_payload = (
             [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
@@ -227,7 +255,7 @@ class NDOTemplate:
             },
             "mac": "00:22:BD:F8:19:FF",
             "mtu": "inherit",
-            "bgpPeers": list(map(lambda obj: asdict(obj), intfConfig.bgpPeers)),
+            "bgpPeers": self.__generate_l3out_bgppeer_payload(tenant_id, intfConfig.bgpPeers),
         }
         if isinstance(intfConfig, L3OutIntPortChannel):
             pcintf = self.find_pc_by_name(intfConfig.portChannelName, site_name)
@@ -242,13 +270,15 @@ class NDOTemplate:
         return INTF_PAYLOAD
 
     def __generate_l3out_subintf(
-        self, site_name: str, intfConfig: L3OutSubInterfaceConfig, intfRoutingPol: str | None
+        self, tenant_id: str, site_name: str, intfConfig: L3OutSubInterfaceConfig, intfRoutingPol: str | None
     ) -> dict:
-        INTF_PAYLOAD = self.__generate_l3out_phyintf(site_name, intfConfig, intfRoutingPol)
+        INTF_PAYLOAD = self.__generate_l3out_phyintf(tenant_id, site_name, intfConfig, intfRoutingPol)
         INTF_PAYLOAD["encap"] = {"encapType": intfConfig.encapType, "value": intfConfig.encapVal}
         return INTF_PAYLOAD
 
-    def __generate_l3out_svivpcintf(self, site_name: str, intfConfig: L3OutSVIVPC, intfRoutingPol: str | None) -> dict:
+    def __generate_l3out_svivpcintf(
+        self, tenant_id: str, site_name: str, intfConfig: L3OutSVIVPC, intfRoutingPol: str | None
+    ) -> dict:
         sec_ip_payload = (
             [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
         )
@@ -267,7 +297,7 @@ class NDOTemplate:
             },
             "mac": "00:22:BD:F8:19:FF",
             "mtu": "inherit",
-            "bgpPeers": list(map(lambda obj: asdict(obj), intfConfig.bgpPeers)),
+            "bgpPeers": self.__generate_l3out_bgppeer_payload(tenant_id, intfConfig.bgpPeers),
         }
 
         vpcintf = self.find_vpc_by_name(intfConfig.vpcName, site_name)
@@ -278,12 +308,12 @@ class NDOTemplate:
         return INTF_PAYLOAD
 
     def __generate_l3out_sviintf(
-        self, site_name: str, intfConfig: L3OutSviInterfaceConfig, intfRoutingPol: str | None
+        self, tenant_id: str, site_name: str, intfConfig: L3OutSviInterfaceConfig, intfRoutingPol: str | None
     ) -> dict:
         if isinstance(intfConfig, L3OutSVIVPC):
-            INTF_PAYLOAD = self.__generate_l3out_svivpcintf(site_name, intfConfig, intfRoutingPol)
+            INTF_PAYLOAD = self.__generate_l3out_svivpcintf(tenant_id, site_name, intfConfig, intfRoutingPol)
         else:
-            INTF_PAYLOAD = self.__generate_l3out_subintf(site_name, intfConfig, intfRoutingPol)
+            INTF_PAYLOAD = self.__generate_l3out_subintf(tenant_id, site_name, intfConfig, intfRoutingPol)
         INTF_PAYLOAD["svi"] = {"encapScope": "local", "autostate": intfConfig.autoState, "mode": intfConfig.sviMode}
         return INTF_PAYLOAD
 
@@ -291,12 +321,14 @@ class NDOTemplate:
         payload["interfaces"] = []
         payload["subInterfaces"] = []
         payload["sviInterfaces"] = []
+        tenant_id = template["l3outTemplate"]["tenantId"]
         for intf in l3outConfig.interfaces:
             if intf.portType not in ["port", "pc", "vpc"]:
                 raise ValueError(f"portType {intf.portType} is not supported")
             if intf.type == "interfaces":
                 payload["interfaces"].append(
                     self.__generate_l3out_phyintf(
+                        tenant_id,
                         self.siteid_name_map[template["l3outTemplate"]["siteId"]],
                         intf,
                         l3outConfig.interfaceRoutingPolicy,
@@ -305,6 +337,7 @@ class NDOTemplate:
             elif intf.type == "subInterfaces":
                 payload["subInterfaces"].append(
                     self.__generate_l3out_subintf(
+                        tenant_id,
                         self.siteid_name_map[template["l3outTemplate"]["siteId"]],
                         intf,
                         l3outConfig.interfaceRoutingPolicy,
@@ -313,6 +346,7 @@ class NDOTemplate:
             elif intf.type == "sviInterfaces":
                 payload["sviInterfaces"].append(
                     self.__generate_l3out_sviintf(
+                        tenant_id,
                         self.siteid_name_map[template["l3outTemplate"]["siteId"]],
                         intf,
                         l3outConfig.interfaceRoutingPolicy,
@@ -1687,13 +1721,17 @@ class NDOTemplate:
             time.sleep(self.delay)
 
     # support replace mode
-    def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig, replace: bool = False) -> None:
+    def add_l3out_under_template(
+        self, template_name: str, l3outConfig: L3OutConfig, operation: Literal["replace", "merge"] | None
+    ) -> None:
         """
         Adds an L3out to the specified template.
 
         Args:
             template_name (str): The name of the template.
             l3outConfig (L3OutConfig): An object of class L3OutConfig representing the L3out configuration.
+            operation (str | None): The operation mode for adding the L3out. Can be "replace", "merge", or None.
+            If None, If the L3out already exists, it will not be added again.
 
         Raises:
             ValueError: If l3outConfig is not an object of class L3OutConfig or if the template does not exist.
@@ -1716,9 +1754,18 @@ class NDOTemplate:
         filtered = list(filter(lambda l: l["name"] == l3outConfig.name, l3outs))
         if len(filtered) != 0:
             print(f"  |--- L3out {l3outConfig.name} already exist.")
-            if replace:
+            if operation == "replace":
                 print(f"  |--- replace TRUE : Replacing {l3outConfig.name} config")
                 filtered[0] = filtered[0].update(self.__generate_l3out_payload(template, l3outConfig))
+            elif operation == "merge":
+                print(f"  |--- merge TRUE : Merging {l3outConfig.name} config")
+                new_payload = self.__generate_l3out_payload(template, l3outConfig)
+                if "interfaces" in filtered[0]:
+                    filtered[0]["interfaces"].extend(new_payload["interfaces"])
+                if "subInterfaces" in filtered[0]:
+                    filtered[0]["subInterfaces"].extend(new_payload["subInterfaces"])
+                if "sviInterfaces" in filtered[0]:
+                    filtered[0]["sviInterfaces"].extend(new_payload["sviInterfaces"])
             else:
                 return
         else:
