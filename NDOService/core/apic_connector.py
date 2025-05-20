@@ -30,7 +30,7 @@ class APICTemplate:
         self.session.trust_env = False
         payload = {"aaaUser": {"attributes": {"name": self.username, "pwd": self.password}}}
         url = f"{self.base_path}{PATH_APIC_LOGIN}"
-        self.session.post(url, json=payload).json()
+        self.session.post(url, json=payload, timeout=10).json()
         print("- LOGIN SUCCESS")
 
     def create_stormcontrol_policy(self, name: str, config: StormCtlConfig | None = None) -> None:

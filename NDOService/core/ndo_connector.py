@@ -485,7 +485,7 @@ class NDOTemplate:
             "domain": self.domain,
         }
         url = f"{self.base_path}{PATH_LOGIN}"
-        self.session.post(url, json=payload).json()
+        self.session.post(url, json=payload, timeout=10).json()
         # create site name to ID map
         print("- INDEXING NODE IDS")
         for site in self.get_all_sites():
