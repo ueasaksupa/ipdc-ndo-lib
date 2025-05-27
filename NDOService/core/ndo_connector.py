@@ -156,6 +156,9 @@ class NDOTemplate:
         for entry in currentRM["rtMapEntryList"]:
             entryName = entry["rtMapContext"]["name"]
             entIndex[entryName] = entry
+            if "matchPrefixList" not in entry["matchRule"][0]:
+                entry["matchRule"][0]["matchPrefixList"] = []
+
             for prefix in entry["matchRule"][0]["matchPrefixList"]:
                 prefixKey = entryName + "_" + prefix["prefix"]
                 prefixIndex[prefixKey] = prefix
