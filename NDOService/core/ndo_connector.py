@@ -14,11 +14,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class NDOTemplate:
-    def __init__(self, host, username, password, port=443, delay: None | float = None) -> None:
+    def __init__(self, host, username, password, port=443, delay: None | float = None, domain: str = "local") -> None:
         self.host = host
         self.username = username
         self.password = password
-        self.domain = "local"
+        self.domain = domain
         self.base_path = f"https://{self.host}:{port}"
         self.sitename_id_map = {}
         self.siteid_name_map = {}
