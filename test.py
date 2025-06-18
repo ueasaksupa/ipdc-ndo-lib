@@ -74,56 +74,56 @@ if not schema:
 ############################################################################################################
 
 
-l3outconfig = L3OutConfig(
-    name="L3OUT_SITEA_TEST_2",
-    vrf="VRF_TEST_NUTTAWUT",
-    l3domain="L3_DOMAIN_BL_DOM01",
-    nodes=[
-        L3OutNodeConfig(
-            nodeID="3102",
-            routerID="10.0.0.2",
-        ),
-    ],
-    routingProtocol="bgp",
-    importRouteControl=True,
-    importRouteMap="RM_L3OUT_TEST_BGP_IN",
-    exportRouteMap="RM_L3OUT_TEST_BGP_OUT",
-    interfaces=[
-        # L3OutIntPhysicalPort(
-        #     primaryV4="20.0.1.2/30",
-        #     secondaryAddrs=["15.1.1.1/16"],
-        #     nodeID="3102",
-        #     portID="1/31",
-        #     bgpPeers=[
-        #         L3OutBGPPeerConfig(
-        #             peerAddressV4="10.10.10.2",
-        #             peerAsn=65001,
-        #             localAsn=6500011,
-        #             localAsnConfig="no-prepend",
-        #             importRouteMap="RM_L3OUT_TEST_BGP_IN",
-        #             exportRouteMap="RM_L3OUT_TEST_BGP_OUT",
-        #         )
-        #     ],
-        # ),
-        L3OutIntPhysicalPort(
-            primaryV4="20.0.2.2/30",
-            secondaryAddrs=["15.1.2.1/16"],
-            nodeID="3102",
-            portID="1/32",
-            bgpPeers=[
-                L3OutBGPPeerConfig(
-                    peerAddressV4="10.10.12.2",
-                    peerAsn=65001,
-                    localAsn=6500011,
-                    localAsnConfig="no-prepend",
-                )
-            ],
-        ),
-    ],
-    interfaceRoutingPolicy="L3OUT_BFD_100",
-)
+# l3outconfig = L3OutConfig(
+#     name="L3OUT_SITEA_TEST_2",
+#     vrf="VRF_TEST_NUTTAWUT",
+#     l3domain="L3_DOMAIN_BL_DOM01",
+#     nodes=[
+#         L3OutNodeConfig(
+#             nodeID="3102",
+#             routerID="10.0.0.2",
+#         ),
+#     ],
+#     routingProtocol="bgp",
+#     importRouteControl=True,
+#     importRouteMap="RM_L3OUT_TEST_BGP_IN",
+#     exportRouteMap="RM_L3OUT_TEST_BGP_OUT",
+#     interfaces=[
+#         # L3OutIntPhysicalPort(
+#         #     primaryV4="20.0.1.2/30",
+#         #     secondaryAddrs=["15.1.1.1/16"],
+#         #     nodeID="3102",
+#         #     portID="1/31",
+#         #     bgpPeers=[
+#         #         L3OutBGPPeerConfig(
+#         #             peerAddressV4="10.10.10.2",
+#         #             peerAsn=65001,
+#         #             localAsn=6500011,
+#         #             localAsnConfig="no-prepend",
+#         #             importRouteMap="RM_L3OUT_TEST_BGP_IN",
+#         #             exportRouteMap="RM_L3OUT_TEST_BGP_OUT",
+#         #         )
+#         #     ],
+#         # ),
+#         L3OutIntPhysicalPort(
+#             primaryV4="20.0.2.2/30",
+#             secondaryAddrs=["15.1.2.1/16"],
+#             nodeID="3102",
+#             portID="1/32",
+#             bgpPeers=[
+#                 L3OutBGPPeerConfig(
+#                     peerAddressV4="10.10.12.2",
+#                     peerAsn=65001,
+#                     localAsn=6500011,
+#                     localAsnConfig="no-prepend",
+#                 )
+#             ],
+#         ),
+#     ],
+#     interfaceRoutingPolicy="L3OUT_BFD_100",
+# )
 
-ndo.add_l3out_under_template("TN_NUTTAWUT_SiteA_L3Out_Template", l3outconfig, operation="merge")
+# ndo.add_l3out_under_template("TN_NUTTAWUT_SiteA_L3Out_Template", l3outconfig, operation="merge")
 
 
 #
@@ -218,4 +218,27 @@ ndo.add_l3out_under_template("TN_NUTTAWUT_SiteA_L3Out_Template", l3outconfig, op
 # )
 # ndo.add_route_map_policy_under_template(
 #     template_name="TN_NUTTAWUT_Tenant_Policies_SiteA", rnConfig=ROUTE_MAP_CONFIG, operation="merge"
+# )
+
+
+# Test adding tenant policies IGMP interface policy
+# ndo.add_igmp_int_pol_under_template(
+#     template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
+#     igmpIntPolConfig=IGMPInterfacePolicyConfig(
+#         name="IGMP_INT_POL_TEST",
+#         igmpVersion="v2",
+#         enableV3ASM=True,
+#     )
+# )
+
+
+# Test adding tenant policies IGMP Snooping policy
+# ndo.add_igmp_snoop_pol_under_template(
+#     template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
+#     igmpSnoopPol=IGMPSnoopingPolicyConfig(
+#         name="IGMP_SNOOP_POL_TEST",
+#         igmpVersion="v3",
+#         enableFastLeave=True,
+#     ),
+#     operation="replace"
 # )

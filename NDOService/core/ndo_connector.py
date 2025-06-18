@@ -1580,6 +1580,102 @@ class NDOTemplate:
         if self.delay is not None:  # delay for a while
             time.sleep(self.delay)
 
+    def add_igmp_int_pol_under_template(
+        self, template_name: str, igmpIntPolConfig: IGMPInterfacePolicyConfig, operation: Literal["add", "replace"] = "add") -> None:
+        print("--- Adding IGMPInterfacePolicy policy")
+        if not isinstance(igmpIntPolConfig, IGMPInterfacePolicyConfig):
+            raise ValueError("igmpIntPolConfig must be an object of class IGMPInterfacePolicyConfig")
+
+        template = self.find_tenant_policies_template_by_name(template_name)
+        if template is None:
+            raise ValueError(f"template {template_name} does not exist")
+
+        payload = {
+            "name": igmpIntPolConfig.name,
+            "description": igmpIntPolConfig.description,
+            "igmpQuerierVersion": igmpIntPolConfig.igmpVersion,
+            "enableV3Asm": igmpIntPolConfig.enableV3ASM,
+            "enableFastLeaveControl": igmpIntPolConfig.enableFastLeave,
+            "enableReportLinkLocalGroups": igmpIntPolConfig.enableReportLinkLocalGroups,
+            "groupTimeout": igmpIntPolConfig.groupTimeout,
+            "queryInterval": igmpIntPolConfig.queryInterval,
+            "queryResponseInterval": igmpIntPolConfig.queryResponseInterval,
+        }
+
+        if "igmpInterfacePolicies" not in template["tenantPolicyTemplate"]["template"]:
+            template["tenantPolicyTemplate"]["template"]["igmpInterfacePolicies"] = [payload]
+        else:
+            pol: list = template["tenantPolicyTemplate"]["template"]["igmpInterfacePolicies"]
+            filtered_ele = list(filter(lambda p: p["name"] == igmpIntPolConfig.name, pol))
+            if len(filtered_ele) > 0:
+                print(f"  |--- IGMPInterfacePolicyConfig {igmpIntPolConfig.name} already exist.")
+                if operation == "replace":
+                    print(f"  |--- replace TRUE : Replacing {igmpIntPolConfig.name} config")
+                    filtered_ele[0] = filtered_ele[0].update(payload)
+                else:
+                    return
+            else:
+                pol.append(payload)
+
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
+        resp = self.session.put(url, json=template)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
+
+
+    def add_igmp_snoop_pol_under_template(
+        self, template_name: str, igmpSnoopPol: IGMPSnoopingPolicyConfig, operation: Literal["add", "replace"] = "add") -> None:
+        print("--- Adding IGMPInterfacePolicy policy")
+        if not isinstance(igmpSnoopPol, IGMPSnoopingPolicyConfig):
+            raise ValueError("igmpSnoopPol must be an object of class IGMPSnoopingPolicyConfig")
+
+        template = self.find_tenant_policies_template_by_name(template_name)
+        if template is None:
+            raise ValueError(f"template {template_name} does not exist")
+
+        payload = {
+            "name": igmpSnoopPol.name,
+            "description": igmpSnoopPol.description,
+            "enableAdminState": igmpSnoopPol.adminState,
+            "igmpQuerierVersion": igmpSnoopPol.igmpVersion,
+            "enableFastLeaveControl": igmpSnoopPol.enableFastLeave,
+            "enableQuerierControl": igmpSnoopPol.enableQuerierControl,
+            "queryInterval": igmpSnoopPol.queryInterval,
+            "queryResponseInterval": igmpSnoopPol.queryResponseInterval,
+            "lastMemberQueryInterval": igmpSnoopPol.lastMemberQueryInterval,
+            "startQueryCount": igmpSnoopPol.startQueryCount,
+            "startQueryInterval": igmpSnoopPol.startQueryInterval
+        }
+
+        if "igmpSnoopPolicies" not in template["tenantPolicyTemplate"]["template"]:
+            template["tenantPolicyTemplate"]["template"]["igmpSnoopPolicies"] = [payload]
+        else:
+            pol: list = template["tenantPolicyTemplate"]["template"]["igmpSnoopPolicies"]
+            filtered_ele = list(filter(lambda p: p["name"] == igmpSnoopPol.name, pol))
+            if len(filtered_ele) > 0:
+                print(f"  |--- IGMPSnoopingPolicyConfig {igmpSnoopPol.name} already exist.")
+                if operation == "replace":
+                    print(f"  |--- replace TRUE : Replacing {igmpSnoopPol.name} config")
+                    filtered_ele[0] = filtered_ele[0].update(payload)
+                else:
+                    return
+            else:
+                pol.append(payload)
+
+        url = f"{self.base_path}{PATH_TEMPLATES}/{template['templateId']}"
+        resp = self.session.put(url, json=template)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
+    
+
     def add_l3out_intf_routing_policy(
         self,
         template_name: str,

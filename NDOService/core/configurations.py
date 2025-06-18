@@ -495,3 +495,45 @@ class StormCtlConfig:
     unicastMaxBurstPPS: int = 500
     action: Literal["drop", "shutdown"] = "drop"
     soakInstCount: int = 3
+
+@dataclass(kw_only=True)
+class IGMPInterfacePolicyConfig:
+    """
+    ### Note:
+    - name : name of the IGMP Interface Policy
+    - description : description of the IGMP Interface Policy
+    - igmpVersion : IGMP version to use
+    - enableV3ASM : enable or disable IGMPv3 ASM
+    - enableFastLeave : enable or disable fast leave
+    - enableReportLinkLocalGroups : enable or disable reporting of link-local groups
+    - groupTimeout : timeout in seconds for IGMP groups
+    - queryInterval : interval in seconds for sending IGMP queries
+    - queryResponseInterval : maximum response time in seconds for IGMP queries
+    """
+    name: str
+    description: str = ""
+    # 
+    igmpVersion: Literal["v2", "v3"] = "v3"
+    enableV3ASM: bool = False
+    enableFastLeave: bool = False
+    enableReportLinkLocalGroups: bool = False
+    # Advaced IGMP settings
+    groupTimeout: int = 260
+    queryInterval: int = 125
+    queryResponseInterval: int = 10
+
+@dataclass(kw_only=True)
+class IGMPSnoopingPolicyConfig:
+    name: str
+    description: str = ""
+    #
+    adminState:Literal["enabled", "disabled"] = "enabled"
+    enableFastLeave: bool = False
+    enableQuerierControl: bool = False
+    igmpVersion: Literal["v2", "v3"] = "v3"
+    # Advaced IGMP settings
+    queryInterval: int = 125
+    queryResponseInterval: int = 10
+    lastMemberQueryInterval: int = 1
+    startQueryCount: int = 2
+    startQueryInterval: int = 31
