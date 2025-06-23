@@ -1522,10 +1522,10 @@ class NDOTemplate:
         if self.delay is not None:  # delay for a while
             time.sleep(self.delay)
 
-    def add_igmp_int_pol_under_template(
+    def create_igmp_int_pol_under_template(
         self, template_name: str, igmpIntPolConfig: IGMPInterfacePolicyConfig, operation: Literal["add", "replace"] = "add"
     ) -> None:
-        print("--- Adding IGMPInterfacePolicy policy")
+        print(f"--- Adding IGMPInterfacePolicy policy {igmpIntPolConfig.name}")
         if not isinstance(igmpIntPolConfig, IGMPInterfacePolicyConfig):
             raise ValueError("igmpIntPolConfig must be an object of class IGMPInterfacePolicyConfig")
 
@@ -1569,10 +1569,10 @@ class NDOTemplate:
         if self.delay is not None:  # delay for a while
             time.sleep(self.delay)
 
-    def add_igmp_snoop_pol_under_template(
+    def create_igmp_snoop_pol_under_template(
         self, template_name: str, igmpSnoopPol: IGMPSnoopingPolicyConfig, operation: Literal["add", "replace"] = "add"
     ) -> None:
-        print("--- Adding IGMPInterfacePolicy policy")
+        print(f"--- Adding IGMPSnoopingPolicy policy {igmpSnoopPol.name}")
         if not isinstance(igmpSnoopPol, IGMPSnoopingPolicyConfig):
             raise ValueError("igmpSnoopPol must be an object of class IGMPSnoopingPolicyConfig")
 

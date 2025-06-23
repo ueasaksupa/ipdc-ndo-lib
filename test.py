@@ -222,26 +222,26 @@ if not schema:
 
 
 # Test adding tenant policies IGMP interface policy
-# ndo.add_igmp_int_pol_under_template(
-#     template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
-#     igmpIntPolConfig=IGMPInterfacePolicyConfig(
-#         name="IGMP_INT_POL_TEST",
-#         igmpVersion="v2",
-#         enableV3ASM=True,
-#     )
-# )
+ndo.create_igmp_int_pol_under_template(
+    template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
+    igmpIntPolConfig=IGMPInterfacePolicyConfig(
+        name="IGMP_INT_POL_TEST",
+        igmpVersion="v2",
+        enableV3ASM=True,
+    ),
+)
 
 
 # Test adding tenant policies IGMP Snooping policy
-# ndo.add_igmp_snoop_pol_under_template(
-#     template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
-#     igmpSnoopPol=IGMPSnoopingPolicyConfig(
-#         name="IGMP_SNOOP_POL_TEST",
-#         igmpVersion="v3",
-#         enableFastLeave=True,
-#     ),
-#     operation="replace"
-# )
+ndo.create_igmp_snoop_pol_under_template(
+    template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
+    igmpSnoopPol=IGMPSnoopingPolicyConfig(
+        name="IGMP_SNOOP_POL_TEST",
+        igmpVersion="v3",
+        enableFastLeave=True,
+    ),
+    operation="replace",
+)
 
 
 # Test adding interface setting policy (Physical Interface)
