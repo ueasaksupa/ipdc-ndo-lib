@@ -30,23 +30,17 @@ class NDOTemplate:
 
     # ** INTERNAL ONLY ** UTIL METHODs
 
-    def __get_port_resource_path(
-        self, staticport: StaticPortPhy | StaticPortPC | StaticPortVPC, site_name: str, pod: str, strict_check: bool
-    ):
+    def __get_port_resource_path(self, staticport: StaticPortPhy | StaticPortPC | StaticPortVPC, site_name: str, pod: str, strict_check: bool):
         path = ""
         if staticport.port_type == "vpc":
             vpc_resource = self.find_vpc_by_name(staticport.port_name, site_name)
             if not vpc_resource:
-                raise Exception(
-                    f"VPC resource name {staticport.port_name} does not exist in the Fabric Resource Policy."
-                )
+                raise Exception(f"VPC resource name {staticport.port_name} does not exist in the Fabric Resource Policy.")
             path = vpc_resource["path"]
         elif staticport.port_type == "dpc":
             pc_resource = self.find_pc_by_name(staticport.port_name, site_name)
             if not pc_resource:
-                raise Exception(
-                    f"PC resource name {staticport.port_name} does not exist in the Fabric Resource Policy."
-                )
+                raise Exception(f"PC resource name {staticport.port_name} does not exist in the Fabric Resource Policy.")
             path = pc_resource["path"]
         elif staticport.port_type == "port":
             portId = staticport.port_name.replace("eth", "")
@@ -61,9 +55,7 @@ class NDOTemplate:
 
         return path
 
-    def __append_fabricRes_intf_object(
-        self, key: str, template: dict, port_config: PhysicalIntfResource | PortChannelResource | VPCResource
-    ):
+    def __append_fabricRes_intf_object(self, key: str, template: dict, port_config: PhysicalIntfResource | PortChannelResource | VPCResource):
         if not template[key]:
             template[key] = [asdict(port_config)]
             return
@@ -85,9 +77,7 @@ class NDOTemplate:
                 l3outTemplate = self.find_l3out_template_by_name(l3out.l3outTemplate)
                 if l3outTemplate is None:
                     raise ValueError(f"L3out template {l3out.l3outTemplate} does not exist.")
-                l3outObject = list(
-                    filter(lambda l: l["name"] == l3out.l3outName, l3outTemplate["l3outTemplate"]["l3outs"])
-                )
+                l3outObject = list(filter(lambda l: l["name"] == l3out.l3outName, l3outTemplate["l3outTemplate"]["l3outs"]))
                 if len(l3outObject) == 0:
                     raise Exception(f"L3out {l3out.l3outName} does not exist in template {l3out.l3outTemplate}")
 
@@ -119,9 +109,7 @@ class NDOTemplate:
                 [
                     {
                         "criteria": attrs.setAsPath.criteria,
-                        "pathASNs": [
-                            {"asn": asn, "order": i} for i, asn in enumerate(attrs.setAsPath.pathASNs, start=1)
-                        ],
+                        "pathASNs": [{"asn": asn, "order": i} for i, asn in enumerate(attrs.setAsPath.pathASNs, start=1)],
                         "asnCount": attrs.setAsPath.asnCount,
                     }
                 ]
@@ -220,21 +208,15 @@ class NDOTemplate:
             if peer.importRouteMap is None and peer.exportRouteMap is None:
                 peer_payload.append(asdict(peer))
             else:
-                print(
-                    f"  |--- Apply routeMap in peer level for peer: {peer.peerAddressV4 if peer.peerAddressV4 else peer.peerAddressV6}"
-                )
+                print(f"  |--- Apply routeMap in peer level for peer: {peer.peerAddressV4 if peer.peerAddressV4 else peer.peerAddressV6}")
                 tmp = asdict(peer)
                 if peer.importRouteMap is not None:
-                    im_routemap = self.find_template_object_by_name(
-                        peer.importRouteMap, f"type=routeMap&tenant-id={tenant_id}"
-                    )
+                    im_routemap = self.find_template_object_by_name(peer.importRouteMap, f"type=routeMap&tenant-id={tenant_id}")
                     if im_routemap is None:
                         raise Exception(f"RouteMap {peer.importRouteMap} does not exist.")
                     tmp["importRouteMapRef"] = im_routemap["uuid"]
                 if peer.exportRouteMap is not None:
-                    ex_routemap = self.find_template_object_by_name(
-                        peer.exportRouteMap, f"type=routeMap&tenant-id={tenant_id}"
-                    )
+                    ex_routemap = self.find_template_object_by_name(peer.exportRouteMap, f"type=routeMap&tenant-id={tenant_id}")
                     if ex_routemap is None:
                         raise Exception(f"RouteMap {peer.exportRouteMap} does not exist.")
                     tmp["exportRouteMapRef"] = ex_routemap["uuid"]
@@ -242,12 +224,8 @@ class NDOTemplate:
                 peer_payload.append(tmp)
         return peer_payload
 
-    def __generate_l3out_phyintf(
-        self, tenant_id: str, site_name: str, intfConfig: L3OutInterfaceConfig, intfRoutingPol: str | None
-    ) -> dict:
-        sec_ip_payload = (
-            [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
-        )
+    def __generate_l3out_phyintf(self, tenant_id: str, site_name: str, intfConfig: L3OutInterfaceConfig, intfRoutingPol: str | None) -> dict:
+        sec_ip_payload = [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
         INTF_PAYLOAD = {
             "group": "IF_GROUP_POLICY" if intfRoutingPol is not None else "",
             "pathType": intfConfig.portType,
@@ -272,19 +250,13 @@ class NDOTemplate:
 
         return INTF_PAYLOAD
 
-    def __generate_l3out_subintf(
-        self, tenant_id: str, site_name: str, intfConfig: L3OutSubInterfaceConfig, intfRoutingPol: str | None
-    ) -> dict:
+    def __generate_l3out_subintf(self, tenant_id: str, site_name: str, intfConfig: L3OutSubInterfaceConfig, intfRoutingPol: str | None) -> dict:
         INTF_PAYLOAD = self.__generate_l3out_phyintf(tenant_id, site_name, intfConfig, intfRoutingPol)
         INTF_PAYLOAD["encap"] = {"encapType": intfConfig.encapType, "value": intfConfig.encapVal}
         return INTF_PAYLOAD
 
-    def __generate_l3out_svivpcintf(
-        self, tenant_id: str, site_name: str, intfConfig: L3OutSVIVPC, intfRoutingPol: str | None
-    ) -> dict:
-        sec_ip_payload = (
-            [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
-        )
+    def __generate_l3out_svivpcintf(self, tenant_id: str, site_name: str, intfConfig: L3OutSVIVPC, intfRoutingPol: str | None) -> dict:
+        sec_ip_payload = [{"address": ip} for ip in intfConfig.secondaryAddrs] if intfConfig.secondaryAddrs is not None else None
         INTF_PAYLOAD = {
             "group": "IF_GROUP_POLICY" if intfRoutingPol is not None else "",
             "pathType": "vpc",
@@ -310,9 +282,7 @@ class NDOTemplate:
         INTF_PAYLOAD["encap"] = {"encapType": intfConfig.encapType, "value": intfConfig.encapVal}
         return INTF_PAYLOAD
 
-    def __generate_l3out_sviintf(
-        self, tenant_id: str, site_name: str, intfConfig: L3OutSviInterfaceConfig, intfRoutingPol: str | None
-    ) -> dict:
+    def __generate_l3out_sviintf(self, tenant_id: str, site_name: str, intfConfig: L3OutSviInterfaceConfig, intfRoutingPol: str | None) -> dict:
         if isinstance(intfConfig, L3OutSVIVPC):
             INTF_PAYLOAD = self.__generate_l3out_svivpcintf(tenant_id, site_name, intfConfig, intfRoutingPol)
         else:
@@ -359,9 +329,7 @@ class NDOTemplate:
                 raise ValueError(f"interface type {intf.type} is not supported")
 
     def __generate_l3out_payload(self, template: dict, l3outConfig: L3OutConfig) -> dict:
-        vrf = self.find_template_object_by_name(
-            l3outConfig.vrf, f"type=vrf&tenant-id={template['l3outTemplate']['tenantId']}"
-        )
+        vrf = self.find_template_object_by_name(l3outConfig.vrf, f"type=vrf&tenant-id={template['l3outTemplate']['tenantId']}")
         if vrf is None:
             raise Exception(f"VRF {l3outConfig.vrf} does not exist.")
 
@@ -379,9 +347,7 @@ class NDOTemplate:
             if im_routemap is None:
                 raise Exception(f"RouteMap {l3outConfig.importRouteMap} does not exist.")
 
-        l3domain = self.find_domain_by_name(
-            l3outConfig.l3domain, site_id=template["l3outTemplate"]["siteId"], type="l3"
-        )
+        l3domain = self.find_domain_by_name(l3outConfig.l3domain, site_id=template["l3outTemplate"]["siteId"], type="l3")
         if l3domain is None:
             raise Exception(f"l3domain {l3outConfig.l3domain} does not exist.")
 
@@ -391,9 +357,7 @@ class NDOTemplate:
             "l3domain": l3domain["uuid"],
             "routingProtocol": l3outConfig.routingProtocol,
             "exportRouteMapRef": None if l3outConfig.exportRouteMap is None else ex_routemap["uuid"],
-            "importRouteMapRef": (
-                None if not l3outConfig.importRouteControl or not l3outConfig.importRouteMap else im_routemap["uuid"]
-            ),
+            "importRouteMapRef": (None if not l3outConfig.importRouteControl or not l3outConfig.importRouteMap else im_routemap["uuid"]),
             "importRouteControl": l3outConfig.importRouteControl,
             "nodes": list(map(lambda obj: asdict(obj), l3outConfig.nodes)),
             "pim": l3outConfig.pimEnabled,
@@ -767,9 +731,7 @@ class NDOTemplate:
             print(f"--- Adding site {site} to template {template_name}")
             try:
                 site_id = self.sitename_id_map[site]
-                filter_site = list(
-                    filter(lambda el: el["siteId"] == site_id and el["templateName"] == template_name, schema["sites"])
-                )
+                filter_site = list(filter(lambda el: el["siteId"] == site_id and el["templateName"] == template_name, schema["sites"]))
 
                 if len(filter_site) != 0:
                     print(f"  |--- Site {site} already exist in the template {template_name}")
@@ -843,9 +805,7 @@ class NDOTemplate:
         print(f"  |--- Done")
         return filter_template[0]["filters"][-1]
 
-    def create_contract_under_template(
-        self, schema: dict, template_name: str, contract_name: str, filter_name: str
-    ) -> Contract:
+    def create_contract_under_template(self, schema: dict, template_name: str, contract_name: str, filter_name: str) -> Contract:
         """
         Creates a contract under a template.
         Args:
@@ -1004,9 +964,7 @@ class NDOTemplate:
         }
         payload.update(asdict(bd_config))
         if bd_config.l2Stretch == False:
-            print(
-                "  |--- *** BD is not stretched, so subnets are removed and intersiteBumTrafficAllow is set to False ***"
-            )
+            print("  |--- *** BD is not stretched, so subnets are removed and intersiteBumTrafficAllow is set to False ***")
             payload["subnets"] = []
             payload["intersiteBumTrafficAllow"] = False
             # deploy per site subnet if config is set
@@ -1113,9 +1071,7 @@ class NDOTemplate:
 
         # TODO
         # Parameterized flags
-        target_schema = (
-            schema if epg_config.linked_schema is None else self.find_schema_by_name(epg_config.linked_schema)
-        )
+        target_schema = schema if epg_config.linked_schema is None else self.find_schema_by_name(epg_config.linked_schema)
         if target_schema is None:
             raise ValueError(f"Linked schema {epg_config.linked_schema} does not exist.")
         payload = {
@@ -1220,9 +1176,7 @@ class NDOTemplate:
         print(f"  |--- Done")
         return filter_template[0]["externalEpgs"][-1]
 
-    def change_ext_epg_l3out_binding(
-        self, schema: dict, template_name: str, epg_name: str, l3outToSiteInfo: List[ExternalEpgToL3OutBinding]
-    ) -> None:
+    def change_ext_epg_l3out_binding(self, schema: dict, template_name: str, epg_name: str, l3outToSiteInfo: List[ExternalEpgToL3OutBinding]) -> None:
         """
         Change the L3Out binding of an External EPG.
 
@@ -1284,9 +1238,7 @@ class NDOTemplate:
 
         # filter target epg from schema object
         target_site_id = self.sitename_id_map[site_name]
-        schema_site_template = list(
-            filter(lambda s: s["siteId"] == target_site_id and s["templateName"] == template_name, schema["sites"])
-        )
+        schema_site_template = list(filter(lambda s: s["siteId"] == target_site_id and s["templateName"] == template_name, schema["sites"]))
         if len(schema_site_template) == 0:
             raise ValueError(f"Template {template_name} with site {site_name} does not exist.")
 
@@ -1355,9 +1307,7 @@ class NDOTemplate:
 
         # filter target epg from schema object
         target_site_id = self.sitename_id_map[site_name]
-        target_template = list(
-            filter(lambda s: s["siteId"] == target_site_id and s["templateName"] == template_name, schema["sites"])
-        )
+        target_template = list(filter(lambda s: s["siteId"] == target_site_id and s["templateName"] == template_name, schema["sites"]))
 
         if len(target_template) == 0:
             raise ValueError(f"Template {template_name} does not exist.")
@@ -1472,9 +1422,7 @@ class NDOTemplate:
                 break
 
     # Tenant policies template
-    def create_tenant_policies_template(
-        self, template_name: str, sites: list[str], tenant_name: str
-    ) -> TenantPolTemplate:
+    def create_tenant_policies_template(self, template_name: str, sites: list[str], tenant_name: str) -> TenantPolTemplate:
         print(f"--- Creating Tenant policies template {template_name}")
         for site in sites:
             if site not in self.sitename_id_map:
@@ -1523,9 +1471,7 @@ class NDOTemplate:
             raise ValueError(f"template {template_name} does not exist")
 
         if "routeMapPolicies" not in template["tenantPolicyTemplate"]["template"]:
-            template["tenantPolicyTemplate"]["template"]["routeMapPolicies"] = [
-                self.__generate_routeMap_payload(rnConfig)
-            ]
+            template["tenantPolicyTemplate"]["template"]["routeMapPolicies"] = [self.__generate_routeMap_payload(rnConfig)]
         else:
             rm_policies: list = template["tenantPolicyTemplate"]["template"]["routeMapPolicies"]
             filtered_rm = list(filter(lambda rm: rm["name"] == rnConfig.name, rm_policies))
@@ -1551,16 +1497,12 @@ class NDOTemplate:
         if self.delay is not None:  # delay for a while
             time.sleep(self.delay)
 
-    def add_route_map_prefix_to_policy(
-        self, template_name: str, rm_name: str, entryOrder: int, prefix: RouteMapPrefix
-    ) -> None:
+    def add_route_map_prefix_to_policy(self, template_name: str, rm_name: str, entryOrder: int, prefix: RouteMapPrefix) -> None:
         print(f"--- Adding prefix to route map {rm_name}")
         template = self.find_tenant_policies_template_by_name(template_name)
         if template is None:
             raise ValueError(f"Tenant policy {template_name} does not exist.")
-        rm_pol = list(
-            filter(lambda p: p["name"] == rm_name, template["tenantPolicyTemplate"]["template"]["routeMapPolicies"])
-        )
+        rm_pol = list(filter(lambda p: p["name"] == rm_name, template["tenantPolicyTemplate"]["template"]["routeMapPolicies"]))
         found = False
         for entry in rm_pol[0]["rtMapEntryList"]:
             if entry["rtMapContext"]["order"] != entryOrder:
@@ -1581,7 +1523,8 @@ class NDOTemplate:
             time.sleep(self.delay)
 
     def add_igmp_int_pol_under_template(
-        self, template_name: str, igmpIntPolConfig: IGMPInterfacePolicyConfig, operation: Literal["add", "replace"] = "add") -> None:
+        self, template_name: str, igmpIntPolConfig: IGMPInterfacePolicyConfig, operation: Literal["add", "replace"] = "add"
+    ) -> None:
         print("--- Adding IGMPInterfacePolicy policy")
         if not isinstance(igmpIntPolConfig, IGMPInterfacePolicyConfig):
             raise ValueError("igmpIntPolConfig must be an object of class IGMPInterfacePolicyConfig")
@@ -1626,9 +1569,9 @@ class NDOTemplate:
         if self.delay is not None:  # delay for a while
             time.sleep(self.delay)
 
-
     def add_igmp_snoop_pol_under_template(
-        self, template_name: str, igmpSnoopPol: IGMPSnoopingPolicyConfig, operation: Literal["add", "replace"] = "add") -> None:
+        self, template_name: str, igmpSnoopPol: IGMPSnoopingPolicyConfig, operation: Literal["add", "replace"] = "add"
+    ) -> None:
         print("--- Adding IGMPInterfacePolicy policy")
         if not isinstance(igmpSnoopPol, IGMPSnoopingPolicyConfig):
             raise ValueError("igmpSnoopPol must be an object of class IGMPSnoopingPolicyConfig")
@@ -1648,7 +1591,7 @@ class NDOTemplate:
             "queryResponseInterval": igmpSnoopPol.queryResponseInterval,
             "lastMemberQueryInterval": igmpSnoopPol.lastMemberQueryInterval,
             "startQueryCount": igmpSnoopPol.startQueryCount,
-            "startQueryInterval": igmpSnoopPol.startQueryInterval
+            "startQueryInterval": igmpSnoopPol.startQueryInterval,
         }
 
         if "igmpSnoopPolicies" not in template["tenantPolicyTemplate"]["template"]:
@@ -1674,7 +1617,6 @@ class NDOTemplate:
         print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
         if self.delay is not None:  # delay for a while
             time.sleep(self.delay)
-    
 
     def add_l3out_intf_routing_policy(
         self,
@@ -1781,9 +1723,7 @@ class NDOTemplate:
 
         return resp.json()
 
-    def add_static_route_prefixes_to_l3out(
-        self, template_name: str, l3out_name: str, nodeID: str, prefixes: list[L3OutStaticRouteConfig]
-    ) -> None:
+    def add_static_route_prefixes_to_l3out(self, template_name: str, l3out_name: str, nodeID: str, prefixes: list[L3OutStaticRouteConfig]) -> None:
         """
         Adds static route prefixes to an L3Out.
         parameters:
@@ -1822,9 +1762,7 @@ class NDOTemplate:
             time.sleep(self.delay)
 
     # support replace mode
-    def add_l3out_under_template(
-        self, template_name: str, l3outConfig: L3OutConfig, operation: Literal["replace", "merge"] | None
-    ) -> None:
+    def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig, operation: Literal["replace", "merge"] | None) -> None:
         """
         Adds an L3out to the specified template.
 
@@ -2019,9 +1957,7 @@ class NDOTemplate:
                 return item["spec"]
         return None
 
-    def find_domain_by_name(
-        self, domain_name: str, site_name: str | None = None, site_id: str | None = None, type: str = ""
-    ) -> dict | None:
+    def find_domain_by_name(self, domain_name: str, site_name: str | None = None, site_id: str | None = None, type: str = "") -> dict | None:
         """
         Find a domain object by its name.
 
@@ -2136,6 +2072,9 @@ class NDOTemplate:
 
         return resp.json()
 
+    def create_intf_setting_policy(self, policy_name: str, settings: PCInterfaceSettingPolConfig | PhysicalInterfaceSettingPolConfig) -> None:
+        pass
+
     def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int | Tuple[int, int]] = []) -> None:
         """
         Adds a list of VLANs to a VLAN pool in a fabric policy.
@@ -2176,9 +2115,7 @@ class NDOTemplate:
         if "vlanPools" not in policy["fabricPolicyTemplate"]["template"]:
             policy["fabricPolicyTemplate"]["template"]["vlanPools"] = [payload]
         else:
-            target_pool = list(
-                filter(lambda pool: pool["name"] == pool_name, policy["fabricPolicyTemplate"]["template"]["vlanPools"])
-            )
+            target_pool = list(filter(lambda pool: pool["name"] == pool_name, policy["fabricPolicyTemplate"]["template"]["vlanPools"]))
             if len(target_pool) == 0:
                 # create new pool
                 policy["fabricPolicyTemplate"]["template"]["vlanPools"].append(payload)
@@ -2186,13 +2123,9 @@ class NDOTemplate:
                 # extent the target pool with new vlans
                 for vlan in vlans:
                     if isinstance(vlan, tuple):
-                        target_pool[0]["encapBlocks"].append(
-                            {"range": {"from": vlan[0], "to": vlan[1], "allocMode": "static"}}
-                        )
+                        target_pool[0]["encapBlocks"].append({"range": {"from": vlan[0], "to": vlan[1], "allocMode": "static"}})
                     elif isinstance(vlan, int):
-                        target_pool[0]["encapBlocks"].append(
-                            {"range": {"from": vlan, "to": vlan, "allocMode": "static"}}
-                        )
+                        target_pool[0]["encapBlocks"].append({"range": {"from": vlan, "to": vlan, "allocMode": "static"}})
 
         url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
         resp = self.session.put(url, json=policy)
@@ -2256,9 +2189,7 @@ class NDOTemplate:
             port_config.policy = interface_setting["uuid"]
             self.__append_fabricRes_intf_object("virtualPortChannels", template, port_config)
         else:
-            raise ValueError(
-                "port_config is not valid, you must pass an object of types PhysicalIntfResource | PortChannelResource | VPCResource"
-            )
+            raise ValueError("port_config is not valid, you must pass an object of types PhysicalIntfResource | PortChannelResource | VPCResource")
 
         url = f'{self.base_path}{PATH_TEMPLATES}/{resource["templateId"]}'
         resp = self.session.put(url, json=resource)

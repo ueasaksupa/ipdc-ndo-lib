@@ -496,6 +496,7 @@ class StormCtlConfig:
     action: Literal["drop", "shutdown"] = "drop"
     soakInstCount: int = 3
 
+
 @dataclass(kw_only=True)
 class IGMPInterfacePolicyConfig:
     """
@@ -510,9 +511,10 @@ class IGMPInterfacePolicyConfig:
     - queryInterval : interval in seconds for sending IGMP queries
     - queryResponseInterval : maximum response time in seconds for IGMP queries
     """
+
     name: str
     description: str = ""
-    # 
+    #
     igmpVersion: Literal["v2", "v3"] = "v3"
     enableV3ASM: bool = False
     enableFastLeave: bool = False
@@ -522,12 +524,13 @@ class IGMPInterfacePolicyConfig:
     queryInterval: int = 125
     queryResponseInterval: int = 10
 
+
 @dataclass(kw_only=True)
 class IGMPSnoopingPolicyConfig:
     name: str
     description: str = ""
     #
-    adminState:Literal["enabled", "disabled"] = "enabled"
+    adminState: Literal["enabled", "disabled"] = "enabled"
     enableFastLeave: bool = False
     enableQuerierControl: bool = False
     igmpVersion: Literal["v2", "v3"] = "v3"
@@ -537,3 +540,18 @@ class IGMPSnoopingPolicyConfig:
     lastMemberQueryInterval: int = 1
     startQueryCount: int = 2
     startQueryInterval: int = 31
+
+
+@dataclass(kw_only=True)
+class PhysicalInterfaceSettingPolConfig:
+    name: str
+    description: str = ""
+    enableCDP: bool = False
+    enableLLDP: bool = True
+    speed: Literal["inherit", "100M", "1G", "10G", "25g", "40G", "50G", "100G", "200G", "400G"] = "inherit"
+    autoNegotiate: Literal["on", "on-enforce", "off"] = "on"
+
+
+@dataclass(kw_only=True)
+class PCInterfaceSettingPolConfig(PhysicalInterfaceSettingPolConfig):
+    portChannelMode: Literal["off", "active", "passive", "on"] = "active"
