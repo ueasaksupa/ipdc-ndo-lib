@@ -242,3 +242,20 @@ if not schema:
 #     ),
 #     operation="replace"
 # )
+
+
+# Test adding interface setting policy (Physical Interface)
+ndo.create_intf_setting_policy(
+    fabric_pol_name="NUTTAWUT_Fabric_policies",
+    settings=PhysicalInterfaceSettingPolConfig(
+        name="INT_POL_TEST", domain="NUTTAWUT_TEST_DOM", speed="10G", enableCDP=True, autoNegotiate="on-enforce"
+    ),
+)
+
+# Test adding interface setting policy (Port Channel Interface)
+ndo.create_intf_setting_policy(
+    fabric_pol_name="NUTTAWUT_Fabric_policies",
+    settings=PCInterfaceSettingPolConfig(
+        name="INT_POL_TEST_PC", domain="NUTTAWUT_TEST_DOM", speed="10G", enableCDP=True, autoNegotiate="on-enforce", portChannelMode="off"
+    ),
+)

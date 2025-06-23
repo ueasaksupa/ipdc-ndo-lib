@@ -2072,8 +2072,70 @@ class NDOTemplate:
 
         return resp.json()
 
-    def create_intf_setting_policy(self, policy_name: str, settings: PCInterfaceSettingPolConfig | PhysicalInterfaceSettingPolConfig) -> None:
-        pass
+    def create_intf_setting_policy(self, fabric_pol_name: str, settings: PCInterfaceSettingPolConfig | PhysicalInterfaceSettingPolConfig) -> None:
+        """
+        Creates an interface setting policy for either physical interfaces or port channels.
+        """
+
+        print(f"--- Creating interface setting policy {settings.name} in fabric policy {fabric_pol_name}")
+        if not isinstance(settings, (PCInterfaceSettingPolConfig, PhysicalInterfaceSettingPolConfig)):
+            raise ValueError("settings must be an object of class PCInterfaceSettingPolConfig or PhysicalInterfaceSettingPolConfig")
+        payload = {
+            "type": "physical",
+            "name": settings.name,
+            "cdp": {"adminState": "enabled" if settings.enableCDP else "disabled"},
+            "lldp": {
+                "receiveState": "enabled" if settings.enableLLDP else "disabled",
+                "transmitState": "enabled" if settings.enableLLDP else "disabled",
+            },
+            "l2Interface": {"qinq": "disabled", "reflectiveRelay": "disabled", "vlanScope": settings.vlanScope},
+            "linkLevel": {
+                "speed": settings.speed,
+                "autoNegotiation": settings.autoNegotiate,
+                "bringUpDelay": 0,
+                "debounceInterval": 100,
+                "fec": "inherit",
+            },
+        }
+        if isinstance(settings, PCInterfaceSettingPolConfig):
+            payload["type"] = "portchannel"
+            payload["portChannelPolicy"] = {
+                "mode": settings.portChannelMode,
+                "control": ["fast-sel-hot-stdby", "graceful-conv", "susp-individual"],
+                "minLinks": settings.minLinks,
+                "maxLinks": settings.maxLinks,
+            }
+
+        policy = self.find_fabric_policy_by_name(fabric_pol_name)
+        if not policy:
+            raise ValueError(f"Fabric Policy {fabric_pol_name} not exist, Please create it first.")
+
+        # find domain ID
+        if "domains" not in policy["fabricPolicyTemplate"]["template"]:
+            raise ValueError(f"No domain {settings.domain} found in fabric policy template.")
+        domain = list(filter(lambda d: d["name"] == settings.domain, policy["fabricPolicyTemplate"]["template"]["domains"]))
+        if len(domain) == 0:
+            raise ValueError(f"Domain {settings.domain} not found in fabric policy template.")
+        payload["domains"] = [domain[0]["uuid"]]
+
+        if "interfacePolicyGroups" not in policy["fabricPolicyTemplate"]["template"]:
+            policy["fabricPolicyTemplate"]["template"]["interfacePolicyGroups"] = [payload]
+        else:
+            intf_policies: list = policy["fabricPolicyTemplate"]["template"]["interfacePolicyGroups"]
+            filtered_intf = list(filter(lambda p: p["name"] == settings.name, intf_policies))
+            if len(filtered_intf) > 0:
+                print(f"  |--- Interface setting policy {settings.name} already exist.")
+                return
+            intf_policies.append(payload)
+
+        url = f"{self.base_path}{PATH_TEMPLATES}/{policy['templateId']}"
+        resp = self.session.put(url, json=policy)
+        if resp.status_code >= 400:
+            raise Exception(resp.json())
+
+        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
+        if self.delay is not None:  # delay for a while
+            time.sleep(self.delay)
 
     def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int | Tuple[int, int]] = []) -> None:
         """

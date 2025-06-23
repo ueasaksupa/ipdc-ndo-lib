@@ -545,13 +545,27 @@ class IGMPSnoopingPolicyConfig:
 @dataclass(kw_only=True)
 class PhysicalInterfaceSettingPolConfig:
     name: str
+    domain: str
     description: str = ""
     enableCDP: bool = False
     enableLLDP: bool = True
     speed: Literal["inherit", "100M", "1G", "10G", "25g", "40G", "50G", "100G", "200G", "400G"] = "inherit"
     autoNegotiate: Literal["on", "on-enforce", "off"] = "on"
+    vlanScope: Literal["portlocal", "global"] = "global"
 
 
 @dataclass(kw_only=True)
 class PCInterfaceSettingPolConfig(PhysicalInterfaceSettingPolConfig):
-    portChannelMode: Literal["off", "active", "passive", "on"] = "active"
+    """
+    parameters:
+    portChannelMode - defines the mode of the port channel
+        - off: port channel Static mode
+        - active: port channel is LACP active
+        - passive: port channel is LACP passive
+    maxLinks - maximum number of links in the port channel
+    minLinks - minimum number of links in the port channel
+    """
+
+    portChannelMode: Literal["off", "active", "passive"] = "active"
+    maxLinks: int = 16
+    minLinks: int = 1
