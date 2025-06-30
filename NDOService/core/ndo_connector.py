@@ -36,6 +36,20 @@ def AddDelayAfter(delay_time=None):
     return decorator
 
 
+class AutoRefreshSession(requests.Session):
+    def __init__(self, ndo_template):
+        super().__init__()
+        self.ndo_template = ndo_template
+
+    def request(self, method, url, *args, **kwargs):
+        resp = super().request(method, url, *args, **kwargs)
+        if resp.status_code in (401, 403):  # Unauthorized or Forbidden
+            print("Session expired, re-authenticating...")
+            self.ndo_template.login()
+            resp = super().request(method, url, *args, **kwargs)
+        return resp
+
+
 class NDOTemplate:
     def __init__(self, host, username, password, port=443, delay: None | float = None, domain: str = "local") -> None:
         self.host = host
@@ -46,13 +60,12 @@ class NDOTemplate:
         self.sitename_id_map = {}
         self.siteid_name_map = {}
         self.fabric_res_phyif_map = {}
-        self.session = requests.Session()
+        self.session = AutoRefreshSession(self)  # Use custom session
         self.delay = delay
         # LOGIN
         self.login()
 
     # ** INTERNAL ONLY ** UTIL METHODs
-
     def __get_port_resource_path(self, staticport: StaticPortPhy | StaticPortPC | StaticPortVPC, site_name: str, pod: str, strict_check: bool):
         path = ""
         if staticport.port_type == "vpc":
@@ -466,7 +479,6 @@ class NDOTemplate:
     # UTILS
     def login(self) -> None:
         print("- TRYING TO LOGIN TO NDO")
-        self.session = requests.session()
         self.session.verify = False
         self.session.trust_env = False
         payload = {
