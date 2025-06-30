@@ -13,6 +13,29 @@ import re
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+def AddDelayAfter(delay_time=None):
+    """
+    Decorator to add delay after executing the function.
+    Can be used as @add_delay_after() or @add_delay_after(2).
+    """
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            # Use decorator argument if provided, else use self.delay if available
+            actual_delay = delay_time
+            if actual_delay is None and args and hasattr(args[0], "delay"):
+                actual_delay = args[0].delay
+            if actual_delay is not None:
+                time.sleep(actual_delay)
+            print(f"  |--- Done delay {actual_delay} sec")
+            return result
+
+        return wrapper
+
+    return decorator
+
+
 class NDOTemplate:
     def __init__(self, host, username, password, port=443, delay: None | float = None, domain: str = "local") -> None:
         self.host = host
@@ -467,15 +490,23 @@ class NDOTemplate:
 
     def get_all_sites(self) -> list[Site]:
         url = f"{self.base_path}{PATH_SITES}"
-        resp = self.session.get(url).json()
-        return resp["sites"]
+        resp = self.session.get(url)
+
+        if resp.status_code >= 400:
+            raise Exception(f"Failed to get tenants: {resp.status_code} {resp.text}")
+
+        return resp.json()["sites"]
 
     def find_tenant_by_name(self, tenant_name: str) -> Tenant | None:
         url = f"{self.base_path}{PATH_TENANTS}"
         # Get all
-        resp: list = self.session.get(url).json()["tenants"]
+        resp = self.session.get(url)
+
+        if resp.status_code >= 400:
+            raise Exception(f"Failed to get tenants: {resp.status_code} {resp.text}")
+
         # filter by name
-        filter_tenants = list(filter(lambda t: t["name"] == tenant_name, resp))
+        filter_tenants = list(filter(lambda t: t["name"] == tenant_name, resp.json()["tenants"]))
         if len(filter_tenants) == 0:
             return None
 
@@ -559,6 +590,7 @@ class NDOTemplate:
     # All of the methods in this Tenant Template will return the updated schema object.
     # Note that it won't change the schema object in the NDO until you call the `save_schema` method with the updated schema object.
 
+    @AddDelayAfter()
     def save_schema(self, schema: dict) -> Schema:
         """
         Saves the given schema. This method is used to save the schema after making changes to it.
@@ -578,11 +610,9 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
         return resp.json()
 
+    @AddDelayAfter()
     def create_tenant(self, tenant_name: str, sites: list[str], tenant_desc: str = "") -> Tenant:
         """
         Creates a new tenant with the given name, sites, and optional description.
@@ -633,11 +663,9 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
         return resp.json()
 
+    @AddDelayAfter()
     def create_schema(self, schema_name: str, schema_desc: str = "") -> Schema:
         """
         Creates a new schema with the given name and description. If the schema already exists, it will return the existing schema.
@@ -666,9 +694,6 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
         return resp.json()
 
     def create_template(self, schema: dict, template_name: str, tenant_id: str) -> Template:
@@ -1422,6 +1447,7 @@ class NDOTemplate:
                 break
 
     # Tenant policies template
+    @AddDelayAfter()
     def create_tenant_policies_template(self, template_name: str, sites: list[str], tenant_name: str) -> TenantPolTemplate:
         print(f"--- Creating Tenant policies template {template_name}")
         for site in sites:
@@ -1452,13 +1478,10 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
         return resp.json()
 
     # support replace mode
+    @AddDelayAfter()
     def add_route_map_policy_under_template(
         self, template_name: str, rnConfig: RouteMapConfig, operation: Literal["add", "merge", "replace"] = "add"
     ) -> None:
@@ -1493,10 +1516,7 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
+    @AddDelayAfter()
     def add_route_map_prefix_to_policy(self, template_name: str, rm_name: str, entryOrder: int, prefix: RouteMapPrefix) -> None:
         print(f"--- Adding prefix to route map {rm_name}")
         template = self.find_tenant_policies_template_by_name(template_name)
@@ -1518,10 +1538,7 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
+    @AddDelayAfter()
     def create_igmp_int_pol_under_template(
         self, template_name: str, igmpIntPolConfig: IGMPInterfacePolicyConfig, operation: Literal["add", "replace"] = "add"
     ) -> None:
@@ -1565,10 +1582,7 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
+    @AddDelayAfter()
     def create_igmp_snoop_pol_under_template(
         self, template_name: str, igmpSnoopPol: IGMPSnoopingPolicyConfig, operation: Literal["add", "replace"] = "add"
     ) -> None:
@@ -1614,10 +1628,7 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
+    @AddDelayAfter()
     def add_l3out_intf_routing_policy(
         self,
         template_name: str,
@@ -1668,11 +1679,8 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
     # L3OUT template
+    @AddDelayAfter()
     def create_l3out_template(self, template_name: str, site_name: str, tenant_name: str) -> L3OutTemplate:
         """
         Creates an L3OutTemplate with the given parameters.
@@ -1717,12 +1725,9 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
         return resp.json()
 
+    @AddDelayAfter()
     def add_static_route_prefixes_to_l3out(self, template_name: str, l3out_name: str, nodeID: str, prefixes: list[L3OutStaticRouteConfig]) -> None:
         """
         Adds static route prefixes to an L3Out.
@@ -1757,11 +1762,8 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
     # support replace mode
+    @AddDelayAfter()
     def add_l3out_under_template(self, template_name: str, l3outConfig: L3OutConfig, operation: Literal["replace", "merge"] | None) -> None:
         """
         Adds an L3out to the specified template.
@@ -1815,10 +1817,6 @@ class NDOTemplate:
         resp = self.session.put(url, json=template)
         if resp.status_code >= 400:
             print(resp.json())
-
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
 
     # Fabric Template
     def find_vpc_by_name(self, vpc_name: str, site_name: str) -> VPCResourcePolicy | None:
@@ -1984,6 +1982,7 @@ class NDOTemplate:
                 return domain
         return None
 
+    @AddDelayAfter()
     def create_fabric_policy(self, name: str, site: str) -> FabricPolicy:
         """
         Creates a fabric policy with the given name and site.
@@ -2021,12 +2020,9 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
         return resp.json()
 
+    @AddDelayAfter()
     def create_fabric_resource(self, name: str, site: str) -> FabricResourcePolicy:
         """
         Creates a fabric resource policy with the given name and site.
@@ -2066,12 +2062,9 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
         return resp.json()
 
+    @AddDelayAfter()
     def create_intf_setting_policy(self, fabric_pol_name: str, settings: PCInterfaceSettingPolConfig | PhysicalInterfaceSettingPolConfig) -> None:
         """
         Creates an interface setting policy for either physical interfaces or port channels.
@@ -2133,10 +2126,7 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
+    @AddDelayAfter()
     def add_vlans_to_pool(self, policy_name: str, pool_name: str, vlans: list[int | Tuple[int, int]] = []) -> None:
         """
         Adds a list of VLANs to a VLAN pool in a fabric policy.
@@ -2194,10 +2184,7 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
+    @AddDelayAfter()
     def add_port_to_fabric_resource(
         self,
         resource_name: str,
@@ -2258,10 +2245,7 @@ class NDOTemplate:
         if resp.status_code >= 400:
             raise Exception(resp.json())
 
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
-
+    @AddDelayAfter()
     def add_domain_to_fabric_policy(
         self,
         policy_name: str,
@@ -2330,10 +2314,6 @@ class NDOTemplate:
         if resp.status_code >= 400:
             print(f"  |--- {resp.json()}")
             raise Exception(resp.json())
-
-        print(f"  |--- Done{f' delay {self.delay} sec' if self.delay is not None else ''}")
-        if self.delay is not None:  # delay for a while
-            time.sleep(self.delay)
 
     # task deployment
     def deploy_policies_template(self, template_name: str) -> None:
