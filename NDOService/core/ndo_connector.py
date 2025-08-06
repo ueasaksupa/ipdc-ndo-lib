@@ -1338,7 +1338,7 @@ class NDOTemplate:
         Returns:
             None
         """
-        print(f"--- Adding Static port to site {site_name}")
+        print(f"--- Adding Static port to EPG {epg_name} [site: {site_name}]")
         if site_name not in self.sitename_id_map:
             raise ValueError(f"Site {site_name} does not exist.")
 
