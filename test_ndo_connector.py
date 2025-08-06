@@ -8,39 +8,7 @@ ndo = NDOTemplate(host="172.31.1.24", port=443, username="admin", password="P@ss
 
 
 schema = ndo.find_schema_by_name("TN_NUTTAWUT_Schema01")
-if not schema:
-    print("Schema not found")
-    exit(1)
 
-#
-# BD TEST
-############################################################################################################
-
-
-# tname = "POLICY_SITEA"
-# bdname = "BD_REPLEACE_TEST"
-# # linkedVrfSchema="....", # if you want to link to another schema
-# linkedVrfTemplate = "VRF_CONTRACT_STRETCHED_TEMPLATE"
-# linkedVrfName = "VRF_CUSTOMER"
-# bdConfig = BridgeDomainConfig(
-#     unicastRouting=True,
-#     l2Stretch=False,
-#     l2UnknownUnicast="flood",
-#     description="REPLACE OLD ONE",
-#     perSiteSubnet=[("SiteA", BridgeDomainSubnet(ip="10.1.2.1/24"))],
-# )
-
-# ndo.create_bridge_domain_under_template(
-#     schema=schema,
-#     template_name=tname,
-#     linked_vrf_template=linkedVrfTemplate,
-#     linked_vrf_name=linkedVrfName,
-#     bd_name=bdname,
-#     bd_config=bdConfig,
-#     replace=True,
-# )
-
-# ndo.save_schema(schema)
 
 #
 # ROUTE MAP TEST
@@ -221,41 +189,76 @@ if not schema:
 # )
 
 
+# BD TEST
+def test_create_bridge_domain():
+    if not schema:
+        print("Schema not found")
+        raise ValueError("Schema not found")
+
+    tname = "POLICY_SITEA"
+    bdname = "BD_REPLEACE_TEST"
+    # linkedVrfSchema="....", # if you want to link to another schema
+    linkedVrfTemplate = "VRF_CONTRACT_STRETCHED_TEMPLATE"
+    linkedVrfName = "VRF_CUSTOMER"
+    bdConfig = BridgeDomainConfig(
+        unicastRouting=True,
+        l2Stretch=False,
+        l2UnknownUnicast="flood",
+        description="REPLACE OLD ONE",
+        perSiteSubnet=[("SiteA", BridgeDomainSubnet(ip="10.1.2.1/24"))],
+    )
+    ndo.create_bridge_domain_under_template(
+        schema=schema,
+        template_name=tname,
+        linked_vrf_template=linkedVrfTemplate,
+        linked_vrf_name=linkedVrfName,
+        bd_name=bdname,
+        bd_config=bdConfig,
+        replace=True,
+    )
+    ndo.save_schema(schema)
+
+
 # Test adding tenant policies IGMP interface policy
-ndo.create_igmp_int_pol_under_template(
-    template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
-    igmpIntPolConfig=IGMPInterfacePolicyConfig(
-        name="IGMP_INT_POL_TEST",
-        igmpVersion="v2",
-        enableV3ASM=True,
-    ),
-)
+def test_create_igmp_int_pol():
+    ndo.create_igmp_int_pol_under_template(
+        template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
+        igmpIntPolConfig=IGMPInterfacePolicyConfig(
+            name="IGMP_INT_POL_TEST",
+            igmpVersion="v2",
+            enableV3ASM=True,
+        ),
+    )
 
 
 # Test adding tenant policies IGMP Snooping policy
-ndo.create_igmp_snoop_pol_under_template(
-    template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
-    igmpSnoopPol=IGMPSnoopingPolicyConfig(
-        name="IGMP_SNOOP_POL_TEST",
-        igmpVersion="v3",
-        enableFastLeave=True,
-    ),
-    operation="replace",
-)
+def test_create_igmp_snoop_pol():
+    ndo.create_igmp_snoop_pol_under_template(
+        template_name="TN_NUTTAWUT_Tenant_Policies_SiteA",
+        igmpSnoopPol=IGMPSnoopingPolicyConfig(
+            name="IGMP_SNOOP_POL_TEST",
+            igmpVersion="v3",
+            enableFastLeave=True,
+        ),
+        operation="replace",
+    )
 
 
 # Test adding interface setting policy (Physical Interface)
-ndo.create_intf_setting_policy(
-    fabric_pol_name="NUTTAWUT_Fabric_policies",
-    settings=PhysicalInterfaceSettingPolConfig(
-        name="INT_POL_TEST", domain="NUTTAWUT_TEST_DOM", speed="10G", enableCDP=True, autoNegotiate="on-enforce"
-    ),
-)
+def test_create_intf_setting_policy():
+    ndo.create_intf_setting_policy(
+        fabric_pol_name="NUTTAWUT_Fabric_policies",
+        settings=PhysicalInterfaceSettingPolConfig(
+            name="INT_POL_TEST", domain="NUTTAWUT_TEST_DOM", speed="10G", enableCDP=True, autoNegotiate="on-enforce"
+        ),
+    )
+
 
 # Test adding interface setting policy (Port Channel Interface)
-ndo.create_intf_setting_policy(
-    fabric_pol_name="NUTTAWUT_Fabric_policies",
-    settings=PCInterfaceSettingPolConfig(
-        name="INT_POL_TEST_PC", domain="NUTTAWUT_TEST_DOM", speed="10G", enableCDP=True, autoNegotiate="on-enforce", portChannelMode="off"
-    ),
-)
+def test_create_port_channel_intf_setting_policy():
+    ndo.create_intf_setting_policy(
+        fabric_pol_name="NUTTAWUT_Fabric_policies",
+        settings=PCInterfaceSettingPolConfig(
+            name="INT_POL_TEST_PC", domain="NUTTAWUT_TEST_DOM", speed="10G", enableCDP=True, autoNegotiate="on-enforce", portChannelMode="off"
+        ),
+    )

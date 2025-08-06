@@ -1,4 +1,4 @@
 /venv
 /references
 __pycache__
-.setting
+.pytest_cache
