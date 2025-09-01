@@ -102,6 +102,7 @@ class BridgeDomainConfig:
     arpFlood: bool = True
     multiDstPktAct: Literal["bd-flood", "encap-flood", "drop"] = "bd-flood"
     unicastRouting: bool = True
+    epMoveDetectMode: Literal["none", "garp"] = "none"
     subnets: List[BridgeDomainSubnet] = field(default_factory=list)
     perSiteSubnet: List[tuple[str, BridgeDomainSubnet]] = field(default_factory=list)
 
