@@ -2101,6 +2101,9 @@ class NDOTemplate:
                 "debounceInterval": 100,
                 "fec": "inherit",
             },
+            "mcp": {
+                "adminState": "enabled" if settings.enableMCP else "disabled",
+            },
         }
         if isinstance(settings, PCInterfaceSettingPolConfig):
             payload["type"] = "portchannel"
@@ -2116,9 +2119,11 @@ class NDOTemplate:
             raise ValueError(f"Fabric Policy {fabric_pol_name} not exist, Please create it first.")
 
         # find domain ID
-        if "domains" not in policy["fabricPolicyTemplate"]["template"]:
-            raise ValueError(f"No domain {settings.domain} found in fabric policy template.")
-        domain = list(filter(lambda d: d["name"] == settings.domain, policy["fabricPolicyTemplate"]["template"]["domains"]))
+        domain = []
+        if "domains" in policy["fabricPolicyTemplate"]["template"]:
+            domain.extend(list(filter(lambda d: d["name"] == settings.domain, policy["fabricPolicyTemplate"]["template"]["domains"])))
+        if "l3Domains" in policy["fabricPolicyTemplate"]["template"]:
+            domain.extend(list(filter(lambda d: d["name"] == settings.domain, policy["fabricPolicyTemplate"]["template"]["l3Domains"])))
         if len(domain) == 0:
             raise ValueError(f"Domain {settings.domain} not found in fabric policy template.")
         payload["domains"] = [domain[0]["uuid"]]

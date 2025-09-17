@@ -550,6 +550,7 @@ class PhysicalInterfaceSettingPolConfig:
     description: str = ""
     enableCDP: bool = False
     enableLLDP: bool = True
+    enableMCP: bool = False
     speed: Literal["inherit", "100M", "1G", "10G", "25g", "40G", "50G", "100G", "200G", "400G"] = "inherit"
     autoNegotiate: Literal["on", "on-enforce", "off"] = "on"
     vlanScope: Literal["portlocal", "global"] = "global"
