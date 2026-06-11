@@ -107,6 +107,13 @@ class BridgeDomainConfig:
     perSiteSubnet: List[tuple[str, BridgeDomainSubnet]] = field(default_factory=list)
 
 
+@dataclass(kw_only=True)
+class VrfMcastRPConfig:
+    ipAddress: str
+    rpType: Literal["static", "fabric"] = "static"
+    mcastRtMapPolicyName: str | None = None
+    mcastRtMapPolicyRef: str | None = None
+
 @dataclass
 class VrfConfig:
     description: str = ""
@@ -114,7 +121,7 @@ class VrfConfig:
     preferredGroup: bool = False
     vzAnyEnabled: bool = True
     ipDataPlaneLearning: Literal["enabled", "disabled"] = "enabled"
-
+    rpConfigs: List[VrfMcastRPConfig] = field(default_factory=list)
 
 @dataclass(kw_only=True)
 class IntfDescription:
