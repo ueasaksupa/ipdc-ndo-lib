@@ -114,6 +114,7 @@ class VrfMcastRPConfig:
     mcastRtMapPolicyName: str | None = None
     mcastRtMapPolicyRef: str | None = None
 
+
 @dataclass
 class VrfConfig:
     description: str = ""
@@ -122,6 +123,7 @@ class VrfConfig:
     vzAnyEnabled: bool = True
     ipDataPlaneLearning: Literal["enabled", "disabled"] = "enabled"
     rpConfigs: List[VrfMcastRPConfig] = field(default_factory=list)
+
 
 @dataclass(kw_only=True)
 class IntfDescription:
@@ -327,6 +329,7 @@ class L3OutBGPPeerConfig:
     exportRouteMap: str | None = None
     bgpControls: L3OutBGPControl = field(default_factory=L3OutBGPControl)
     peerControls: L3OutBGPPeerControl = field(default_factory=L3OutBGPPeerControl)
+    addressTypeControls: Literal["unicast", "multicast"] = "unicast"
 
 
 @dataclass(kw_only=True)

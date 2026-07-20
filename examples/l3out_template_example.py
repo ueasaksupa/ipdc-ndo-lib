@@ -1,40 +1,29 @@
 from NDOService.core.ndo_connector import NDOTemplate
 from NDOService.core.configurations import *
 
-
 params = {
-    "connection": {"host": "127.0.0.1", "port": 10443, "username": "admin", "password": "P@ssw0rd"},
+    "connection": {"host": "172.31.1.24", "port": 443, "username": "admin", "password": "123123123123"},
 }
 
 # INIT
 ndo = NDOTemplate(
-    params["connection"]["host"],
-    params["connection"]["username"],
-    params["connection"]["password"],
-    params["connection"]["port"],
-    1.5,
+    params["connection"]["host"], params["connection"]["username"], params["connection"]["password"], params["connection"]["port"], 1.5, "DefaultAuth"
 )
 
 
 def Example_L3Out():
     # L3out template
-    ndo.create_l3out_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", "SILA", "TN_NUTTAWUT_TEST")
-    ndo.create_l3out_template("TN_NUTTAWUT_TEST_TLS1_L3Out_Template", "TLS1", "TN_NUTTAWUT_TEST")
+    ndo.create_l3out_template("TN_NUTTAWUT_SiteA_L3Out_Template", "SiteA", "TN_NUTTAWUT")
     # create L3 domain
-    ndo.add_domain_to_fabric_policy(
-        "SILA1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM01", "VLAN_SERVER_CL_DOM01_01"
-    )
-    ndo.add_domain_to_fabric_policy(
-        "TLS1_CL_DOM01_FabricPolicy01", "l3Domains", "L3_DOMAIN_BL_DOM01", "VLAN_SERVER_CL_DOM01_01"
-    )
+    ndo.add_domain_to_fabric_policy("NUTTAWUT_Fabric_policies", "l3Domains", "NUTTAWUT_TEST_L3DOM", "VLAN_L3OUT_BL_DOM01_01")
     # prepare L3Out config
     l3outconfig = L3OutConfig(
-        name="L3OUT_SILA_TEST",
-        vrf="VRF_CUSTOMER",
-        l3domain="L3_DOMAIN_BL_DOM01",
+        name="L3OUT_SITEA_TEST",
+        vrf="VRF_TEST_NUTTAWUT",
+        l3domain="NUTTAWUT_TEST_L3DOM",
         nodes=[
             L3OutNodeConfig(
-                nodeID="1101",
+                nodeID="3101",
                 routerID="10.0.0.1",
             ),
         ],
@@ -49,7 +38,7 @@ def Example_L3Out():
             L3OutIntPhysicalPort(
                 primaryV4="10.0.1.1/30",
                 secondaryAddrs=["8.1.1.1/16"],
-                nodeID="1101",
+                nodeID="3101",
                 portID="1/30",
                 bgpPeers=[L3OutBGPPeerConfig(peerAddressV4="10.0.1.2", peerAsn=65001)],
             ),
@@ -81,7 +70,7 @@ def Example_L3Out():
             ),
         ],
     )
-    ndo.add_l3out_under_template("TN_NUTTAWUT_TEST_SILA_L3Out_Template", l3outconfig)
+    ndo.add_l3out_under_template("TN_NUTTAWUT_SiteA_L3Out_Template", l3outconfig, "merge")
     schema = ndo.find_schema_by_name("TN_NUTTAWUT_TEST_Schema01")
     if schema is None:
         return
@@ -89,8 +78,8 @@ def Example_L3Out():
     EEPG_L3OUT_INFO = [
         ExternalEpgToL3OutBinding(
             site="SILA",
-            l3outTemplate="TN_NUTTAWUT_TEST_SILA_L3Out_Template",
-            l3outName="L3OUT_SILA_TEST",
+            l3outTemplate="TN_NUTTAWUT_SiteA_L3Out_Template",
+            l3outName="L3OUT_SITEA_TEST",
         ),
         ExternalEpgToL3OutBinding(
             site="TLS1",
@@ -109,3 +98,7 @@ def Example_L3Out():
         eepg_subnets=[ExternalEpgSubnet(ip="77.1.1.0/24")],
     )
     ndo.save_schema(schema)
+
+
+if __name__ == "__main__":
+    Example_L3Out()

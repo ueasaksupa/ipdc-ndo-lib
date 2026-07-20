@@ -243,6 +243,7 @@ class NDOTemplate:
         for peer in bgpPeers:
             if peer.importRouteMap is None and peer.exportRouteMap is None:
                 peer_payload.append(asdict(peer))
+
             else:
                 print(f"  |--- Apply routeMap in peer level for peer: {peer.peerAddressV4 if peer.peerAddressV4 else peer.peerAddressV6}")
                 tmp = asdict(peer)
@@ -256,8 +257,14 @@ class NDOTemplate:
                     if ex_routemap is None:
                         raise Exception(f"RouteMap {peer.exportRouteMap} does not exist.")
                     tmp["exportRouteMapRef"] = ex_routemap["uuid"]
-
                 peer_payload.append(tmp)
+
+            # handle traslation of addressTypeControls field
+            peer_payload[-1]["addressTypeControls"] = {
+                "afMast": True if peer.addressTypeControls == "multicast" or peer.addressTypeControls == "both" else False,
+                "afUcast": True if peer.addressTypeControls == "unicast" or peer.addressTypeControls == "both" else False,
+            }
+
         return peer_payload
 
     def __generate_l3out_phyintf(self, tenant_id: str, site_name: str, intfConfig: L3OutInterfaceConfig, intfRoutingPol: str | None) -> dict:
