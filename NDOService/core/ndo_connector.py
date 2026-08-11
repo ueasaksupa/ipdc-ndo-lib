@@ -177,15 +177,21 @@ class NDOTemplate:
         # indexing current entry
         entIndex = {}
         prefixIndex = {}
-        for entry in currentRM["rtMapEntryList"]:
-            entryName = entry["rtMapContext"]["name"]
-            entIndex[entryName] = entry
-            if "matchPrefixList" not in entry["matchRule"][0]:
-                entry["matchRule"][0]["matchPrefixList"] = []
+        if "rtMapEntryList" in currentRM:
+            for entry in currentRM["rtMapEntryList"]:
+                entryName = entry["rtMapContext"]["name"]
+                entIndex[entryName] = entry
+                if "matchRule" not in entry:
+                    entry["matchRule"] = [{}]
 
-            for prefix in entry["matchRule"][0]["matchPrefixList"]:
-                prefixKey = entryName + "_" + prefix["prefix"]
-                prefixIndex[prefixKey] = prefix
+                if "matchPrefixList" not in entry["matchRule"][0]:
+                    entry["matchRule"][0]["matchPrefixList"] = []
+
+                for prefix in entry["matchRule"][0]["matchPrefixList"]:
+                    prefixKey = entryName + "_" + prefix["prefix"]
+                    prefixIndex[prefixKey] = prefix
+        else:
+            currentRM["rtMapEntryList"] = []
 
         for rmEntry in rmConfig.entryList:
             if rmEntry.name not in entIndex:
