@@ -585,6 +585,15 @@ class NDOTemplate:
 
         return filtered[0]
 
+    def find_monitoring_policy_by_name(self, name: str, tenant_id: str) -> MonitoringPolicy | None:
+        url = f"{self.base_path}{PATH_TEMPLATES_OBJECT}?type=ipslaMonitoringPolicy&tenant-id={tenant_id}&name={name}"
+        resp: list = self.session.get(url).json()
+        filtered = list(filter(lambda t: t["name"] == name, resp))
+        if len(filtered) > 0:
+            return filtered[0]
+
+        return None
+
     def isSchemaStateSync(self, schema_name: str | None = None, schema: Schema | None = None) -> bool:
         """
         This method is for checking schema state with NDO, whether it sync or out-of-sync.

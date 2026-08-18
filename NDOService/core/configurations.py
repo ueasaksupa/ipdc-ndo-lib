@@ -261,10 +261,14 @@ class L3OutStaticRouteNextHop:
     ### Parameter Notes:
     - nextHopIP : IP address format (ww.xx.yy.zz)
     - preference : is `Administrative Distance`
+    - description : description of the next hop
+    - monitoringPolicyRef : ref ID of the monitoring policy to use for this next hop
     """
 
     nextHopIP: str
     preference: int = 0
+    description: str | None = None
+    monitoringPolicyRef: str | None = None
 
 
 @dataclass(kw_only=True)

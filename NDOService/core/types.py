@@ -26,6 +26,7 @@ FabricPolicy = dict  # template.fabricPolicyTemplate
 FabricResourcePolicy = dict  # template.fabricResourceTemplate
 TenantPolTemplate = dict  # template.tenantPolicyTemplate
 L3OutTemplate = dict  # template.l3outTemplate
+MonitoringPolicy = dict
 
 # NDOObjectSchema/interfaceSetting.json
 IntSettingPolicy = dict
